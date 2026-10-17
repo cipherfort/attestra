@@ -56,7 +56,7 @@ def load(conn: Connection, bundle: ConfigBundle, git_sha: str = "local") -> Acti
                     "sha": bytes.fromhex(doc.sha256),
                     "content": json.dumps(doc.content, default=str),
                 },
-            ).first()
+            ).one()
         ids[kind] = str(row.id)
         conn.execute(
             text(
@@ -86,7 +86,7 @@ def _load_samm(conn: Connection, bundle: ConfigBundle) -> dict[str, str]:
                 "src": samm["source"],
                 "sha": bytes.fromhex(bundle.documents["samm"].sha256),
             },
-        ).first()
+        ).one()
     items: dict[str, str] = {}
 
     def upsert(key: str, parent: str | None, item_type: str, title: str) -> str:
@@ -95,7 +95,7 @@ def _load_samm(conn: Connection, bundle: ConfigBundle) -> dict[str, str]:
                     VALUES (:id, :fw, :key, :parent, :type, :title)
                     ON CONFLICT (framework_id, item_key) DO UPDATE SET title = EXCLUDED.title RETURNING id"""),
             {"id": uuid7(), "fw": fw.id, "key": key, "parent": parent, "type": item_type, "title": title},
-        ).first()
+        ).one()
         items[key] = str(row.id)
         return str(row.id)
 
@@ -128,7 +128,7 @@ def _load_controls(
                 "mode": c["assessment"]["mode"],
                 "def": json.dumps(c, default=str),
             },
-        ).first()
+        ).one()
         out[c["id"]] = str(row.id)
         for tier, level in c["applicability"]["tiers"].items():
             conn.execute(

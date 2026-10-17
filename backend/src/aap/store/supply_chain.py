@@ -90,7 +90,7 @@ def ingest_cyclonedx(
                 "ver": c.get("version") or "",
                 "lic": licence_of(c),
             },
-        ).first()
+        ).one()
         scope = {"required": "required", "optional": "optional", "excluded": "development"}.get(
             c.get("scope", ""), "unknown"
         )
@@ -138,7 +138,7 @@ def upsert_vulnerability(conn: Connection, adv: Mapping[str, Any]) -> str:
             "exp": bool(adv.get("exploit_public")),
             "mal": bool(adv.get("is_malicious")),
         },
-    ).first()
+    ).one()
     return str(row.id)
 
 
@@ -235,7 +235,9 @@ def affected_applications(conn: Connection, vuln_ref: str) -> dict[str, Any] | N
         prev = sbom_state.get(str(s["application_id"]))
         sbom_state[str(s["application_id"])] = "current" if ok or prev == "current" else "stale_sbom"
 
-    affected, possibly, not_affected = [], [], 0
+    affected: list[dict[str, Any]] = []
+    possibly: list[dict[str, Any]] = []
+    not_affected = 0
     for a in apps:
         aid = str(a["id"])
         summary = {

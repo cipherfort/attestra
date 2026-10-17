@@ -60,7 +60,7 @@ Personas: `ajones` (Claims champion: sees only Claims), `ekim` (Payments enginee
 ```bash
 uv run pytest            # 207 tests: unit + integration (starts a throwaway postgres:16 container)
 AAP_TEST_SERVICES=1 uv run pytest -m service   # real Dependency-Track, DefectDojo, OIDC server, Azurite (deploy/local)
-uv run mypy              # strict on domain + evaluators
+uv run mypy              # strict, whole package
 uv run ruff check src tests migrations
 ```
 

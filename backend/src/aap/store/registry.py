@@ -6,7 +6,7 @@ from __future__ import annotations
 import json
 from collections.abc import Mapping
 from dataclasses import dataclass
-from typing import Any
+from typing import Any, cast
 
 from sqlalchemy import Connection, text
 
@@ -25,7 +25,7 @@ def upsert_org_unit(conn: Connection, slug: str, name: str, unit_type: str, pare
         text("""INSERT INTO org_units (id, parent_id, unit_type, name, slug) VALUES (:id, :p, :t, :n, :s)
                 ON CONFLICT (slug) DO UPDATE SET name = EXCLUDED.name RETURNING id"""),
         {"id": uuid7(), "p": parent_id, "t": unit_type, "n": name, "s": slug},
-    ).first()
+    ).one()
     return str(row.id)
 
 
@@ -123,7 +123,7 @@ def upsert_repository(
             "head": head_sha,
             "det": json.dumps(dict(detected or {})),
         },
-    ).first()
+    ).one()
     return str(row.id)
 
 
@@ -162,7 +162,7 @@ def create_application(conn: Connection, app: NewApplication) -> tuple[str, str]
             "pd": app.personal_data,
             "profile": json.dumps(app.profile),
         },
-    ).first()
+    ).one()
     return str(row.id), str(row.app_key)
 
 
@@ -211,7 +211,7 @@ def record_classification(
             "req": requested_by,
             "sup": supersedes_id,
         },
-    ).first()
+    ).one()
     if decision in ("approved", "auto_approved"):
         conn.execute(
             text("UPDATE applications SET tier_rank = :t, classification_id = :c WHERE id = :a"),
@@ -221,7 +221,7 @@ def record_classification(
 
 
 def application_context(conn: Connection, application_id: str) -> Mapping[str, Any] | None:
-    return (
+    row = (
         conn.execute(
             text("""SELECT a.*, o.slug AS org_slug, o.name AS org_name,
                   (SELECT json_agg(json_build_object('id', r.id, 'provider', r.provider, 'external_id', r.external_id, 'full_name', r.full_name,
@@ -234,10 +234,11 @@ def application_context(conn: Connection, application_id: str) -> Mapping[str, A
         .mappings()
         .first()
     )
+    return cast("Mapping[str, Any] | None", row)  # text() rows are keyed by column name
 
 
 def application_by_repo(conn: Connection, external_id: int | str, provider: str = "github") -> Mapping[str, Any] | None:
-    return (
+    row = (
         conn.execute(
             text("""SELECT a.id AS application_id, r.id AS repository_id, r.full_name, r.head_sha, r.default_branch
                 FROM repositories r JOIN application_repositories ar ON ar.repository_id = r.id
@@ -248,3 +249,4 @@ def application_by_repo(conn: Connection, external_id: int | str, provider: str 
         .mappings()
         .first()
     )
+    return cast("Mapping[str, Any] | None", row)  # text() rows are keyed by column name

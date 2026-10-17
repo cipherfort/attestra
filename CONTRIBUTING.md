@@ -75,7 +75,7 @@ The record names its kind, the settings and secrets it needs, its schedule, and 
 
 ## Style
 
-- **Python:** ruff (lint + format), mypy strict on `domain/` and `evaluators/`.
+- **Python:** ruff (lint + format), mypy strict on the whole `aap` package.
 - **TypeScript:** `tsc --noEmit` via `npm run build`.
 - **Docs:** plain English, short sentences, a status label on every design statement (IMPLEMENTED, DESIGNED, PROPOSED).
 - Match the surrounding code.

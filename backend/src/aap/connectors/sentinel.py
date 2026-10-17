@@ -62,7 +62,8 @@ class LogsIngestionClient:
 
     def send(self, rows: Sequence[dict[str, Any]]) -> int:
         """Send rows in ≤ 1 MB gzip batches; returns rows accepted. Raises on the first refused batch."""
-        sent, batch, size = 0, [], 2
+        sent, size = 0, 2
+        batch: list[dict[str, Any]] = []
         for row in rows:
             unknown = set(row) - set(STREAM_COLUMNS)
             if unknown:

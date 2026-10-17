@@ -196,7 +196,8 @@ FROM applications a JOIN org_units o ON o.id = a.org_unit_id
 @r.op("GET", "/applications", "listApplications", "application.read")
 def list_applications(request: Request, q: str | None = None, p: Principal = Depends(principal)) -> dict[str, Any]:
     with transaction(db(request), "aap_api", scope_for(p)) as conn:
-        where, params = "", {"open": list(findings_store.OPEN_STATUSES)}
+        where = ""
+        params: dict[str, Any] = {"open": list(findings_store.OPEN_STATUSES)}
         if q:
             where, params["q"] = " WHERE a.name ILIKE :q OR a.app_key ILIKE :q", f"%{q[:100]}%"
         rows = _rows(conn.execute(text(APP_SUMMARY + where + " ORDER BY a.tier_rank NULLS LAST, a.name"), params))
@@ -408,7 +409,8 @@ def list_findings(
     priority: str | None = None,
     p: Principal = Depends(principal),
 ) -> dict[str, Any]:
-    clauses, params = [], {}
+    clauses: list[str] = []
+    params: dict[str, Any] = {}
     with transaction(db(request), "aap_api", scope_for(p)) as conn:
         if application:
             clauses.append("f.application_id = :a")

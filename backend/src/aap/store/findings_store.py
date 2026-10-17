@@ -11,7 +11,7 @@ import json
 from collections.abc import Iterable, Mapping, Sequence
 from dataclasses import dataclass, field
 from datetime import datetime
-from typing import Any
+from typing import Any, cast
 
 from sqlalchemy import Connection, text
 
@@ -205,7 +205,7 @@ def mark_sla_breaches(conn: Connection, now: datetime) -> int:
 
 
 def for_application(conn: Connection, application_id: str) -> Sequence[Mapping[str, Any]]:
-    return (
+    rows = (
         conn.execute(
             text("""SELECT f.*, v.vuln_key FROM findings f LEFT JOIN vulnerabilities v ON v.id = f.vulnerability_id
                 WHERE f.application_id = :a"""),
@@ -214,3 +214,4 @@ def for_application(conn: Connection, application_id: str) -> Sequence[Mapping[s
         .mappings()
         .all()
     )
+    return cast("Sequence[Mapping[str, Any]]", rows)  # text() rows are keyed by column name

@@ -189,7 +189,7 @@ def due(engine: Engine, bundle: ConfigBundle, store: SecretStore | None, now: da
 
 
 def github_auth(store: SecretStore, permissions: dict[str, str] | None = None) -> Any:
-    from aap.connectors.github_app import GitHubAppAuth, KeyVaultSigner, PemSigner
+    from aap.connectors.github_app import TOKEN_PERMISSIONS, GitHubAppAuth, KeyVaultSigner, PemSigner
 
     key_id = os.environ.get("AAP_GITHUB_APP_KEY_ID")  # Key Vault key (non-exportable) in deployed environments
     signer = (
@@ -199,7 +199,7 @@ def github_auth(store: SecretStore, permissions: dict[str, str] | None = None) -
         os.environ["AAP_GITHUB_APP_CLIENT_ID"],
         signer,
         base_url=os.environ.get("AAP_GITHUB_API", "https://api.github.com"),
-        **({"permissions": permissions} if permissions else {}),
+        permissions=permissions or TOKEN_PERMISSIONS,
     )
 
 

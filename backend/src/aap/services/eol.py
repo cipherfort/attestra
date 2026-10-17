@@ -42,14 +42,14 @@ def eol_sync(conn: Connection, client: Any, policy: dict[str, Any], now: datetim
     for app_id, comps in per_app.items():
         eol, soon, checked = [], [], 0
         for r in comps:
-            product = products.get(purl_without_version(r.purl))
-            if not product or product not in cycles:
+            known = products.get(purl_without_version(r.purl))
+            if not known or known not in cycles:
                 continue
             checked += 1
-            c = match_cycle(r.version, cycles[product])
+            c = match_cycle(r.version, cycles[known])
             if c is None:
                 continue
-            item = {"purl": r.purl, "product": product, "cycle": c.cycle, "eol": c.eol.isoformat() if c.eol else "yes"}
+            item = {"purl": r.purl, "product": known, "cycle": c.cycle, "eol": c.eol.isoformat() if c.eol else "yes"}
             if c.eol_now or (c.eol is not None and c.eol <= today):
                 eol.append(item)
             elif c.eol is not None and c.eol <= today + warn:

@@ -86,5 +86,10 @@ extend-immutable-calls = ["fastapi.Depends", "fastapi.Header", "fastapi.Query"]
 [tool.mypy]
 python_version = "3.12"
 strict = true
-packages = ["aap.domain", "aap.evaluators"]
+packages = ["aap"]
 mypy_path = "src"
+
+[[tool.mypy.overrides]]
+# boto3/botocore ship no type information (S3 evidence store, AWS Security Hub, `aap storage init-s3`)
+module = ["boto3", "boto3.*", "botocore", "botocore.*"]
+ignore_missing_imports = true

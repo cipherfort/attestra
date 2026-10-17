@@ -305,7 +305,8 @@ class AttestationVerifier:
 def bundles_from_listing(listing: dict[str, object], fetch: Callable[[str], bytes]) -> list[bytes]:
     """Turn the attestations API response into decoded bundle JSON. `fetch` downloads a bundle_url (size-limited)."""
     out: list[bytes] = []
-    for att in listing.get("attestations") or []:  # type: ignore[union-attr]
+    atts = listing.get("attestations")
+    for att in atts if isinstance(atts, list) else []:
         if not isinstance(att, dict):
             continue
         if att.get("bundle"):

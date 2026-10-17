@@ -121,7 +121,7 @@ def osv_sync(conn: Connection, osv: Any, now: datetime) -> FeedReport:
         new_pair = known is not None and any(
             (by_purl[p], str(known.id)) not in current for p, found in matches.items() if vid in found
         )
-        if not (needs_detail or new_pair):
+        if known is not None and not (needs_detail or new_pair):  # known is None implies needs_detail
             vuln_of[vid] = str(known.id)
             continue
         try:

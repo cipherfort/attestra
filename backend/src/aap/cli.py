@@ -8,10 +8,10 @@ import os
 import sys
 from collections import Counter
 
-from sqlalchemy import text
+from sqlalchemy import Engine, text
 
 
-def _engine():  # type: ignore[no-untyped-def]
+def _engine() -> Engine:
     from aap.db import get_engine
 
     return get_engine()
@@ -162,11 +162,11 @@ def cmd_db_provision_logins(args: argparse.Namespace) -> None:
     if args.from_store:  # Kubernetes / external secret managers: the URLs exist already and stay the source of truth
         for login in logins:
             process = login.removeprefix("aap_").removesuffix("_login")
-            url = store.get(f"database-url-{process}")
-            if not url:
+            stored = store.get(f"database-url-{process}")
+            if not stored:
                 print(f"{login}: no database-url-{process} in {store.describe()}; skipped", file=sys.stderr)
                 continue
-            parsed = make_url(url)
+            parsed = make_url(stored)
             if parsed.username != login or not parsed.password:
                 raise SystemExit(f"database-url-{process} must connect as {login} with a password")
             set_login_password(_engine(), login, parsed.password)
@@ -502,4 +502,4 @@ def main(argv: list[str] | None = None) -> None:
 
 
 if __name__ == "__main__":
-    sys.exit(main())
+    main()

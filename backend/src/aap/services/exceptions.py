@@ -20,7 +20,7 @@ from __future__ import annotations
 import json
 from collections.abc import Mapping, Sequence
 from datetime import datetime, time, timedelta
-from typing import Any
+from typing import Any, cast
 
 from sqlalchemy import Connection, text
 
@@ -67,7 +67,7 @@ def _load(conn: Connection, exception_id: str) -> Mapping[str, Any]:
     )
     if row is None:
         raise ExceptionError("exception not found", 404)  # RLS: out of scope looks the same as missing
-    return row
+    return cast("Mapping[str, Any]", row)  # text() rows are keyed by column name
 
 
 def required_role(bundle: ConfigBundle, priority: str, tier: int, renewal_count: int = 0) -> str:
@@ -157,7 +157,7 @@ def create(
             "rc": renewal_count,
             "review": datetime.combine(requested_expiry, time.min).isoformat() if requested_expiry else None,
         },
-    ).first()
+    ).one()
     _event(conn, str(row.id), "created", requested_by, {"renewal_of": renewal_of} if renewal_of else {})
     return str(row.id)
 

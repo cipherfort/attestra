@@ -11,7 +11,7 @@ from __future__ import annotations
 from collections import Counter
 from collections.abc import Mapping
 from datetime import UTC, datetime
-from typing import Any
+from typing import Any, cast
 
 from sqlalchemy import Connection, text
 
@@ -77,7 +77,7 @@ def score_application(conn: Connection, bundle: ConfigBundle, application_id: st
             else None
         )
         scope = (f["location"] or {}).get("component_scope")
-        result = model.score(_context(app, f, vuln, scope))
+        result = model.score(_context(app, f, cast("Mapping[str, Any] | None", vuln), scope))
         current = (
             conn.execute(
                 text("SELECT priority, score, explanation FROM finding_risk_assessments WHERE id = :r"),

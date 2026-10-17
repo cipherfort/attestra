@@ -13,7 +13,7 @@ from __future__ import annotations
 
 import re
 from collections.abc import Mapping
-from typing import Any
+from typing import Any, cast
 
 from sqlalchemy import Connection, text
 
@@ -51,7 +51,7 @@ def _unit(conn: Connection, slug: str) -> Mapping[str, Any]:
     row = conn.execute(text("SELECT * FROM org_units WHERE slug = :s"), {"s": slug}).mappings().first()
     if row is None:
         raise AdminError(f"no unit {slug!r}", 404)
-    return row
+    return cast("Mapping[str, Any]", row)  # text() rows are keyed by column name
 
 
 def tree(conn: Connection) -> list[dict[str, Any]]:
@@ -197,7 +197,7 @@ def revoke(conn: Connection, *, actor: str, grant_id: str) -> Mapping[str, Any]:
     if row["role"] == "platform_admin":
         raise AdminError("platform_admin is managed in the identity provider")
     conn.execute(text("DELETE FROM role_assignments WHERE id = :g"), {"g": row["id"]})
-    return row
+    return cast("Mapping[str, Any]", row)  # text() rows are keyed by column name
 
 
 def users(conn: Connection, q: str = "") -> list[dict[str, Any]]:

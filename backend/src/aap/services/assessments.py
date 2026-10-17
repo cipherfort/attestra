@@ -16,7 +16,7 @@ from __future__ import annotations
 import re
 from collections.abc import Mapping, Sequence
 from datetime import datetime
-from typing import Any
+from typing import Any, cast
 
 from sqlalchemy import Connection, text
 
@@ -60,7 +60,7 @@ def _load(conn: Connection, assessment_id: str) -> Mapping[str, Any]:
     )
     if row is None:
         raise AssessmentError("assessment not found", 404)
-    return row
+    return cast("Mapping[str, Any]", row)  # text() rows are keyed by column name
 
 
 def validate_scope(bundle: ConfigBundle, kind: str, scope: Mapping[str, Any], final: bool) -> list[str]:
@@ -126,7 +126,7 @@ def create(
         text("""INSERT INTO assessments (assessment_type, application_id, scope, lead_assessor_id, due_at)
                 VALUES (CAST(:t AS assessment_type), :a, CAST(:s AS jsonb), :l, :d) RETURNING id"""),
         {"t": kind, "a": application_id, "s": json.dumps(dict(scope or {})), "l": lead_assessor, "d": due_at},
-    ).first()
+    ).one()
     return str(row.id)
 
 

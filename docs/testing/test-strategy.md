@@ -17,7 +17,7 @@ The platform's credibility rests on three properties, which get the heaviest tes
 
 | Level | Scope | Tooling | Runs | Gate |
 |---|---|---|---|---|
-| Static | Lint, types, catalogue/config/schema/OpenAPI validation, link check | ruff, mypy (strict on domain), `tools/*` validators, Spectral, oasdiff | Every PR | Blocking |
+| Static | Lint, types, catalogue/config/schema/OpenAPI validation, link check | ruff, mypy (strict, whole backend), `tools/*` validators, Spectral, oasdiff | Every PR | Blocking |
 | Unit | Evaluators, freshness policies, risk model, classification, fingerprints, parsers, policy module | pytest + Hypothesis (property-based) | Every PR | Blocking, coverage ≥ 85% on `domain/`, `evaluators/`, `risk/` |
 | Database | DDL security properties (ledgers, SoD, RLS, partitions), migrations up/down | `tests/database/run.sh`, Testcontainers | Every PR touching schema | Blocking |
 | Integration | Repository layer + RLS, queue semantics, connectors against recorded fixtures (VCR) and stub servers | pytest, Testcontainers PG, WireMock-style stubs | Every PR | Blocking |

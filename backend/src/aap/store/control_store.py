@@ -5,7 +5,7 @@ from __future__ import annotations
 
 import json
 from collections.abc import Mapping, Sequence
-from typing import Any
+from typing import Any, cast
 
 from sqlalchemy import Connection, text
 
@@ -104,7 +104,7 @@ def record(
 
 
 def current_states(conn: Connection, application_id: str) -> Sequence[Mapping[str, Any]]:
-    return (
+    rows = (
         conn.execute(
             text("""SELECT cs.control_key, cs.scope_type, cs.scope_ref, cs.requirement, cs.state, cs.since,
                        cs.last_evaluated_at, cs.observe_mode, ce.explanation, ce.evidence_ids, ce.evaluator, ce.details
@@ -115,10 +115,11 @@ def current_states(conn: Connection, application_id: str) -> Sequence[Mapping[st
         .mappings()
         .all()
     )
+    return cast("Sequence[Mapping[str, Any]]", rows)  # text() rows are keyed by column name
 
 
 def history(conn: Connection, application_id: str, control_key: str, limit: int = 50) -> Sequence[Mapping[str, Any]]:
-    return (
+    rows = (
         conn.execute(
             text("""SELECT id, evaluated_at, scope_type, scope_ref, state, previous_state, evaluator, evaluator_build,
                        catalogue_version_id, evidence_ids, explanation, details
@@ -129,3 +130,4 @@ def history(conn: Connection, application_id: str, control_key: str, limit: int 
         .mappings()
         .all()
     )
+    return cast("Sequence[Mapping[str, Any]]", rows)  # text() rows are keyed by column name
