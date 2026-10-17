@@ -1,7 +1,7 @@
 # KPI / KRI catalogue: SOURCE OF TRUTH (rendered to docs/standards/kpi-kri-catalogue.md by
 # tools/metrics/render.py). Status: DESIGNED; targets/thresholds PROPOSED (Governance Board approval).
 #
-# Rules (TOM §7, brief §39):
+# Rules (TOM section 7, brief section 39):
 #   * No metric rewards finding FEWER issues. Raw finding counts are context only, never targets.
 #   * Metrics are computed by the platform from ledgers; none is self-reported.
 #   * Team/app/business-unit level only. Never per person.

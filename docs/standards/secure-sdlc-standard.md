@@ -10,7 +10,7 @@
 
 ## 1. Purpose
 
-Defines the security activities each application must perform at each lifecycle stage, scaled by tier. This is the umbrella standard. Detailed standards (listed in §5) define each activity. The [control catalogue](control-catalogue.md) defines how each one is tested and evidenced.
+Defines the security activities each application must perform at each lifecycle stage, scaled by tier. This is the umbrella standard. Detailed standards (listed in section 5) define each activity. The [control catalogue](control-catalogue.md) defines how each one is tested and evidenced.
 
 ## 2. Principles
 

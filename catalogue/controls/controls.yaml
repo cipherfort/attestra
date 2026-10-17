@@ -121,7 +121,7 @@ controls:
       params: { threshold_pct: 90, contributor_window_days: 90 }
     proof: >
       LMS completion export (connector) joined to GitHub contributors via the Entra/GitHub identity link. Reported
-      at TEAM level only, never per person (privacy, see platform security architecture §6).
+      at TEAM level only, never per person (privacy, see platform security architecture section 6).
     implementation: Assign the secure-development course to all engineers via the LMS.
     remediation: Team lead schedules outstanding completions.
     notes: LMS connector is PROPOSED; until it exists this control is evaluated from a quarterly HR export (M1).

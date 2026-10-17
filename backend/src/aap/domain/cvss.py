@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: Apache-2.0
-"""CVSS v3.0/v3.1 base score from a vector string (FIRST CVSS v3.1 specification §7.1 and Appendix A).
+"""CVSS v3.0/v3.1 base score from a vector string (FIRST CVSS v3.1 specification section 7.1 and Appendix A).
 
 OSV advisories carry the vector, not the score. Scores are computed here rather than trusted from a third field.
 """

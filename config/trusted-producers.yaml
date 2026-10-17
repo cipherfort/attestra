@@ -1,4 +1,4 @@
-# Trusted evidence producers (evidence model §4, ADR-005/006/016).
+# Trusted evidence producers (evidence model section 4, ADR-005/006/016).
 # Status: DESIGNED. Evidence from any producer/version not listed here is REJECTED (UNTRUSTED_PRODUCER /
 # UNAPPROVED_WORKFLOW_REF). Changes by PR only (CODEOWNERS: appsec-platform, 2 approvals).
 #
@@ -6,7 +6,7 @@
 # workflow-lint. The other entries are for workflows an organization writes itself (provenance, DAST, API, deploy).
 # `aap pipelines approve --sha <commit> --release <tag>` appends to every shipped entry.
 #
-# Release process (pipeline architecture §6): a security-workflows release appends its commit SHA under
+# Release process (pipeline architecture section 6): a security-workflows release appends its commit SHA under
 # approved_shas with `approved_at`. A superseded SHA gets `retire_after` = successor release + 90 days.
 # Emergency revocation: set `revoked_at` → evidence produced by that SHA after `revoked_from` is revoked.
 

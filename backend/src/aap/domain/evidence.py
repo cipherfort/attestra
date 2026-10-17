@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: Apache-2.0
-"""Evidence verification and tamper-evident hashing (evidence model §4 and §6, ADR-016).
+"""Evidence verification and tamper-evident hashing (evidence model section 4 and section 6, ADR-016).
 
 `verify_bundle` is the gate between a pipeline and the evidence ledger. Everything in a manifest is untrusted
 until checked against what GitHub reports about the run and against the trusted-producer registry. A forged
@@ -198,7 +198,7 @@ def verify_bundle(
     schema_errors: Sequence[str] = (),
     limits: Limits | None = None,
 ) -> Verdict:
-    """Steps 1–6 of evidence model §4. `schema_errors` come from validating the manifest against its schema."""
+    """Steps 1–6 of evidence model section 4. `schema_errors` come from validating the manifest against its schema."""
     limits = limits or Limits()
     if schema_errors:
         return _reject(RejectReason.SCHEMA_INVALID, "; ".join(schema_errors[:5]))

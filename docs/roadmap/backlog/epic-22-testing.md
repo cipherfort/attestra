@@ -10,7 +10,7 @@
 ## F02: Security testing
 
 ### E22-F02-S01: Abuse-case suite (AC-01 … AC-10) · M · Phase 1 → 5
-- **AC:** Each abuse case from the [platform threat model §5](../../security/platform-security-architecture.md#5-abuse-cases-drive-security-tests) is an automated test in CI with the expected outcome. A failure blocks merge.
+- **AC:** Each abuse case from the [platform threat model section 5](../../security/platform-security-architecture.md#5-abuse-cases-drive-security-tests) is an automated test in CI with the expected outcome. A failure blocks merge.
 
 ### E22-F02-S02: Access-control matrix tests · M · Phase 1 →
 - **AC:** Generated from roles × OpenAPI operations × scope. Includes RLS-level tests (as in `tests/database/test_schema_security.sql` T5–T9) and API-level tests. 404-not-403 verified.

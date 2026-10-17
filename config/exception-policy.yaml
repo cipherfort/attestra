@@ -1,4 +1,4 @@
-# Security exception policy (ADR-021, governance model §4). Enforced by the workflow engine.
+# Security exception policy (ADR-021, governance model section 4). Enforced by the workflow engine.
 # Status: PROPOSED. REQUIRES HUMAN APPROVAL (CISO).
 # Per-control max durations in the catalogue (exception.max_days) apply in addition; the SHORTER wins.
 

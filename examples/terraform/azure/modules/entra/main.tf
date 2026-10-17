@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: Apache-2.0
-# Entra ID for the platform (ADR-014, access control model §2), created from nothing.
+# Entra ID for the platform (ADR-014, access control model section 2), created from nothing.
 #
 # * aap-web: the BFF's confidential client. Authenticates with a FEDERATED CREDENTIAL of the API's managed identity
 #   (no client secret exists). App roles = the platform's org-wide roles; tokens carry `roles` and the object ids of

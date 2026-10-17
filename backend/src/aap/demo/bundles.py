@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: Apache-2.0
-"""Build evidence bundles exactly as the `security-workflows` `emit-evidence` action will (pipeline architecture §5):
+"""Build evidence bundles exactly as the `security-workflows` `emit-evidence` action will (pipeline architecture section 5):
 a zip holding `evidence-manifest.json` plus the declared raw files, each with its SHA-256 in the manifest."""
 
 from __future__ import annotations

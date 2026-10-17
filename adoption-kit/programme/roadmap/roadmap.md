@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Status | PROPOSED. Durations assume the Phase 2+ team in the [charter §16](../charter/programme-charter.md#16-resource-requirements-indicative-to-be-refined-in-the-business-case) and that external dependencies land on time (R-06). |
+| Status | PROPOSED. Durations assume the Phase 2+ team in the [charter section 16](../charter/programme-charter.md#16-resource-requirements-indicative-to-be-refined-in-the-business-case) and that external dependencies land on time (R-06). |
 | Start (T0) | Charter approval date (TBC) |
 
 ## Phases
@@ -32,8 +32,8 @@ gantt
 
 | Phase | Goal | Key outputs | Exit gate |
 |---|---|---|---|
-| **0 Discovery and governance** | Know the estate. Get decisions and dependencies moving. | Inventory, validated assumptions, Board running, catalogue/model decisions, external requests dated, buy-vs-build decision, pilot teams | [PID §3](../charter/project-initiation-document.md#3-phase-0-discovery-and-governance-6-weeks) |
-| **1 Architecture and foundation** | Prove the riskiest part (verified pull-based evidence) on a thin slice | IaC, auth, data layer, config loader, GitHub App + receiver, thin slice | [PID §4](../charter/project-initiation-document.md#4-phase-1-architecture-and-foundation-810-weeks) |
+| **0 Discovery and governance** | Know the estate. Get decisions and dependencies moving. | Inventory, validated assumptions, Board running, catalogue/model decisions, external requests dated, buy-vs-build decision, pilot teams | [PID section 3](../charter/project-initiation-document.md#3-phase-0-discovery-and-governance-6-weeks) |
+| **1 Architecture and foundation** | Prove the riskiest part (verified pull-based evidence) on a thin slice | IaC, auth, data layer, config loader, GitHub App + receiver, thin slice | [PID section 4](../charter/project-initiation-document.md#4-phase-1-architecture-and-foundation-810-weeks) |
 | **2 Application registry** | Authoritative apps, owners, tiers | Registry API, `application.yaml` ingestion, classification workflow, onboarding CLI/PR | 100% of pilot apps registered and classified with approved tiers |
 | **3 Security pipeline** | Paved road v1 | `security-workflows` v1.0 (suite, SAST, SCA, IaC, container, SBOM, workflow-lint, dependency review, emit-evidence), migration of infra-repo workflows, DD/DT keys removed from pilot repos | Canary repos green. Manifests schema-valid. Pinned release registered. |
 | **4 Evidence platform** | Evidence in, controls out | Ingestion + verification, WORM, hash chain + checkpoints, freshness engine, evaluator framework + 20 automated evaluators, control-state API | AC-01/02/05 pass. Freshness transitions verified. Integrity job green 14 days. |

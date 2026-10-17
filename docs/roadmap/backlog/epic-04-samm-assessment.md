@@ -16,7 +16,7 @@
 
 ### E04-F02-S01: Derive answers from control states · M · Phase 6
 - **Story:** As Head of AppSec, I want SAMM answers derived from control states per the methodology, so that maturity reflects observed practice.
-- **Technical:** Implements [methodology §A.3](../../standards/samm-asvs-mapping.md#a3-maturity-calculation): automated fraction → banded answer, manual cap rule, provenance.
+- **Technical:** Implements [methodology section A.3](../../standards/samm-asvs-mapping.md#a3-maturity-calculation): automated fraction → banded answer, manual cap rule, provenance.
 - **AC:** For a fixture app, the calculated stream/practice/function scores match hand-computed expected values. Each answer carries provenance (`automated` / `manual_m2` / `manual_m1` / `unassessed`) and the control-state IDs behind it.
 - **Tests:** Golden tests. Edge cases: N/A removed from the denominator, excepted counts 0, partial pro-rata.
 

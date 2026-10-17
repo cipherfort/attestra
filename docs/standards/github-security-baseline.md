@@ -26,7 +26,7 @@
 | GH-11 | Self-hosted runners | Not used by public repositories. Runner groups restricted to selected repos. Ephemeral for security workflows. | Runner compromise (T-03) | Confidence cap |
 | GH-12 | Security features (code security configuration) | Applied to all repos: dependency graph, Dependabot alerts and security updates, secret scanning with push protection and validity checks, code scanning (CodeQL default setup or `aap-security` advanced setup), private vulnerability reporting | Detection coverage | ASC-SRC-03, ASC-BLD-01/02 |
 | GH-13 | Push protection bypass | Bypass requires a reason. Bypasses are ingested as findings and reviewed. | Secret leakage | ASC-SRC-04 |
-| GH-14 | Org rulesets | Default-branch ruleset for in-scope repos (see §2). "Require workflow" rule for `aap-security`, targeted by the `aap_tier` custom property. | Enforce the paved road | ASC-SRC-01 |
+| GH-14 | Org rulesets | Default-branch ruleset for in-scope repos (see section 2). "Require workflow" rule for `aap-security`, targeted by the `aap_tier` custom property. | Enforce the paved road | ASC-SRC-01 |
 | GH-15 | Repository custom properties | `aap_app_id`, `aap_tier` (set by the platform onboarding process) | Ruleset targeting, discovery | Connector |
 | GH-16 | Audit log streaming | Stream to Azure Event Hubs → Sentinel. Retention per the SOC. | Detection, investigations | SOC |
 | GH-17 | IP allow list | Enterprise IP allow list where feasible. The platform GitHub App IP allow list is enabled. | Token misuse (T-10) | Annual review |

@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: Apache-2.0
-"""Control evaluation ledger + current-state projection (control framework §5)."""
+"""Control evaluation ledger + current-state projection (control framework section 5)."""
 
 from __future__ import annotations
 

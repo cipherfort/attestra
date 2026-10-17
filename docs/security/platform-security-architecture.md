@@ -52,7 +52,7 @@ The platform holds an **organisation-wide map of exploitable weaknesses**: which
 | In transit | TLS 1.2+ everywhere, TLS 1.3 preferred. Private endpoints for PG, Blob and Key Vault. `sslmode=verify-full` to PG. |
 | At rest | Platform-managed encryption by default. **Customer-managed keys (Key Vault) for PG and Blob — PROPOSED, REQUIRES HUMAN APPROVAL** (cost and key-ops overhead vs data sensitivity). |
 | Sensitive fields | Secret-scanning findings store **only** the secret type, location, fingerprint and validity. **Never the secret value.** Raw secret-scanner output is redacted by the ingestion worker before it reaches WORM storage. |
-| Public vs internal | A public repository's *code* is public. Its *security evidence and findings are not* ([ADR-028](../../adr/ADR-028-supply-chain-security.md), §Open source). The platform never writes findings back to public repos (no PR comments with vuln detail on public repos). SARIF to the GHAS tab is acceptable because GitHub restricts code-scanning alert visibility to users with security-alert access. |
+| Public vs internal | A public repository's *code* is public. Its *security evidence and findings are not* ([ADR-028](../../adr/ADR-028-supply-chain-security.md), "Open source" section). The platform never writes findings back to public repos (no PR comments with vuln detail on public repos). SARIF to the GHAS tab is acceptable because GitHub restricts code-scanning alert visibility to users with security-alert access. |
 | Data minimisation | Developer identity is limited to GitHub login + Entra object ID where linked. No commit-level productivity metrics. See the [privacy considerations](#6-privacy-considerations). |
 
 ### 3.3 Evidence integrity ([ADR-016](../../adr/ADR-016-evidence-immutability.md))
@@ -118,7 +118,7 @@ Scope: the components and trust boundaries above. Ratings are inherent → resid
 | T-15 | Public repos | **I**nfo disclosure | Evidence or findings for a public repo leak via PR comments, workflow logs or artifacts | M | Reusable workflows detect `github.event.repository.visibility == 'public'`, suppress detail in logs and job summaries, and set artifact retention to 1 day (the platform pulls immediately) | L |
 | T-16 | Fork PRs on public repos | **E**levation | `pull_request_target` misuse runs untrusted code with secrets | H | Reusable workflows **never** use `pull_request_target`. The platform does not depend on fork-PR evidence. Org policy: approval required for first-time contributors. | L |
 | T-17 | Availability | **D**oS | Platform outage during a CVE emergency | M | HA PG, multi-replica web, read-only degraded mode, CVE query also runnable directly against Dependency-Track as a fallback (runbook) | L |
-| T-18 | Maturity metrics | **T**ampering (gaming) | Teams game metrics (see TOM §7) | M | Metric design + sampling audits | M |
+| T-18 | Maturity metrics | **T**ampering (gaming) | Teams game metrics (see TOM section 7) | M | Metric design + sampling audits | M |
 
 **Residual risks to accept explicitly (REQUIRES HUMAN APPROVAL):** T-03 until ephemeral runners exist, T-09 (inherent to an aggregated vuln store), T-10 (GitHub App read access to all code is inherent to the design), T-18.
 

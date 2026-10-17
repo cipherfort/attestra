@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: Apache-2.0
-"""Evidence verification (abuse cases AC-01, AC-02, AC-07; evidence model §4) and hash-chain tamper detection."""
+"""Evidence verification (abuse cases AC-01, AC-02, AC-07; evidence model section 4) and hash-chain tamper detection."""
 
 import hashlib
 

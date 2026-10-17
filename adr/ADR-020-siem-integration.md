@@ -1,6 +1,6 @@
 # ADR-020: SIEM / SOC integration
 
-**Status:** Proposed (2026-10-07), amended by [ADR-031](ADR-031-integrations-owned-and-bootstrapped-by-the-project.md) (2026-10-08)  ·  **Related:** [`config/risk-model.yaml`](../config/risk-model.yaml) `soc_escalation`, [Governance §5](../adoption-kit/governance/governance-model.md#5-escalation)
+**Status:** Proposed (2026-10-07), amended by [ADR-031](ADR-031-integrations-owned-and-bootstrapped-by-the-project.md) (2026-10-08)  ·  **Related:** [`config/risk-model.yaml`](../config/risk-model.yaml) `soc_escalation`, [Governance section 5](../adoption-kit/governance/governance-model.md#5-escalation)
 
 ## Context
 

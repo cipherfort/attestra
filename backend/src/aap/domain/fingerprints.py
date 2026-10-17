@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: Apache-2.0
-"""Deterministic finding identities (data model §4): the same real issue maps to the same finding on every run."""
+"""Deterministic finding identities (data model section 4): one real issue maps to the same finding on every run."""
 
 from __future__ import annotations
 

@@ -33,4 +33,4 @@ Compromised dependencies (malicious or hijacked releases, typosquats) · comprom
 
 ## 3. Incident response triggers
 
-Advisory affecting an action or tool we use · malicious package detected · unexpected attestation failure · unapproved workflow evidence attempts. Response: [CVE emergency runbook](../runbooks/cve-emergency-response.md), evidence revocation ([evidence model §5.3](../architecture/04-evidence-model.md#53-derived-state)), credential rotation.
+Advisory affecting an action or tool we use · malicious package detected · unexpected attestation failure · unapproved workflow evidence attempts. Response: [CVE emergency runbook](../runbooks/cve-emergency-response.md), evidence revocation ([evidence model section 5.3](../architecture/04-evidence-model.md#53-derived-state)), credential rotation.

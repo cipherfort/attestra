@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: Apache-2.0
-"""Control applicability and state vocabulary (control framework §4–5)."""
+"""Control applicability and state vocabulary (control framework sections 4–5)."""
 
 from __future__ import annotations
 

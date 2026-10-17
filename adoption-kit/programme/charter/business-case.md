@@ -8,7 +8,7 @@
 
 ## 1. Strategic case (summary)
 
-The organisation cannot evidence the security of its applications. Tools exist but are disconnected from ownership, criticality and controls. See the [charter §2](programme-charter.md#2-problem-statement) and [current state](../../governance/target-state-assessment.md). The programme supports the [AppSec strategy](../../governance/appsec-strategy.md) objectives SO1–SO7.
+The organisation cannot evidence the security of its applications. Tools exist but are disconnected from ownership, criticality and controls. See the [charter section 2](programme-charter.md#2-problem-statement) and [current state](../../governance/target-state-assessment.md). The programme supports the [AppSec strategy](../../governance/appsec-strategy.md) objectives SO1–SO7.
 
 ## 2. Options appraisal
 
@@ -63,7 +63,7 @@ Action (Phase 0): produce 3-year TCO for options 2 and 3 using the Azure pricing
 | Avoided per-repo licences | Cost avoidance | Option 2 licence quote minus option 3 run cost |
 | Defensible maturity reporting | Governance | % of maturity answers backed by C2+/M2 evidence |
 
-Benefits realisation ownership and review: [charter §21](programme-charter.md#21-benefits-realisation).
+Benefits realisation ownership and review: [charter section 21](programme-charter.md#21-benefits-realisation).
 
 ## 5. Commercial and procurement
 

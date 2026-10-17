@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: Apache-2.0
-"""Evidence ledger persistence (evidence model §2, §6; ADR-016).
+"""Evidence ledger persistence (evidence model section 2, section 6; ADR-016).
 
 Inserts are serialised per monthly chain with an advisory lock, so `prev_hash` always points at the chain's
 previous record. Rows are never updated: freshness lives in `evidence_validity_events` (append-only) and the

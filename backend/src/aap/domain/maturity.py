@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: Apache-2.0
-"""SAMM maturity derived from control states (SAMM/ASVS methodology §A.3, config/maturity-methodology.yaml).
+"""SAMM maturity derived from control states (SAMM/ASVS methodology section A.3, config/maturity-methodology.yaml).
 
 Per (stream, level) answer:
     automated_fraction = Σ weight(state) / count(mandatory mapped controls that apply)

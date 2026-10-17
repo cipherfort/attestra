@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: Apache-2.0
-"""Evaluate every catalogue control for an application (control framework §5, evidence model §5).
+"""Evaluate every catalogue control for an application (control framework section 5, evidence model section 5).
 
 1. Refresh evidence freshness (latest-per-scope, commit/artifact/continuous/time/event policies) and move the
    projection, appending validity events on change.
@@ -235,7 +235,7 @@ def _merged_detection(repos: Sequence[Mapping[str, Any]]) -> dict[str, Any]:
 def raise_control_gaps(
     conn: Connection, application_id: str, results: Sequence[ScopeResult], now: datetime, grace: timedelta
 ) -> int:
-    """Mandatory controls failing longer than the grace period become `control_gap` findings (control framework §5)."""
+    """Mandatory controls failing longer than the grace period become `control_gap` findings (control framework section 5)."""
     since = {(r["control_key"], r["scope_ref"]): r["since"] for r in control_store.current_states(conn, application_id)}
     raised = 0
     for r in results:

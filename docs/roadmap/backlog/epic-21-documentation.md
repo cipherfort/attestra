@@ -1,6 +1,6 @@
 # E21: Documentation
 
-**Goal:** The 40-document set in the brief (§31) produced, owned and kept current. Stage 1 produced the architecture and programme core. The remainder is Stage 3.
+**Goal:** The 40-document set in the brief (section 31) produced, owned and kept current. Stage 1 produced the architecture and programme core. The remainder is Stage 3.
 
 ## F01: Standards (Stage 3)
 
@@ -15,7 +15,7 @@
 
 ### E21-F02-S01: Programme documents · M · Phase 0
 - **Scope:** Business Case (with costed run estimates) · Security Strategy · Current/Target State Assessments · SAMM Assessment Methodology (extract from the Stage 1 methodology) · KPI/KRI catalogue · RAID log · Implementation roadmap (maintained).
-- **Progress:** all 40 brief §31 documents exist as drafts. See the [documentation index](../../README.md). Remaining work is approval and refinement with stakeholders, not authoring.
+- **Progress:** all 40 brief section 31 documents exist as drafts. See the [documentation index](../../README.md). Remaining work is approval and refinement with stakeholders, not authoring.
 
 ### E21-F02-S02: Operational and privacy documents · M · Phase 1–9
 - **Scope:** Data Retention Policy (from ADR-017) · Incident Response Runbook · Platform Operations Runbook · DR Plan · Backup and Restore Plan · Threat Model (maintained) · Privacy / DPIA inputs (**DPO review required, no compliance claimed**).

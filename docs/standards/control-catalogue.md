@@ -156,7 +156,7 @@ At least 90% of engineers contributing to the app's repositories in the last 90 
 - **Applies when:** always
 - **Assessment:** automated · evaluator `team_training_coverage@1` · min confidence C3 · evidence `training.completion`
 - **Parameters:** `{contributor_window_days: 90, threshold_pct: 90}`
-- **How we prove it operates:** LMS completion export (connector) joined to GitHub contributors via the Entra/GitHub identity link. Reported at TEAM level only, never per person (privacy, see platform security architecture §6).
+- **How we prove it operates:** LMS completion export (connector) joined to GitHub contributors via the Entra/GitHub identity link. Reported at TEAM level only, never per person (privacy, see platform security architecture section 6).
 - **Implementation:** Assign the secure-development course to all engineers via the LMS.
 - **Remediation:** Team lead schedules outstanding completions.
 - **Exceptions:** allowed, max days T1:90 / T2:180 / T3:365 / T4:365

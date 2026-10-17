@@ -28,7 +28,7 @@
 
 ### E01-F02-S01: Charter and PID sign-off · M · Phase 0
 - **Story:** As sponsor, I want to approve the charter and PID so that the team is resourced and scope is agreed.
-- **AC:** Signed charter (version, date, approver). Resource commitments recorded. Decisions in charter §19 answered.
+- **AC:** Signed charter (version, date, approver). Resource commitments recorded. Decisions in charter section 19 answered.
 - **Tasks:** leadership walkthrough · revisions · sign-off.
 
 ### E01-F02-S02: Policy statement mandating application registration · M · Phase 0–2

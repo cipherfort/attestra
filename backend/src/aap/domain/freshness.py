@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: Apache-2.0
-"""Evidence freshness per config/evidence-types.yaml (evidence model §5).
+"""Evidence freshness per config/evidence-types.yaml (evidence model section 5).
 
 Freshness is computed, never assumed: an evidence record is ACTIVE, EXPIRING, EXPIRED, SUPERSEDED or REVOKED
 depending on its type's policy, the current time and what has happened since it was observed.

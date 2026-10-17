@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Status | **DESIGNED + schema verified**. [`schemas/database/0001_core.sql`](../../schemas/database/0001_core.sql) applies cleanly to PostgreSQL 16, and its security properties pass [`tests/database/run.sh`](../../tests/database/run.sh) (12 checks, §7). It is not yet an Alembic migration (Phase 1). |
+| Status | **DESIGNED + schema verified**. [`schemas/database/0001_core.sql`](../../schemas/database/0001_core.sql) applies cleanly to PostgreSQL 16, and its security properties pass [`tests/database/run.sh`](../../tests/database/run.sh) (12 checks, section 7). It is not yet an Alembic migration (Phase 1). |
 | Related | [ADR-008](../../adr/ADR-008-postgresql-data-model.md), [ADR-016](../../adr/ADR-016-evidence-immutability.md), [ADR-017](../../adr/ADR-017-evidence-retention.md), [ADR-022](../../adr/ADR-022-multi-directorate-model.md) |
 
 ## 1. Modelling principles
