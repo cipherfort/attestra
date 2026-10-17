@@ -12,7 +12,8 @@ minor also gets security fixes ([SECURITY.md](SECURITY.md)).
 1. Commits on `main` use Conventional Commit messages (`feat:`, `fix:`, `docs:`, `chore:`, `feat!:` for breaking).
 2. `release-please` keeps a release pull request open with `CHANGELOG.md` and the version bumped in
    `backend/pyproject.toml`, `frontend/package.json` and `charts/attestra/Chart.yaml`.
-3. A maintainer reviews and merges it. release-please tags the merge commit (`vX.Y.Z`); tags matching `v*` are
+3. A maintainer reviews and merges it, first checking that the notes list every publicly known vulnerability the
+   release fixes, with its CVE or GHSA identifier. release-please tags the merge commit (`vX.Y.Z`); tags matching `v*` are
    protected by a repository ruleset (only release-please and maintainers can create them, nobody can move or delete
    them).
 4. The tag runs [`release.yml`](.github/workflows/release.yml):
