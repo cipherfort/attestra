@@ -44,6 +44,10 @@ COPY config /app/config
 COPY schemas /app/schemas
 COPY templates /app/templates
 COPY pipelines /app/pipelines
+# the licence travels with the released image (OpenSSF Baseline OSPS-LE-03.02)
+COPY LICENSE NOTICE /app/
+LABEL org.opencontainers.image.licenses="Apache-2.0" \
+      org.opencontainers.image.source="https://github.com/cipherfort/attestra"
 ENV PATH=/app/backend/.venv/bin:$PATH AAP_REPO_ROOT=/app AAP_STATIC_DIR=/app/frontend/dist \
     PYTHONUNBUFFERED=1 PYTHONDONTWRITEBYTECODE=1
 USER 10001

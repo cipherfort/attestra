@@ -96,6 +96,7 @@ jobs:
           version="${TAG#v}"
           sed -i "s|^version: .*|version: ${version}|; s|^appVersion: .*|appVersion: \"${version}\"|" charts/attestra/Chart.yaml
           sed -i "s|^  digest: .*|  digest: \"${DIGEST}\"|; s|^  repository: .*|  repository: ${IMAGE}|" charts/attestra/values.yaml
+          cp LICENSE NOTICE charts/attestra/   # the licence travels with the released chart (OSPS-LE-03.02)
           helm package charts/attestra
           echo "$GH_TOKEN" | helm registry login ghcr.io --username "$GITHUB_ACTOR" --password-stdin
           out=$(helm push "attestra-${version}.tgz" "oci://ghcr.io/${GITHUB_REPOSITORY_OWNER,,}/charts" 2>&1)
