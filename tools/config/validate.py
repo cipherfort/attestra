@@ -262,7 +262,7 @@ def check_openapi() -> list[str]:
     try:
         from openapi_spec_validator import validate
     except ImportError:
-        print("SKIP openapi structural validation (pip install -r tools/requirements.txt)")
+        print("SKIP openapi structural validation (pip install --require-hashes -r tools/requirements.txt)")
         return errors
     try:
         validate(spec)

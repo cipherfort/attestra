@@ -1,0 +1,6 @@
+# Pinned tooling for repository validation (CI and local). Lock: tools/requirements.txt, regenerate with
+#   uv pip compile --universal --generate-hashes --python-version 3.12 tools/requirements.in -o tools/requirements.txt
+# Install: pip install --require-hashes -r tools/requirements.txt
+PyYAML==6.0.3
+jsonschema==4.26.0
+openapi-spec-validator==0.9.0

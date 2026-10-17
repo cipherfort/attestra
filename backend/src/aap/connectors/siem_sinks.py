@@ -94,6 +94,7 @@ class SyslogSink:
         self.host, self.port = host, int(port)
         self.hostname = hostname or socket.gethostname()
         self._ctx = ssl.create_default_context(cafile=ca_file)  # verifies the server certificate and hostname
+        self._ctx.minimum_version = ssl.TLSVersion.TLSv1_2  # RFC 9662: TLS 1.2 or later
         self._connect = connect or (lambda: socket.create_connection((self.host, self.port), timeout=15))
 
     def send(self, rows: Sequence[dict[str, Any]]) -> int:
