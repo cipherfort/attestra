@@ -71,7 +71,7 @@ export function FindingPage({ id }: { id: string }) {
     <Loadable state={finding}>
       {({ data: f, etag }) => (
         <>
-          <p className="small"><a href={`#/apps/${f.app_key}`}>← {f.application_name}</a></p>
+          <p className="small"><a href={`/apps/${f.app_key}`}>← {f.application_name}</a></p>
           <div className="row"><PriorityChip p={f.priority} /><h1>{f.title}</h1></div>
           <p className="muted">{f.type} · {f.status.replaceAll("_", " ")} · first seen {date(f.first_seen_at)} · fix by {date(f.sla_due_at)}{f.sla_breached ? " (past SLA)" : ""}</p>
           <div className="grid two">
@@ -88,7 +88,7 @@ export function FindingPage({ id }: { id: string }) {
               <h2>Actions</h2>
               <Actions f={f} etag={etag ?? ""} onDone={() => setVersion((v) => v + 1)} />
               {!["closed", "false_positive", "excepted"].includes(f.status) && (
-                <p className="small"><a href={`#/exceptions/new?app=${f.app_key}&type=finding&ref=${f.id}`}>Request an exception for this finding</a></p>
+                <p className="small"><a href={`/exceptions/new?app=${f.app_key}&type=finding&ref=${f.id}`}>Request an exception for this finding</a></p>
               )}
               <p className="small muted">Closing is not an action: a finding closes only when a re-scan of the same scope no longer reports it. A ticket marked Done is not enough.</p>
               <h3>History</h3>

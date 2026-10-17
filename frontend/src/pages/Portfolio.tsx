@@ -2,6 +2,7 @@
 import { api, type Priority } from "../api";
 import { CoverageBar, CoverageLegend } from "../components/charts";
 import { Loadable, PriorityChip, Tier, useLoad } from "../components/ui";
+import { go } from "../router";
 
 const PRIORITIES: Priority[] = ["P1", "P2", "P3", "P4"];
 
@@ -14,7 +15,7 @@ export function Portfolio() {
         <h1>Applications</h1>
         <span className="spacer" />
         {me.data?.permissions.includes("application.register") && (
-          <button type="button" onClick={() => { window.location.hash = "#/register"; }}>Register an application</button>
+          <button type="button" onClick={() => { go("/register"); }}>Register an application</button>
         )}
       </div>
       <p className="muted">
@@ -34,8 +35,8 @@ export function Portfolio() {
                 </thead>
                 <tbody>
                   {items.map((a) => (
-                    <tr key={a.id} className="clickable" onClick={() => { window.location.hash = `#/apps/${a.app_key}`; }}>
-                      <td><a href={`#/apps/${a.app_key}`}>{a.name}</a><div className="muted small">{a.app_key} · {a.lifecycle}</div></td>
+                    <tr key={a.id} className="clickable" onClick={() => { go(`/apps/${a.app_key}`); }}>
+                      <td><a href={`/apps/${a.app_key}`}>{a.name}</a><div className="muted small">{a.app_key} · {a.lifecycle}</div></td>
                       <td><Tier tier={a.tier} /></td>
                       <td className="small">{a.org_unit}</td>
                       <td><CoverageBar counts={a.mandatory_controls ?? {}} /></td>

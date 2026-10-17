@@ -163,7 +163,7 @@ async function request<T>(path: string, init: RequestInit = {}): Promise<{ data:
       detail = p.detail;
     } catch { /* non-JSON error body */ }
     if (res.status === 401 && detail && SIGN_IN_REQUIRED.has(detail)) {
-      const back = window.location.pathname + window.location.hash;
+      const back = window.location.pathname + window.location.search;
       window.location.assign(`/auth/login?return_to=${encodeURIComponent(back)}`);
     }
     throw new ApiError(res.status, title, detail);

@@ -31,6 +31,7 @@
     "react-router": "^7.18.4"
   },
   "devDependencies": {
+    "@playwright/test": "^1.61.1",
     "@tailwindcss/vite": "^4.3.3",
     "@types/d3-array": "^3.2.2",
     "@types/d3-scale": "^4.0.9",

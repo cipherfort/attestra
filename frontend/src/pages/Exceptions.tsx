@@ -2,15 +2,16 @@
 import { useState } from "react";
 import { ApiError, api, type ExceptionCreate, type Priority, type SecurityException } from "../api";
 import { date, Loadable, PriorityChip, useLoad } from "../components/ui";
+import { go } from "../router";
 
 const STATUS: Record<string, string> = {
   draft: "Draft", pending_approval: "Waiting for a decision", approved: "Approved", rejected: "Rejected",
   expired: "Expired", revoked: "Revoked", closed: "Replaced by a renewal",
 };
 
-/** Query string after the hash route, e.g. #/exceptions/new?app=APP-00001&type=control&ref=ASC-SRC-01 */
+/** Query string of the route, e.g. /exceptions/new?app=APP-00001&type=control&ref=ASC-SRC-01 */
 export function hashQuery(): URLSearchParams {
-  const q = window.location.hash.split("?")[1] ?? "";
+  const q = window.location.search.slice(1);
   return new URLSearchParams(q);
 }
 
@@ -48,8 +49,8 @@ function ExceptionList() {
                 <thead><tr><th>Exception</th><th>Application</th><th>Target</th><th>Residual</th><th>Status</th><th>Expires</th></tr></thead>
                 <tbody>
                   {shown.map((r) => (
-                    <tr key={r.id} className="clickable" onClick={() => { window.location.hash = `#/exceptions/${r.exception_key}`; }}>
-                      <td><a href={`#/exceptions/${r.exception_key}`}>{r.exception_key}</a><div className="muted small">by {r.requested_by}</div></td>
+                    <tr key={r.id} className="clickable" onClick={() => { go(`/exceptions/${r.exception_key}`); }}>
+                      <td><a href={`/exceptions/${r.exception_key}`}>{r.exception_key}</a><div className="muted small">by {r.requested_by}</div></td>
                       <td className="small">{r.app_key} · {r.application_name}</td>
                       <td className="small">{r.target_type} <span className="mono">{r.target_ref.slice(0, 18)}</span></td>
                       <td><PriorityChip p={r.residual_priority} /></td>
@@ -82,7 +83,7 @@ function NewException() {
     try {
       const x = await api.createException({ ...form, compensating_controls: form.compensating_controls || undefined,
         requested_expiry: form.requested_expiry || undefined });
-      window.location.hash = `#/exceptions/${x.exception_key}`;
+      go(`/exceptions/${x.exception_key}`);
     } catch (err) { setError(message(err)); }
   };
   const area = (k: keyof ExceptionCreate, label: string, hint: string) => (
@@ -94,7 +95,7 @@ function NewException() {
   );
   return (
     <>
-      <p className="small"><a href="#/exceptions">← Exceptions</a></p>
+      <p className="small"><a href="/exceptions">← Exceptions</a></p>
       <h1>Request an exception</h1>
       <form className="card" onSubmit={submit}>
         <dl className="kv">
@@ -134,9 +135,9 @@ function ExceptionDetail({ id }: { id: string }) {
     <Loadable state={x}>
       {(e) => (
         <>
-          <p className="small"><a href="#/exceptions">← Exceptions</a></p>
+          <p className="small"><a href="/exceptions">← Exceptions</a></p>
           <div className="row"><h1>{e.exception_key}</h1><PriorityChip p={e.residual_priority} />
-            <span className="muted">{STATUS[e.status] ?? e.status} · <a href={`#/apps/${e.app_key}`}>{e.app_key}</a></span></div>
+            <span className="muted">{STATUS[e.status] ?? e.status} · <a href={`/apps/${e.app_key}`}>{e.app_key}</a></span></div>
           <div className="grid two">
             <div className="card">
               <h2>What is accepted</h2>
@@ -179,7 +180,7 @@ function ExceptionActions({ e, onDone }: { e: SecurityException; onDone: () => v
     setMsg(null);
     try {
       const out = await api.exceptionAction(e.id, action, body);
-      if (action === "renewals") window.location.hash = `#/exceptions/${out.exception_key}`;
+      if (action === "renewals") go(`/exceptions/${out.exception_key}`);
       setComment(""); onDone();
     } catch (err) { setMsg(message(err)); }
   };
