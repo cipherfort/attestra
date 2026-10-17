@@ -1,18 +1,106 @@
 # OpenSSF Best Practices: self-assessment (passing level)
 
-Status: PREPARED. The badge itself is requested by a maintainer at https://www.bestpractices.dev once the public
-repository exists (REQUIRES HUMAN ACTION). This maps each criterion group to where the project meets it.
+Badge entry: [bestpractices.dev/en/projects/15625](https://www.bestpractices.dev/en/projects/15625). This page
+records the answer and the evidence for every "passing" criterion, in the order of the badge form, so the answers can
+be checked against the repository. Links point at `main`.
 
-| Criterion group | Met by |
-|---|---|
-| Basics: description, interaction, contribution, licence | [README](../../README.md), [CONTRIBUTING](../../CONTRIBUTING.md) (DCO), [LICENSE](../../LICENSE) Apache-2.0, [CODE_OF_CONDUCT](../../CODE_OF_CONDUCT.md), [GOVERNANCE](../../GOVERNANCE.md) |
-| Documentation | Docs site (MkDocs), install guides, architecture, API contract, ADRs |
-| Other: HTTPS, discussion, English | GitHub (HTTPS), issues and discussions |
-| Change control: public repo, unique versioning, release notes | Git; semantic versions; `CHANGELOG.md` by release-please ([RELEASING](../../RELEASING.md)) |
-| Reporting: bug and vulnerability process, response | Issue templates; [SECURITY.md](../../SECURITY.md) (private reporting, response targets) |
-| Quality: build, automated tests, new-functionality tests, warnings | CI: ruff, mypy strict on the whole backend, 340+ tests, contract fuzzing, Helm install/upgrade on kind; tests required with changes (CONTRIBUTING) |
-| Security: secure design knowledge, crypto practices | Threat model, ADRs; standard libraries only for crypto (cryptography, sigstore); no custom crypto; TLS for every outbound connection |
-| Secured delivery against MITM | Signed images and chart (cosign), SLSA provenance, HTTPS only |
-| Publicly known vulnerabilities fixed | Dependabot (3-day cooldown); CI fails on known vulnerabilities in runtime dependencies (`pip-audit`, `npm audit`); Trivy scan of the image before release |
-| Static analysis | CodeQL (`codeql.yml`), ruff security rules (S), Checkov for Terraform, zizmor for workflows |
-| Dynamic analysis | Property-based fuzzing of every untrusted-input parser (CI and nightly), Schemathesis against the API |
+Project details on the form: **name** Attestra; **description** "Evidence-driven application security assurance
+(OWASP SAMM/ASVS): controls are judged from verified, signed pipeline evidence, never from configuration alone.";
+**licence** Apache-2.0; **implementation languages** Python, TypeScript.
+
+## Basics
+
+| Criterion | Answer | Justification |
+|---|---|---|
+| description_good | Met | The README says what Attestra does and for whom: https://github.com/cipherfort/attestra#readme |
+| interact | Met | The README links to the documentation, issues, discussions and contribution guide. Docs: https://cipherfort.github.io/attestra/ |
+| contribution | Met | https://github.com/cipherfort/attestra/blob/main/CONTRIBUTING.md |
+| contribution_requirements | Met | Coding standards, required checks and DCO sign-off: https://github.com/cipherfort/attestra/blob/main/CONTRIBUTING.md |
+| floss_license | Met | Apache-2.0. |
+| floss_license_osi | Met | Apache-2.0 is OSI-approved. |
+| license_location | Met | https://github.com/cipherfort/attestra/blob/main/LICENSE |
+| documentation_basics | Met | Getting started, install (Helm, Compose), configuration and user guide: https://cipherfort.github.io/attestra/ |
+| documentation_interface | Met | REST API reference generated from the OpenAPI contract, and the settings reference: https://cipherfort.github.io/attestra/reference/api/ and https://cipherfort.github.io/attestra/reference/settings/ |
+| sites_https | Met | The repository (GitHub) and the documentation site (GitHub Pages) are served only over HTTPS. |
+| discussion | Met | GitHub Issues and Discussions: https://github.com/cipherfort/attestra/issues and https://github.com/cipherfort/attestra/discussions |
+| english | Met | Documentation and code are in English; reports in English are accepted. |
+| maintained | Met | Actively maintained: https://github.com/cipherfort/attestra/commits/main |
+
+## Change control
+
+| Criterion | Answer | Justification |
+|---|---|---|
+| repo_public | Met | https://github.com/cipherfort/attestra |
+| repo_track | Met | Git records every change, its author and date. |
+| repo_interim | Met | Work between releases is committed to the public repository through pull requests. |
+| repo_distributed | Met | Git. |
+| version_unique | Met | Each release gets a unique semantic version (release-please): https://github.com/cipherfort/attestra/blob/main/RELEASING.md |
+| version_semver | Met | Semantic Versioning 2.0.0: https://github.com/cipherfort/attestra/blob/main/RELEASING.md |
+| version_tags | Met | Releases are tagged `vX.Y.Z` by release-please, and a repository ruleset makes release tags immutable. No release has been cut yet. |
+| release_notes | N/A | No release has been made yet. Each release will get human-readable notes in CHANGELOG.md, generated by release-please: https://github.com/cipherfort/attestra/blob/main/CHANGELOG.md |
+| release_notes_vulns | N/A | No release has been made yet, so no release has fixed a publicly known vulnerability. Release notes will identify any that are fixed (RELEASING.md). |
+
+## Reporting
+
+| Criterion | Answer | Justification |
+|---|---|---|
+| report_process | Met | Bug reports through GitHub Issues, with templates: https://github.com/cipherfort/attestra/issues/new/choose |
+| report_tracker | Met | GitHub Issues. |
+| report_responses | Met | Maintainers respond to reports through GitHub Issues. No bug reports have been received yet. |
+| enhancement_responses | Met | Enhancement requests are answered through GitHub Issues and Discussions. None have been received yet. |
+| report_archive | Met | Reports and responses are publicly archived and searchable: https://github.com/cipherfort/attestra/issues?q=is%3Aissue |
+| vulnerability_report_process | Met | https://github.com/cipherfort/attestra/blob/main/SECURITY.md |
+| vulnerability_report_private | Met | Private reporting through GitHub private vulnerability reporting (enabled), or email: https://github.com/cipherfort/attestra/security/advisories/new |
+| vulnerability_report_response | N/A | No vulnerability reports have been received. SECURITY.md commits to acknowledging within 3 working days and assessing within 10: https://github.com/cipherfort/attestra/blob/main/SECURITY.md |
+
+## Quality
+
+| Criterion | Answer | Justification |
+|---|---|---|
+| build | Met | Backend with uv, UI with npm and Vite, container image with Docker, Helm chart. Instructions in CONTRIBUTING.md. |
+| build_common_tools | Met | uv, npm, Docker and Helm. |
+| build_floss_tools | Met | All build tools are FLOSS. |
+| test | Met | Automated suite (pytest; 343 tests including PostgreSQL integration tests), database security-property tests, an API contract test (Schemathesis) and a Helm install/upgrade test on kind, all run in CI. How to run them: CONTRIBUTING.md. |
+| test_invocation | Met | `uv run pytest` (backend), `npm run build` (UI type check and build), documented in CONTRIBUTING.md. |
+| test_most | Met | Backend line coverage is 77% (pytest-cov, all non-opt-in tests). |
+| test_continuous_integration | Met | Every pull request and push to main runs the full suite: https://github.com/cipherfort/attestra/actions/workflows/ci.yml |
+| test_policy | Met | New functionality comes with tests: CONTRIBUTING.md and the pull-request checklist ("Tests added or updated"): https://github.com/cipherfort/attestra/blob/main/.github/PULL_REQUEST_TEMPLATE.md |
+| tests_are_added | Met | Recent changes added tests with the code, e.g. the TLS 1.2 floor for the syslog sink in https://github.com/cipherfort/attestra/pull/16 |
+| tests_documented_added | Met | The pull-request template requires tests: https://github.com/cipherfort/attestra/blob/main/.github/PULL_REQUEST_TEMPLATE.md |
+| warnings | Met | ruff (lint) and mypy (strict) for Python; TypeScript `strict` with `noUnusedLocals`/`noUnusedParameters`; actionlint, zizmor and shellcheck for workflows and scripts. |
+| warnings_fixed | Met | CI fails on any warning from these tools, so none can merge. |
+| warnings_strict | Met | mypy `--strict` over the whole backend package; TypeScript `strict`. |
+
+## Security
+
+| Criterion | Answer | Justification |
+|---|---|---|
+| know_secure_design | Met | The maintainer works in application security. The design is documented in the threat model and security architecture: https://github.com/cipherfort/attestra/blob/main/docs/security/platform-security-architecture.md |
+| know_common_errors | Met | The maintainer works in application security (OWASP ASVS/SAMM, the domain of this project). Mitigations for common errors are recorded in the threat model: https://github.com/cipherfort/attestra/blob/main/docs/security/platform-security-architecture.md |
+| crypto_published | Met | Only published algorithms: SHA-256, RS256 (JWT), ECDSA P-256 and Sigstore signatures, TLS. |
+| crypto_call | Met | Cryptography is delegated to libraries: Python `cryptography`, `pyjwt`, `sigstore` and `ssl`. |
+| crypto_floss | Met | All of these are FLOSS. |
+| crypto_keylength | Met | The project does not generate long-term keys: evidence is signed keylessly (Sigstore), and GitHub generates the GitHub App's RSA key. Verification accepts RS256 and ECDSA P-256 only. |
+| crypto_working | Met | No broken algorithms in security functions. The only SHA-1 seeds demo data and is marked `usedforsecurity=False`. |
+| crypto_weaknesses | Met | No algorithms or modes with known serious weaknesses are used. |
+| crypto_pfs | Met | Network connections use TLS through Python's `ssl` defaults (TLS 1.3 and ECDHE suites); the syslog sink enforces TLS 1.2 or later. |
+| crypto_password_storage | N/A | Attestra stores no user passwords: people sign in through an external OIDC identity provider, and service credentials are kept in a secret store. |
+| crypto_random | Met | Tokens and generated credentials use Python's `secrets` module (a CSPRNG). |
+| delivery_mitm | Met | Source is delivered over HTTPS from GitHub. The release workflow signs container images with cosign (keyless) and publishes SLSA provenance. |
+| delivery_unsigned | Met | Nothing is fetched over HTTP. The container build verifies downloaded tools against SHA-256 digests pinned in the Dockerfile. |
+| vulnerabilities_fixed_60_days | Met | There are no unpatched vulnerabilities of medium or higher severity in Attestra. Dependabot alerts in CI-only tooling (Checkov's dependencies, no upstream fix yet) are triaged with recorded reasons. |
+| vulnerabilities_critical_fixed | Met | Critical vulnerabilities are fixed promptly. SECURITY.md targets 30 days for critical and high. |
+| no_leaked_credentials | Met | No credentials in the repository. gitleaks scans the full history on every pull request, and GitHub secret scanning with push protection is enabled. |
+
+## Analysis
+
+| Criterion | Answer | Justification |
+|---|---|---|
+| static_analysis | Met | CodeQL (Python, TypeScript, Actions) on every pull request and push, plus ruff, mypy (strict), Checkov, zizmor, actionlint and shellcheck in CI: https://github.com/cipherfort/attestra/blob/main/.github/workflows/codeql.yml |
+| static_analysis_common_vulnerabilities | Met | CodeQL's security queries look for common vulnerabilities; zizmor for workflow injection; Checkov for infrastructure. |
+| static_analysis_fixed | Met | Findings are fixed or triaged promptly, e.g. the first CodeQL scan's TLS finding was fixed the same day: https://github.com/cipherfort/attestra/pull/16 |
+| static_analysis_often | Met | On every pull request and push to main, and weekly. |
+| dynamic_analysis | Met | Schemathesis fuzzes the API against its OpenAPI contract in CI. Hypothesis property-based fuzzing covers the parsers and verifiers (200 examples per run, 5,000 nightly). |
+| dynamic_analysis_unsafe | N/A | Attestra is written in memory-safe languages (Python, TypeScript). |
+| dynamic_analysis_enable_assertions | Met | Python assertions stay enabled in tests and fuzzing, and Schemathesis checks every response against the API contract. |
+| dynamic_analysis_fixed | Met | Fuzzing found crashes in the SARIF and SBOM parsers and the component verifier. They were fixed before the first public commit, and the cases are kept as regression tests. |
