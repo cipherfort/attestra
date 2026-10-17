@@ -4,6 +4,7 @@
 
 [![Licence: Apache-2.0](https://img.shields.io/badge/licence-Apache--2.0-blue)](LICENSE)
 [![OpenSSF Best Practices](https://www.bestpractices.dev/projects/15625/badge)](https://www.bestpractices.dev/projects/15625)
+[![OpenSSF Baseline](https://www.bestpractices.dev/projects/15625/baseline)](https://www.bestpractices.dev/en/projects/15625/baseline-1)
 [![OpenSSF Scorecard](https://api.securityscorecards.dev/projects/github.com/cipherfort/attestra/badge)](https://scorecard.dev/viewer/?uri=github.com/cipherfort/attestra)
 
 Status: **pre-release (0.x)**, not yet production-ready · [Roadmap to 1.0](ROADMAP.md)
