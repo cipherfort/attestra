@@ -55,7 +55,7 @@
 
 ### E24-F03-S02: Real connectors · M · Phase 1–8
 - **Scope:** GitHub App + settings, Sigstore (two backends), OIDC BFF, Jira, Dependency-Track, DefectDojo, Defender, Security Hub, Sentinel, Azure Blob.
-- **Status:** IMPLEMENTED. The test target for each is in [ADR-031 §4](../../../adr/ADR-031-integrations-owned-and-bootstrapped-by-the-project.md#decision).
+- **Status:** IMPLEMENTED. The test target for each is in [ADR-031 section 4](../../../adr/ADR-031-integrations-owned-and-bootstrapped-by-the-project.md#decision).
 
 ## F04: Remaining
 
@@ -65,7 +65,7 @@
   - `aap integrations status` shows everything in scope as configured, and each connector's first run is `ok` or explains its gaps.
   - The WORM policy is verified by a failed delete attempt.
   - The AWS trust claims (`iss`/`aud`/`sub`) are confirmed on a real token.
-- **Depends on:** the accounts in runbook §0 and decision D-018.
+- **Depends on:** the accounts in runbook section 0 and decision D-018.
 
 ### E24-F04-S02: Per-process PostgreSQL logins (risk R-25) · M · before pilot
 - **AC:**

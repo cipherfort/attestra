@@ -25,9 +25,9 @@ The platform's credibility rests on three properties, which get the heaviest tes
 | End-to-end | Sandbox GitHub org with canary repos → `security-workflows` → ingestion → evaluation → Jira sandbox → re-scan closure | Playwright (UI), scripted scenarios | Nightly + pre-release | Release gate |
 | Security | Abuse cases AC-01…AC-10, authZ matrix, SAST/SCA/secrets/container/IaC on the platform, DAST (ZAP) on dev, parser fuzzing | pytest, ZAP, Atheris/Hypothesis | PR (abuse cases, authZ), nightly (DAST, fuzz) | Blocking (PR set) |
 | Penetration test | Independent, full scope ([E19-F04-S02](../roadmap/backlog/epic-19-platform-security.md)) | External | Before pilot exit, then annually | Go-live gate |
-| Performance | Design scale ([architecture §7](../architecture/02-platform-architecture.md#7-scale-envelope-design-target)) | k6/Locust, synthetic data generator | Pre-release, monthly | Release gate for listed SLOs |
+| Performance | Design scale ([architecture section 7](../architecture/02-platform-architecture.md#7-scale-envelope-design-target)) | k6/Locust, synthetic data generator | Pre-release, monthly | Release gate for listed SLOs |
 | Resilience / failure | Upstream outages, rate limits, PG failover, worker crash mid-job, poison messages | Fault injection (toxiproxy), chaos scripts | Pre-release | Release gate |
-| DR | Restore drill | [Backup plan §4](../operations/backup-and-restore-plan.md#4-restore-drill) | 6-monthly | Operational gate |
+| DR | Restore drill | [Backup plan section 4](../operations/backup-and-restore-plan.md#4-restore-drill) | 6-monthly | Operational gate |
 
 ## 3. Key test suites
 

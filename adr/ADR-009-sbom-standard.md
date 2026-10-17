@@ -37,7 +37,7 @@ Fast, honest CVE impact queries · artifact binding · reuse of Dependency-Track
 
 ## Security implications
 
-SBOMs reveal the attack surface. They are internal evidence even for public repos (ADR-028 §open source) and are not published unless a release process explicitly decides to.
+SBOMs reveal the attack surface. They are internal evidence even for public repos (ADR-028, "Open source" section) and are not published unless a release process explicitly decides to.
 
 ## Operational implications
 

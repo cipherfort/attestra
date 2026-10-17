@@ -2,7 +2,7 @@
 
 All documents are drafts until approved. Status labels follow the [root README](../README.md). Approval decisions are tracked in the [decision log](../adoption-kit/governance/decision-log.md).
 
-## The 40 programme documents (brief §31)
+## The 40 programme documents (brief section 31)
 
 | # | Document | Location |
 |---|---|---|
@@ -38,7 +38,7 @@ All documents are drafts until approved. Status labels follow the [root README](
 | 30 | Platform Operations Runbook | [operations/platform-operations-runbook.md](operations/platform-operations-runbook.md) (+ [key rotation](runbooks/key-rotation.md)) |
 | 31 | Disaster Recovery Plan | [operations/disaster-recovery-plan.md](operations/disaster-recovery-plan.md) |
 | 32 | Backup and Restore Plan | [operations/backup-and-restore-plan.md](operations/backup-and-restore-plan.md) |
-| 33 | Threat Model (platform) | [security/platform-security-architecture.md §4](security/platform-security-architecture.md#4-threat-model-the-platform-stride) |
+| 33 | Threat Model (platform) | [security/platform-security-architecture.md section 4](security/platform-security-architecture.md#4-threat-model-the-platform-stride) |
 | 34 | Privacy / Data Protection Assessment | [security/privacy-assessment.md](security/privacy-assessment.md) |
 | 35 | DPIA considerations | [security/dpia-considerations.md](security/dpia-considerations.md) |
 | 36 | Risk Register | [adoption-kit/programme/risk-register/risk-register.md](../adoption-kit/programme/risk-register/risk-register.md) |

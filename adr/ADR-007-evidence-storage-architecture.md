@@ -1,6 +1,6 @@
 # ADR-007: Evidence storage architecture
 
-**Status:** Proposed (2026-10-07)  ·  **Related:** ADR-016, ADR-017, [Evidence model §6](../docs/architecture/04-evidence-model.md#6-immutability-and-audit-summary-of-adr-016)
+**Status:** Proposed (2026-10-07)  ·  **Related:** ADR-016, ADR-017, [Evidence model section 6](../docs/architecture/04-evidence-model.md#6-immutability-and-audit-summary-of-adr-016)
 
 ## Context
 

@@ -23,7 +23,7 @@ This programme establishes an **evidence-driven application security capability*
 5. tracks remediation through Jira and **closes issues only when a re-test proves the fix**;
 6. derives **SAMM maturity from evidence** rather than questionnaires, with the evidence behind each number visible.
 
-**The ask:** approve Phase 0 (discovery and governance, 6 weeks) and Phase 1 (foundation), resource a core team of ~6, and confirm the decisions listed in §19.
+**The ask:** approve Phase 0 (discovery and governance, 6 weeks) and Phase 1 (foundation), resource a core team of ~6, and confirm the decisions listed in section 19.
 
 ## 2. Problem statement
 
@@ -83,11 +83,11 @@ Sponsor: CISO. Owner: Head of AppSec. Decision forum: the **AppSec Governance Bo
 
 ## 9. Assumptions
 
-GitHub Enterprise Cloud with GHAS covers in-scope orgs · Entra ID is the IdP · Azure (UK South) hosts the platform · Jira is available with API access · artifact attestations are available for private repos · 100–500 applications, 300–2,000 repos · a data-classification scheme exists. Each has a validation step in Phase 0 ([problem definition §7](../../../docs/architecture/01-problem-definition.md#7-assumptions-to-be-validated-in-phase-0)).
+GitHub Enterprise Cloud with GHAS covers in-scope orgs · Entra ID is the IdP · Azure (UK South) hosts the platform · Jira is available with API access · artifact attestations are available for private repos · 100–500 applications, 300–2,000 repos · a data-classification scheme exists. Each has a validation step in Phase 0 ([problem definition section 7](../../../docs/architecture/01-problem-definition.md#7-assumptions-to-be-validated-in-phase-0)).
 
 ## 10. Constraints
 
-Existing licences and tools are reused before buying new ones · data stays in the organisation's Azure tenant · the platform must not block delivery if it is unavailable · no individual performance metrics · private networking for sensitive data · team size as resourced (§16).
+Existing licences and tools are reused before buying new ones · data stays in the organisation's Azure tenant · the platform must not block delivery if it is unavailable · no individual performance metrics · private networking for sensitive data · team size as resourced (section 16).
 
 ## 11. Key risks (top 8; full register: [risk register](../risk-register/risk-register.md))
 
@@ -142,7 +142,7 @@ The project creates and owns every technical integration ([ADR-031](../../../adr
 | Evidence integrity verification failures | > 0 |
 | Connector staleness > 2× interval | > 24h |
 
-**Anti-gaming design:** no KPI rewards fewer findings. Detection counts are context, not targets ([TOM §7](../../governance/target-operating-model.md#7-how-the-tom-avoids-gaming)).
+**Anti-gaming design:** no KPI rewards fewer findings. Detection counts are context, not targets ([TOM section 7](../../governance/target-operating-model.md#7-how-the-tom-avoids-gaming)).
 
 ## 16. Resource requirements (indicative, to be refined in the Business Case)
 
@@ -188,11 +188,11 @@ Detail: [roadmap](../roadmap/roadmap.md).
 2. Confirm sponsor, programme owner and Governance Board membership.
 3. Approve the **design principles**: evidence over assertion; observe before gate; platform never in the delivery critical path; no individual performance metrics.
 4. Mandate registration of production applications (policy statement).
-5. Nominate owners for external dependencies (§12) with dates.
+5. Nominate owners for external dependencies (section 12) with dates.
 
 ## 20. Operating model, RACI, forums and reporting
 
-Operating model: [target operating model](../../governance/target-operating-model.md). RACI: [RACI](../raci/raci.md). Forums and reporting: [governance model §6–7](../../governance/governance-model.md#6-forums-and-cadence).
+Operating model: [target operating model](../../governance/target-operating-model.md). RACI: [RACI](../raci/raci.md). Forums and reporting: [governance model sections 6–7](../../governance/governance-model.md#6-forums-and-cadence).
 
 ## 21. Benefits realisation
 

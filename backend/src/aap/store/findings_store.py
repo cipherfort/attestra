@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: Apache-2.0
-"""Findings projection, lifecycle ledger and risk assessments (vulnerability management standard §2).
+"""Findings projection, lifecycle ledger and risk assessments (vulnerability management standard section 2).
 
 Rules enforced here and by the schema: one finding per fingerprint (dedup), closure only with verification
 evidence (schema test T4), regression of a closed fingerprint reopens it, SLA due dates never extend.

@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: Apache-2.0
-"""Application maturity from current control states (methodology §A.3)."""
+"""Application maturity from current control states (methodology section A.3)."""
 
 from __future__ import annotations
 

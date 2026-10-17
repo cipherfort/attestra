@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: Apache-2.0
-"""Pull-based evidence ingestion (ADR-005, evidence model §4). Triggered by a `workflow_run.completed` webhook.
+"""Pull-based evidence ingestion (ADR-005, evidence model section 4). Triggered by a `workflow_run.completed` webhook.
 
     run metadata from GitHub  →  download aap-evidence-* artifacts (size-limited)  →  safe unzip
     →  manifest schema check  →  verify_bundle (approved workflow @ approved SHA, binding, digests, attestation)

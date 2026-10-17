@@ -8,7 +8,7 @@
 ## 1. Principles
 
 1. **Evidence is an observation, not a claim.** It records *who observed what, about which exact thing (commit, digest, setting), when, with which tool and version*.
-2. **The platform collects evidence; it does not accept assertions.** Pipeline evidence is pulled from GitHub and verified ([§4](#4-producer-verification)). Configuration evidence is read from authoritative APIs. Only manual evidence is entered by people, and it carries their identity and an SoD check.
+2. **The platform collects evidence; it does not accept assertions.** Pipeline evidence is pulled from GitHub and verified ([section 4](#4-producer-verification)). Configuration evidence is read from authoritative APIs. Only manual evidence is entered by people, and it carries their identity and an SoD check.
 3. **Evidence is immutable.** Corrections are new records (revocation, supersession), never edits.
 4. **Evidence expires.** Freshness is computed, not assumed. Expired evidence is retained but no longer satisfies controls.
 5. **Every claim is traceable** from dashboard number → control state → evaluation → evidence IDs → raw artefact SHA-256 in WORM storage.
@@ -30,14 +30,14 @@
 | `ingested_at` | timestamptz | When the platform recorded it |
 | `result` | enum | `pass` · `fail` · `findings` · `inconclusive` · `error` · `observed` (for config snapshots) |
 | `summary` | jsonb | Normalised summary (counts by severity, languages covered, URLs crawled, settings values) |
-| `confidence` | enum | `C0`–`C3`, `M1`, `M2` (§3) |
+| `confidence` | enum | `C0`–`C3`, `M1`, `M2` (section 3) |
 | `confidence_reasons` | text[] | e.g. `["approved_workflow_verified","attestation_verified","non_ephemeral_runner"]` |
 | `run_ref` | jsonb | `{run_id, run_attempt, workflow_ref, event, actor, runner_environment}` |
 | `raw_location` | text | Blob URI (platform-generated) |
 | `raw_sha256` | bytea[] | Digests of raw files |
 | `attestation_ref` | text | Attestation bundle digest (Sigstore) if present |
-| `valid_from` / `valid_until_hint` | timestamptz | Initial freshness computation. The authoritative state is the freshness engine's (§5). |
-| `prev_hash` / `record_hash` | bytea | Hash chain (§6) |
+| `valid_from` / `valid_until_hint` | timestamptz | Initial freshness computation. The authoritative state is the freshness engine's (section 5). |
+| `prev_hash` / `record_hash` | bytea | Hash chain (section 6) |
 
 The canonical JSON form of a record (RFC 8785 JCS) is what is hashed.
 

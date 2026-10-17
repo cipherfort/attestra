@@ -8,7 +8,7 @@
 ## 1. Goals
 
 1. **Paved road.** One caller file per repo. Capabilities are auto-detected. Sensible defaults per tier.
-2. **Evidence by construction.** Every capability job emits a manifest and an attestation the platform can verify ([evidence model §4](04-evidence-model.md#4-producer-verification)).
+2. **Evidence by construction.** Every capability job emits a manifest and an attestation the platform can verify ([evidence model section 4](04-evidence-model.md#4-producer-verification)).
 3. **Tool-replaceable.** The platform reasons about *capabilities* (`scan.sast`), not products. Swapping a tool means changing one adapter job.
 4. **The platform is never in the merge-critical path.** Gates use GitHub-native mechanisms (rulesets, required checks, code-scanning merge protection), so a platform outage never blocks delivery.
 5. **No platform secrets in consumer repos.** The pull model ([ADR-005](../../adr/ADR-005-github-primary-source-integration.md)) fixes current-state issue CS-1.
@@ -101,7 +101,7 @@ flowchart TB
 3. Release = annotated tag `vX.Y.Z` + GitHub release notes + **registration of the release commit SHA in `config/trusted-producers.yaml`** (PR to this repo).
 4. Consumers pin by SHA (`@<sha> # vX.Y.Z`). Dependabot proposes bumps. The onboarding bot sets the initial pin.
 5. A retired SHA stays trusted for 90 days after its successor's release. After that, evidence from it is rejected with `UNAPPROVED_WORKFLOW_REF`, and the control state shows a clear "pin outdated" reason.
-6. Emergency revocation (e.g. a tool compromise) removes the SHA immediately and triggers evidence revocation for the affected window ([evidence model §5.3](04-evidence-model.md#53-derived-state)).
+6. Emergency revocation (e.g. a tool compromise) removes the SHA immediately and triggers evidence revocation for the affected window ([evidence model section 5.3](04-evidence-model.md#53-derived-state)).
 
 ## 7. Migration from the existing reusable workflows
 

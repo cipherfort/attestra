@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: Apache-2.0
-"""Sigstore verification of GitHub artifact attestations (ADR-030, evidence model §4 step 3).
+"""Sigstore verification of GitHub artifact attestations (ADR-030, evidence model section 4 step 3).
 
 A security-workflows release attests the evidence manifest with `actions/attest-build-provenance`. The platform:
 

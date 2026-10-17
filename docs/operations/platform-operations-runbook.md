@@ -21,7 +21,7 @@
 
 | Task | Frequency | Procedure |
 |---|---|---|
-| Check SLO dashboard and connector health | Daily (business hours) | Azure Monitor workbook "AAP SLOs". Any connector stale > 2× interval → §4.3. |
+| Check SLO dashboard and connector health | Daily (business hours) | Azure Monitor workbook "AAP SLOs". Any connector stale > 2× interval → section 4.3. |
 | Review dead-lettered jobs | Daily | `aap jobs list --status dead --since 24h` → classify (bug, upstream, data) → replay or ticket |
 | Integrity verification result | Daily | Alert-driven. A failure means the [evidence integrity runbook](../runbooks/evidence-integrity-mismatch.md). |
 | Partition maintenance | Monthly (automated job; verify) | Confirm next 2 months' partitions exist and **direct grants are revoked** (`tests/database` T8 query) |
@@ -30,7 +30,7 @@
 | Catalogue/config release | On approved PR | Loader job → verify `config_versions` active row → spot-check evaluations |
 | Key and secret rotation | Per schedule | [Key rotation runbook](../runbooks/key-rotation.md) |
 | Access review export | Quarterly | Entra access review for org-wide roles. Attach the result as evidence. |
-| Restore drill | 6-monthly | [Backup and restore plan §4](backup-and-restore-plan.md#4-restore-drill) |
+| Restore drill | 6-monthly | [Backup and restore plan section 4](backup-and-restore-plan.md#4-restore-drill) |
 | Dependency and image updates | Weekly (Dependabot/Renovate) | Normal PR flow. The CD verifies attestations. |
 
 ## 3. Deployment

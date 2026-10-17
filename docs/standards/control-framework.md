@@ -46,7 +46,7 @@ Frameworks are **not** implemented directly. They are mapped onto one internal c
 1. *Is the control operating?* (e.g. SAST ran on HEAD with the right configuration.) This produces **control state**.
 2. *What did it find, and is that being handled?* This produces **findings → risk → SLA**, which feed *outcome* controls (ASC-VUL-*).
 
-A scan that finds 40 vulnerabilities is a SAST control that is **satisfied**. Penalising detection teaches teams to stop detecting ([TOM §7](../../adoption-kit/governance/target-operating-model.md#7-how-the-tom-avoids-gaming)).
+A scan that finds 40 vulnerabilities is a SAST control that is **satisfied**. Penalising detection teaches teams to stop detecting ([TOM section 7](../../adoption-kit/governance/target-operating-model.md#7-how-the-tom-avoids-gaming)).
 
 ## 3. Application classification model
 

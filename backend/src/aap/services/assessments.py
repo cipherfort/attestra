@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: Apache-2.0
-"""Manual assessments: the evidence a person provides when no tool can (evidence model §3, M1/M2).
+"""Manual assessments: the evidence a person provides when no tool can (evidence model section 3, M1/M2).
 
     planned ──record──▶ in_progress ──submit──▶ submitted ──approve──▶ approved ──(worker)──▶ assessment.* evidence
                                                           └─reject──▶ rejected

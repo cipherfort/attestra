@@ -11,7 +11,7 @@ Leadership needs a maturity model that is recognised, open, prescriptive enough 
 Adopt **OWASP SAMM 2.0** (version to be confirmed at Phase 0 import) as the primary maturity framework, with these rules:
 
 1. SAMM structure, activity text and assessment questions are **imported verbatim** from the official model at a pinned version and displayed unmodified. Platform documentation paraphrases only for orientation and labels the paraphrase.
-2. Maturity is **derived**: automated control states feed SAMM answers where a mapping exists. Manual answers fill the rest and are capped by contrary automated evidence ([methodology §A.3](../docs/standards/samm-asvs-mapping.md#a3-maturity-calculation)).
+2. Maturity is **derived**: automated control states feed SAMM answers where a mapping exists. Manual answers fill the rest and are capped by contrary automated evidence ([methodology section A.3](../docs/standards/samm-asvs-mapping.md#a3-maturity-calculation)).
 3. Assessment happens at **two scopes**: organisation (Governance practices) and application (the rest).
 4. Every score shows its **evidence mix** (automated / independent manual / self / unassessed).
 

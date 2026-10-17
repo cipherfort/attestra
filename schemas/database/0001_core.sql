@@ -2,7 +2,7 @@
 -- =============================================================================
 -- Attestra: core schema (PostgreSQL 16)
 -- Status: DESIGNED. Applied cleanly to postgres:16 in a scratch container (see
--- docs/architecture/03-data-model.md §7). Becomes the first Alembic migration in Phase 1.
+-- docs/architecture/03-data-model.md section 7). Becomes the first Alembic migration in Phase 1.
 --
 -- Conventions
 --   * Primary keys are UUIDs; the application supplies time-ordered UUIDv7
@@ -884,7 +884,7 @@ CREATE TABLE tickets (
 
 CREATE TABLE findings (
   id                  uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-  fingerprint         text NOT NULL UNIQUE,      -- dedup identity; see data-model doc §4
+  fingerprint         text NOT NULL UNIQUE,      -- dedup identity; see data-model doc section 4
   application_id      uuid NOT NULL REFERENCES applications(id),
   repository_id       uuid REFERENCES repositories(id),
   scope_type          scope_type NOT NULL,

@@ -5,7 +5,7 @@
 | ID | STD-10 · Status: DRAFT, REQUIRES HUMAN APPROVAL (CISO) |
 | Owner | Head of Application Security. Operated by Security Governance. |
 | Configuration | [`config/exception-policy.yaml`](../../config/exception-policy.yaml) |
-| Related | [ADR-021](../../adr/ADR-021-security-exceptions.md), [Governance model §4](../../adoption-kit/governance/governance-model.md#4-risk-acceptance-exception-approval-thresholds) |
+| Related | [ADR-021](../../adr/ADR-021-security-exceptions.md), [Governance model section 4](../../adoption-kit/governance/governance-model.md#4-risk-acceptance-exception-approval-thresholds) |
 
 ## 1. Purpose
 

@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: Apache-2.0
-"""Authorisation policy (ADR-013, access control model §3). One place decides; routes only declare permissions.
+"""Authorisation policy (ADR-013, access control model section 3). One place decides; routes only declare permissions.
 
 Deny by default: a permission not granted by any of the caller's roles is refused. Out-of-scope resources are
 filtered by row-level security and surface as 404 (no enumeration).

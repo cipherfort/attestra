@@ -36,4 +36,4 @@
 
 ### E05-F03-S02: Applicability engine · M · Phase 4
 - **Story:** As the evaluator, I need to know which controls apply to an app (tier × conditions), so that teams are not asked for irrelevant controls.
-- **AC:** The conditions vocabulary (control framework §4) is derived from profile + detection. Unknown conditions fail the catalogue validator. The applicability explanation is shown per control.
+- **AC:** The conditions vocabulary (control framework section 4) is derived from profile + detection. Unknown conditions fail the catalogue validator. The applicability explanation is shown per control.

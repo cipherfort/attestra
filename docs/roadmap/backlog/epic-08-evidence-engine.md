@@ -8,7 +8,7 @@
 
 ### E08-F01-S01: Verified ingestion of workflow evidence · M · Phase 1 (thin slice) → 4
 - **Story:** As the platform, I want every evidence bundle verified (approved workflow SHA, attestation, digests, binding, limits) before storing, so that forged evidence is rejected.
-- **Technical:** Steps 1–6 of evidence model §4. Rejections → `evidence_rejections` + audit + (repeated) SIEM event.
+- **Technical:** Steps 1–6 of evidence model section 4. Rejections → `evidence_rejections` + audit + (repeated) SIEM event.
 - **Depends on:** E06-F02-S03, E07-F01-S02, E05-F02-S01 (trusted producers).
 - **AC:** AC-01 (hand-crafted manifest) → `UNTRUSTED_PRODUCER`. AC-02 (approved path at an unapproved SHA) → `UNAPPROVED_WORKFLOW_REF`. Digest mismatch → `DIGEST_MISMATCH`. Valid → evidence C2/C3 with `confidence_reasons`.
 - **Security:** Treat every artifact as hostile: safe parsers, size limits, isolated worker identity (T-05).

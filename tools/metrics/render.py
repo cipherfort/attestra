@@ -56,7 +56,7 @@ def render(doc: dict) -> str:
         "> Status: DESIGNED. Targets and thresholds are PROPOSED and need Governance Board approval.\n",
         "Design rules: no metric rewards finding fewer issues; every metric is computed by the platform from its ledgers; "
         "reporting is at team, application or directorate level, **never per person** "
-        "([TOM §7](../../adoption-kit/governance/target-operating-model.md#7-how-the-tom-avoids-gaming)).\n",
+        "([TOM section 7](../../adoption-kit/governance/target-operating-model.md#7-how-the-tom-avoids-gaming)).\n",
         f"**{len(metrics)} metrics**: "
         + ", ".join(f"{n} {k.upper() if k != 'context' else 'context'}" for k, n in Counter(m['kind'] for m in metrics).items())
         + ".\n",

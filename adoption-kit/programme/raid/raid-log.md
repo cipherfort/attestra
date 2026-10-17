@@ -33,14 +33,14 @@
 
 | ID | Dependency | Provider | Needed by | Status |
 |---|---|---|---|---|
-| D-01 | GitHub App created and installed | Project: GitHub org owner (`aap bootstrap github-app`, runbook §7) | Phase 1 wk 4 | Code IMPLEMENTED; human step pending |
-| D-02 | Org Actions policy, rulesets, `security-workflows` repo | Project: GitHub org owner (`examples/terraform/azure/envs/github`, §6) | Phase 3 | Code IMPLEMENTED; apply pending |
-| D-03 | Entra app registrations, app roles, groups, federated credential; PIM, Conditional Access | Project: tenant admin (`modules/entra`, §2, §5) | Phase 1 wk 2 | Code IMPLEMENTED; apply pending. PIM/CA policies are tenant settings set by the same admin |
-| D-04 | VNet, private DNS, private endpoints | Project (`modules/platform`, §2) | Phase 1 wk 2 | Code IMPLEMENTED; apply pending |
+| D-01 | GitHub App created and installed | Project: GitHub org owner (`aap bootstrap github-app`, runbook section 7) | Phase 1 wk 4 | Code IMPLEMENTED; human step pending |
+| D-02 | Org Actions policy, rulesets, `security-workflows` repo | Project: GitHub org owner (`examples/terraform/azure/envs/github`, section 6) | Phase 3 | Code IMPLEMENTED; apply pending |
+| D-03 | Entra app registrations, app roles, groups, federated credential; PIM, Conditional Access | Project: tenant admin (`modules/entra`, section 2, section 5) | Phase 1 wk 2 | Code IMPLEMENTED; apply pending. PIM/CA policies are tenant settings set by the same admin |
+| D-04 | VNet, private DNS, private endpoints | Project (`modules/platform`, section 2) | Phase 1 wk 2 | Code IMPLEMENTED; apply pending |
 | D-05 | Reader + Security Reader at chosen scopes | Project: User Access Administrator (`modules/azure-reader`); scopes = D-015 | Phase 8 | Code IMPLEMENTED |
-| D-06 | AWS IAM OIDC provider + Security Hub reader role | Project: AWS admin (`envs/aws`, §8) | Phase 8 | Code IMPLEMENTED |
-| D-07 | Sentinel table, DCR/DCE, analytics rules | Project (`modules/sentinel`, §2); event list approval: SOC lead (§10) | Phase 8 | Code IMPLEMENTED; approval pending |
-| D-08 | Jira site, project, issue security, service account token | Project: Jira site admin (`aap bootstrap jira`, §9) | Phase 8 | Code IMPLEMENTED; human step pending |
+| D-06 | AWS IAM OIDC provider + Security Hub reader role | Project: AWS admin (`envs/aws`, section 8) | Phase 8 | Code IMPLEMENTED |
+| D-07 | Sentinel table, DCR/DCE, analytics rules | Project (`modules/sentinel`, section 2); event list approval: SOC lead (section 10) | Phase 8 | Code IMPLEMENTED; approval pending |
+| D-08 | Jira site, project, issue security, service account token | Project: Jira site admin (`aap bootstrap jira`, section 9) | Phase 8 | Code IMPLEMENTED; human step pending |
 | D-09 | DPIA screening and lawful basis | DPO | Before pilot | Not requested |
 | D-10 | Licence policy approval | Legal | Phase 5 | Not requested |
 | D-11 | Retention schedule approval | Records management | Before WORM lock | Not requested |

@@ -137,7 +137,7 @@ def _resolve(
         is not None
     )
     # `engineer` comes only from team membership (or an explicit app role), never by default: an org-wide role such as
-    # executive must not inherit finding-level read access (access control model §3).
+    # executive must not inherit finding-level read access (access control model section 3).
     names = {r.role for r in roles} | (set(token_roles) & TOKEN_ROLES) | ({"engineer"} if is_member else set())
     return Principal(str(user_id), display, tuple(sorted(names)), tuple(str(u.id) for u in units))
 

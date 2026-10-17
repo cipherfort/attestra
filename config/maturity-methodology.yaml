@@ -1,4 +1,4 @@
-# Maturity derivation parameters (docs/standards/samm-asvs-mapping.md §A.3).
+# Maturity derivation parameters (docs/standards/samm-asvs-mapping.md section A.3).
 # Status: DESIGNED; values PROPOSED. Recorded with every maturity snapshot so methodology changes are visible.
 
 version: 1
@@ -12,7 +12,7 @@ control_state_weights:          # contribution of a mapped mandatory control to 
   excepted: 0.0                 # an exception is a risk decision, not maturity
   error: last_known             # use the last non-error state, flagged in provenance
   not_applicable: exclude       # removed from the denominator
-observe_mode_controls: exclude  # controls in observe mode do not count (control framework §6)
+observe_mode_controls: exclude  # controls in observe mode do not count (control framework section 6)
 
 answer_bands:                   # automated_fraction → official SAMM answer value (Toolbox-style scale)
   - { min_fraction: 0.8,  answer: 1.0 }
