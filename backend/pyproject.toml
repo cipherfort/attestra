@@ -35,7 +35,7 @@ dev = [
     "types-pyyaml",
     "types-jsonschema",
     "respx>=0.22",
-    "moto[securityhub,sts]>=5.0",
+    "moto[securityhub,sts]>=5.2.4",
 ]
 
 [project.scripts]
