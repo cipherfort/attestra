@@ -1553,12 +1553,34 @@ CSP = (
 )
 
 
+def spa_static_files(directory: Any) -> Any:
+    """Static files for the single-page UI: a path that is not a file and looks like a client route (no extension,
+    not under api/ or auth/) gets index.html, so deep links and reloads work. Missing assets and unknown API paths
+    stay 404."""
+    from fastapi.staticfiles import StaticFiles
+    from starlette.exceptions import HTTPException as StarletteHTTPException
+
+    class SPAStaticFiles(StaticFiles):
+        async def get_response(self, path: str, scope: Any) -> Any:
+            try:
+                return await super().get_response(path, scope)
+            except StarletteHTTPException as e:
+                client_route = (
+                    e.status_code == 404
+                    and not path.startswith(("api/", "auth/"))
+                    and "." not in path.rsplit("/", 1)[-1]
+                )
+                if not client_route:
+                    raise
+                return await super().get_response("index.html", scope)
+
+    return SPAStaticFiles(directory=directory, html=True)
+
+
 def _mount_ui(app: FastAPI) -> None:
     """Serve the built SPA from the same origin (BFF pattern, ADR-014/023) with a strict CSP. Skipped when absent."""
     import os
     from pathlib import Path
-
-    from fastapi.staticfiles import StaticFiles
 
     from aap.config import repo_root
 
@@ -1574,4 +1596,4 @@ def _mount_ui(app: FastAPI) -> None:
             response.headers["Referrer-Policy"] = "no-referrer"
         return response
 
-    app.mount("/", StaticFiles(directory=dist, html=True), name="ui")
+    app.mount("/", spa_static_files(dist), name="ui")

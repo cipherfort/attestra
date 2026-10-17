@@ -1,8 +1,9 @@
 // SPDX-License-Identifier: Apache-2.0
 import { useEffect, useState, type ReactNode } from "react";
 import { api, getPersona, setPersona, signOut, type Me } from "../api";
+import { Logo } from "./shell/Logo";
 
-// Demo personas (seeded by `aap demo seed`). Dev authentication only: production identity is Entra ID SSO.
+// Demo personas (seeded by `aap demo seed`). Dev authentication only: in production people sign in through your OIDC identity provider.
 export const PERSONAS = [
   { login: "ajones", label: "Amira Jones — security champion, Claims team" },
   { login: "ekim", label: "Eun Kim — engineer, Payments team" },
@@ -38,7 +39,7 @@ export function Layout({ children, route }: { children: ReactNode; route: string
   return (
     <>
       <header className="topbar">
-        <span className="brand">Attestra</span>
+        <a href="#/apps" className="text-ink hover:no-underline"><Logo /></a>
         <nav className="nav">
           {link("#/apps", "Applications", "apps")}
           {link("#/cve", "Are we affected?", "cve")}
@@ -64,7 +65,7 @@ export function Layout({ children, route }: { children: ReactNode; route: string
       </header>
       {dev && (
         <div className="devbanner">
-          Demo data · development sign-in (persona switcher). In production you sign in with Entra ID and see only what your role allows, exactly as here.
+          Demo data · development sign-in (persona switcher). In production you sign in through your identity provider and see only what your role allows, exactly as here.
         </div>
       )}
       <main>{children}</main>

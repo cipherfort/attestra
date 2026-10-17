@@ -1,7 +1,9 @@
 // SPDX-License-Identifier: Apache-2.0
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
-import "./styles.css";
+import "@fontsource-variable/inter";
+import "@fontsource/jetbrains-mono/400.css";
+import "./styles/app.css";
 import { Layout, useRoute } from "./components/layout";
 import { Admin } from "./pages/Admin";
 import { Application } from "./pages/Application";
