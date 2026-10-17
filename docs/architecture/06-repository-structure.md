@@ -9,45 +9,40 @@
 
 | Repository | Purpose | Why separate |
 |---|---|---|
-| **`attestra`** (this repository) | Platform code, catalogue, config, docs, IaC for the platform | |
-| **`security-workflows`** (new) | Reusable GitHub Actions workflows consumed by every application repo, released by tag and pinned by SHA | Consumers reference `org/security-workflows/.github/workflows/x.yml@<sha>`. A separate repo gives (a) its own stricter CODEOWNERS and release process, because write access here is effectively write access to every pipeline; (b) a release cadence independent of the platform; (c) a small, auditable trusted-producer surface. |
-| **Earlier prototype scaffold** (historical, not used) | Dependency-Track + DefectDojo IaC | Unchanged ownership. Its three reusable workflows migrate into `security-workflows` in Phase 3 ([migration plan](05-pipeline-architecture.md#7-migration-from-the-existing-reusable-workflows)). |
+| **`attestra`** (this repository) | Platform code, catalogue, config, docs, packaging (Helm, Compose) and example infrastructure | |
+| **`security-workflows`** (yours, created at adoption) | Reusable GitHub Actions workflows consumed by every application repo, released by tag and pinned by SHA | Consumers reference `org/security-workflows/.github/workflows/x.yml@<sha>`. A separate repo gives (a) its own stricter CODEOWNERS and release process, because write access here is effectively write access to every pipeline; (b) a release cadence independent of the platform; (c) a small, auditable trusted-producer surface. |
 | **`.github`** (org) | Org-default `SECURITY.md`, issue templates, workflow templates (starter `aap-security.yml`) | GitHub convention |
 
 ### A.1 This repository
 
 ```text
 attestra/
-├── README.md                     status, how to navigate, label legend
-├── adr/                          ADR-001 … ADR-030 (+ index)
+├── README.md, ROADMAP.md, SECURITY.md, CONTRIBUTING.md, GOVERNANCE.md
+├── adr/                          architecture decision records (ADR-001 onwards, with an index)
 ├── docs/
-│   ├── architecture/             01 problem · 02 platform · 03 data model · 04 evidence · 05 pipeline · 06 repos
-│   ├── security/                 platform security architecture + threat model, DPIA inputs
-│   ├── standards/                control framework, rendered catalogue, SAMM/ASVS methodology, (Stage 3) org standards
-│   ├── governance/               TOM, governance model
-│   ├── guides/                   ASVS, cloud, Jira, SOC integration guides
-│   ├── operations/               platform ops runbook, DR plan, backup & restore
-│   ├── runbooks/                 incident, CVE emergency, evidence integrity, key rotation, app IR template
-│   └── testing/                  test strategy
-├── catalogue/
-│   ├── controls/controls.yaml    SOURCE OF TRUTH for controls
-│   └── frameworks/               SAMM ids (+ ASVS/SSDF/CSF importers' pinned sources)
-├── config/                       classification, risk model, evidence types, licence policy, trusted producers
-├── schemas/
-│   ├── catalogue/                JSON Schema for the catalogue
-│   ├── evidence/                 evidence-manifest schema (produced by security-workflows)
-│   ├── repo-contract/            JSON Schemas for .security/* files
-│   ├── database/                 SQL DDL (→ Alembic migrations in Phase 1)
-│   └── api/                      OpenAPI 3.1 (validated; every operation carries x-permission)
-├── templates/repo-contract/      files the onboarding bot proposes to app repos
-├── backend/                      (Stage 7) Python package `aap`: api/, domain/, evaluators/, connectors/,
-│                                 workers/, risk/, maturity/. One codebase, three entrypoints (web, hook, worker)
-├── frontend/                     (Stage 8) React + TypeScript
-├── infrastructure/               (Stage 11) Terraform: modules/ + envs/{dev,prod}
-├── tests/                        database/, unit/, integration/, e2e/, security/ (abuse cases), performance/
-├── tools/                        catalogue validator/renderer, importers
-├── adoption-kit/                 programme (charter, roadmap, risks, RACI) + governance templates, a worked example
-└── .github/workflows/            the platform's own CI/CD: consumes security-workflows (dogfooding)
+│   ├── architecture/             problem · platform · data model · evidence · pipelines · repositories · CI/CD
+│   ├── install/ configure/       Helm and Compose installs; organization model, profiles, plugins
+│   ├── guide/ guides/            user guide; GitLab, Jira, SOC, cloud and ASVS guides
+│   ├── develop/ reference/       plugin developer guide; generated settings and API reference
+│   ├── security/                 security model, threat model, review scope, OpenSSF self-assessment
+│   ├── standards/                control framework, rendered catalogue, SAMM/ASVS methodology, standards templates
+│   ├── operations/ runbooks/     operations, DR, backup and restore; incident and key-rotation runbooks
+│   └── roadmap/ testing/         backlog and test strategy
+├── catalogue/                    controls/controls.yaml (source of truth) and frameworks/ (SAMM, ASVS 5.0)
+├── config/                       rules as data: organization, profiles, risk model, evidence types, trusted producers
+├── schemas/                      api/ (OpenAPI 3.1), database/, evidence/, repo-contract/, catalogue/, settings/
+├── backend/                      Python package `aap`: api/, hook/, worker/, domain/, evaluators/, ingest/,
+│                                 connectors/, plugins/, services/, store/, demo/; migrations/ (Alembic); tests/
+├── frontend/                     React + TypeScript UI (types generated from the OpenAPI document)
+├── pipelines/                    shipped GitHub workflows and GitLab CI components, plus the aap-evidence tool
+├── templates/repo-contract/      files an application repository adds to onboard
+├── charts/attestra/              Helm chart
+├── deploy/                       compose/ (evaluation stack) and local/ (every integration on one machine)
+├── examples/                     Terraform (Azure, AWS), deployment workflows, an example plugin
+├── tests/database/               database security-property tests
+├── tools/                        validators and renderers: catalogue, config, metrics, docs, licences
+├── adoption-kit/                 programme and governance templates (a worked example)
+└── .github/workflows/            this project's CI, CodeQL, Scorecard, release and docs publishing
 ```
 
 Changes from the structure in the brief, and why:
@@ -105,6 +100,6 @@ Everything in `.security/` is **declared (C0)** until the platform verifies it:
 
 ### B.4 Schemas and templates
 
-- [`schemas/repo-contract/application.schema.json`](../../schemas/repo-contract/application.schema.json): validated on every push by the GitHub connector, and locally via the `aap` CLI (Stage 7).
+- [`schemas/repo-contract/application.schema.json`](../../schemas/repo-contract/application.schema.json): validated on every push by the GitHub connector, and locally via the `aap` CLI.
 - [`templates/repo-contract/`](../../templates/repo-contract/): what the onboarding bot proposes in its PR.
 - [`schemas/repo-contract/asvs.schema.json`](../../schemas/repo-contract/asvs.schema.json) and [`threat-model.schema.json`](../../schemas/repo-contract/threat-model.schema.json) with worked templates for every contract file (validated by `tools/config/validate.py`, including threat/asset/flow cross-references).

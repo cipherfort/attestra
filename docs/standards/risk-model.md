@@ -60,7 +60,7 @@ Factors **not** used and why: raw CVSS base score alone (context-free) · findin
 - Re-scoring after a model change only raises priorities automatically. SLA clocks never extend retroactively.
 - Manual override needs a reason and a second approver. The override rate is a KRI for model quality (R-17).
 - Quarterly review: distribution of priorities, override reasons, incidents traced to under-prioritised findings.
-- Phase 11: evaluate CISA **SSVC** as an alternative or front-end ([ADR-011](../../adr/ADR-011-vulnerability-risk-model.md)).
+- Later: evaluate CISA **SSVC** as an alternative or front-end ([ADR-011](../../adr/ADR-011-vulnerability-risk-model.md)).
 
 ## 4. Worked examples
 

@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Status | DESIGNED. Requires a first drill to validate times (Phase 9). |
+| Status | DESIGNED. Validate the times with a first restore drill in your deployment. |
 | Decision | [ADR-026](../../adr/ADR-026-disaster-recovery.md) |
 | Targets | RTO 4h (zonal/service failure), 8h (regional). RPO 15 min (database), 0 for acknowledged raw evidence. |
 
@@ -36,4 +36,4 @@ Incident lead: platform tech lead · Decision to fail over regionally: AppSec le
 
 ## 4. Testing
 
-Restore drill 6-monthly ([backup plan](backup-and-restore-plan.md)). Regional failover tabletop annually. Full regional failover exercise once before Phase 10. Drill results are recorded as platform evidence (`process.review_record`).
+Restore drill 6-monthly ([backup plan](backup-and-restore-plan.md)). Regional failover tabletop annually. Full regional failover exercise once before production use. Drill results are recorded as platform evidence (`process.review_record`).

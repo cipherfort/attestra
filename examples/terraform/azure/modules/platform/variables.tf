@@ -54,7 +54,7 @@ variable "evidence_retention_days" {
 }
 
 variable "evidence_worm_state" {
-  description = "Unlocked during the pilot (can still be shortened). Locking is irreversible: REQUIRES HUMAN APPROVAL (decision log D-0xx)."
+  description = "Unlocked during evaluation (can still be shortened). Locking is irreversible: REQUIRES HUMAN APPROVAL (decision log D-0xx)."
   type        = string
   default     = "Unlocked"
   validation {

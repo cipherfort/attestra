@@ -17,7 +17,7 @@ Eleven curated event types that indicate **active risk or possible compromise**:
 | 1 | SOC | Create custom table `AppSecPlatform_CL` (schema below) and a Data Collection Rule + endpoint |
 | 2 | SOC/IAM | Grant the platform worker's managed identity **Monitoring Metrics Publisher** on the DCR |
 | 3 | Platform | Configure DCE URL, DCR immutable ID and stream name in platform config |
-| 4 | SOC | Deploy analytics rules (`infrastructure/sentinel/`, Stage 9) and set table retention ≥ evidence retention (for `checkpoint.daily`) |
+| 4 | SOC | Deploy analytics rules (the Azure example's `examples/terraform/azure/modules/sentinel`) and set table retention ≥ evidence retention (for `checkpoint.daily`) |
 
 **Table schema**
 

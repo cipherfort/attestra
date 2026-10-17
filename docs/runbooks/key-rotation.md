@@ -15,7 +15,7 @@
 | Session encryption key | 365 days | Key Vault | Add the new key as primary. Keep the old as decrypt-only for 8h (max session). Then remove. |
 | Database access | n/a | Entra auth (managed identity) | No passwords to rotate. Ensure password auth stays disabled for application roles. |
 | Cloud access (Azure/AWS) | n/a | Managed identity / web identity federation | No secrets. Review role assignments quarterly. |
-| **Legacy: repo-held DD/DT keys** (the earlier prototype's pattern) | Retire | Consumer repo secrets | After migration (E07-F03-S02): delete the repo secrets **and** revoke the keys in DD/DT. Rotating alone is not enough, because every repo writer had access. |
+| **Repo-held DD/DT keys** (if your repositories used them before adoption) | Retire | Consumer repo secrets | After migration (E07-F03-S02): delete the repo secrets **and** revoke the keys in DD/DT. Rotating alone is not enough, because every repo writer had access. |
 
 **Expiry alerts:** every Key Vault secret has `expires` set. An Azure Monitor alert fires 14 days before.
 

@@ -121,11 +121,11 @@ The components are **logical**. Physically, they ship as **three deployables** t
 | Pipeline | **Central reusable workflows**, released by tag, consumed by SHA | Per-repo copies; external CI | ADR-006 |
 | SBOM | **CycloneDX** primary; SPDX accepted and converted | SPDX primary | ADR-009, 010 |
 | Hosting | **Azure Container Apps** in a VNet-integrated environment, private endpoints | AKS; App Service | ADR-025 |
-| IaC | **Terraform** (azurerm 4.x, matching the existing infra repo) | Bicep | ADR-025 |
+| IaC | **Terraform** (azurerm 4.x in the Azure example; AWS example included) | Bicep | ADR-025 |
 | Observability | **OpenTelemetry → Azure Monitor / App Insights**; audit to Log Analytics → Sentinel | Self-hosted Grafana stack | ADR-027 |
 | Search | **PostgreSQL full-text + trigram**; no dedicated search engine at this scale | OpenSearch | ADR-008 |
 
-Why Python: the existing team writes Python and Terraform (all current automation in the infra repo is Python + bash). The connector and parser ecosystem is strongest in Python. The workload is I/O-bound integration, where Go's performance advantage does not matter. Rationale and the counter-argument (type safety) are in ADR-023.
+Why Python: security engineers who will maintain and extend it mostly write Python, and the connector and parser ecosystem is strongest in Python. The workload is I/O-bound integration, where Go's performance advantage does not matter. Rationale and the counter-argument (type safety) are in ADR-023.
 
 ## 5. Key flows
 

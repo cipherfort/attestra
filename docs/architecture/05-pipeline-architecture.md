@@ -53,14 +53,14 @@ flowchart TB
 
 | Capability / evidence type | Default tool | Why this default | Runs on | Gate (when enabled) |
 |---|---|---|---|---|
-| SAST `scan.sast` | **CodeQL** (GHAS, already licensed). Advanced setup via `sast.yml`, *or* org-enabled default setup read from the API. | Licensed. Native PR annotations and merge protection. | PR, push to default, weekly | Code-scanning merge protection (ruleset) for new high/critical, Tier 1/2 |
-| SCA `scan.sca` | **OSV-Scanner** (all lockfile ecosystems incl. Terraform via existing custom parser → SBOM) + Dependabot alerts via API | OSV covers malicious-package advisories (`MAL-*`). Vendor-neutral DB. | PR, push, weekly | — |
+| SAST `scan.sast` | **CodeQL** (`sast.yml`), *or* org-enabled default setup read from the API | Free for public repositories (GitHub Code Security for private ones). Native PR annotations and merge protection. | PR, push to default, weekly | Code-scanning merge protection (ruleset) for new high/critical, Tier 1/2 |
+| SCA `scan.sca` | **OSV-Scanner** (`sca.yml`, all lockfile ecosystems) + Dependabot alerts via API | OSV covers malicious-package advisories (`MAL-*`). Vendor-neutral DB. | PR, push, weekly | — |
 | Dependency gate | **`actions/dependency-review-action`** | Native. Blocks new vulnerable/denied-licence deps in the PR diff. | PR | Required check (ASC-BLD-07) |
 | Malicious packages `scan.malicious_package` | OSV-Scanner (`MAL-*`) | As above | PR, push, **daily** (re-match) | Fail on any |
-| Secrets `scan.secrets` | **GHAS secret scanning + push protection** (read via API, C3) | Licensed. Blocks at push time. No pipeline job needed. | Continuous | Push protection |
-| IaC `scan.iac` | **Checkov** + **Trivy config** (PSRule optional for Bicep) | Checkov is already in use. Trivy also covers Dockerfiles and K8s. | PR, push | Tier-based, later |
-| Container `scan.container` | **Trivy** (pinned by SHA, per the March 2026 incident) | Already piloted | On image build, weekly on deployed digests | Fail on fixable critical (Tier 1/2), later |
-| SBOM `sbom` | **cdxgen** (source), **Syft** (images), existing Terraform lock-file parser | cdxgen is already piloted. Syft is strong for images. Both emit CycloneDX. | Build/release, push | — |
+| Secrets `scan.secrets` | **gitleaks** (`secrets.yml`), plus GitHub secret scanning and push protection read via the API where enabled | gitleaks needs no licence; push protection blocks at push time. | Continuous | Push protection |
+| IaC `scan.iac` | **Checkov** (`iac.yml`) | Covers Terraform, CloudFormation, Kubernetes, Helm and Dockerfiles. | PR, push | Tier-based, later |
+| Container `scan.container` | **Trivy** (`container.yml`, pinned by SHA after the March 2026 `trivy-action` tag compromise) | Widely used; SARIF output | On image build, weekly on deployed digests | Fail on fixable critical (Tier 1/2), later |
+| SBOM `sbom` | **Syft** (`sbom.yml`) | Source and images; emits CycloneDX. | Build/release, push | — |
 | Workflow hardening `scan.workflow_hardening` | **zizmor** + **actionlint** | Purpose-built GitHub Actions static analysis | PR, push | High findings, Tier 1–3 |
 | Provenance `provenance.attestation` | **`actions/attest-build-provenance`** | Native, Sigstore-backed, SLSA provenance | Build/release | — |
 | Security tests `test.security` | Team test framework → JUnit with `asvs`/`threat` properties | Reuses existing tests | PR, push | Test failure |
@@ -103,16 +103,18 @@ flowchart TB
 5. A retired SHA stays trusted for 90 days after its successor's release. After that, evidence from it is rejected with `UNAPPROVED_WORKFLOW_REF`, and the control state shows a clear "pin outdated" reason.
 6. Emergency revocation (e.g. a tool compromise) removes the SHA immediately and triggers evidence revocation for the affected window ([evidence model section 5.3](04-evidence-model.md#53-derived-state)).
 
-## 7. Migration from the existing reusable workflows
+## 7. Migrating from workflows you already have
 
-| Existing (the earlier prototype scaffold) | Target | Change |
-|---|---|---|
-| `sbom-scan.yml` (cdxgen/Terraform parser → DT upload with **repo-held DT key** → DD import with **repo-held DD key**) | `security-workflows/sbom.yml` | Keep the generation logic (the Terraform lock-file parser is valuable and already debugged). **Remove the DT/DD uploads.** The platform forwards SBOMs to Dependency-Track with its own credential after verification. |
-| `image-scan.yml` (Trivy → SARIF → GHAS + DD with repo-held key) | `security-workflows/container.yml` | Keep the Trivy SHA pin and SARIF→GHAS. Remove the DD import (the platform forwards). Add the manifest. |
-| `dependabot-import.yml` | **Retired.** The platform's GitHub connector reads Dependabot alerts directly with the GitHub App. | Removes a DD key from every repo |
-| Repo secrets `DEFECTDOJO_API_KEY`, `DEPENDENCY_TRACK_API_KEY` | **Deleted and rotated** after migration | Closes CS-1 |
+Many organizations already run scanners in their pipelines, often uploading results to Dependency-Track or DefectDojo with an API key stored in every repository. When you adopt the shipped workflows:
 
-During migration both paths run. The platform's DefectDojo forwarding uses a different engagement naming scheme to prevent double-import.
+| If a repository has… | Do this |
+|---|---|
+| Its own scan workflows (SBOM, image, IaC) | Replace them with the caller workflow (`aap pipelines caller`). Keep any logic you need by contributing it to your `security-workflows` repository, where it is reviewed and released once. |
+| Uploads to Dependency-Track or DefectDojo with repo-held keys | Remove the uploads. The platform forwards verified results with its own credential. |
+| Repository secrets such as `DEFECTDOJO_API_KEY` or `DEPENDENCY_TRACK_API_KEY` | Delete them **and** revoke the keys in the tool. Rotating alone is not enough. |
+| A Dependabot import job | Retire it: the platform's GitHub connector reads Dependabot alerts directly. |
+
+While both paths run, use a different DefectDojo engagement name for the platform's forwarding to prevent double-import.
 
 ## 8. Enforcement (so teams cannot quietly remove the pipeline)
 
@@ -127,7 +129,7 @@ During migration both paths run. The platform's DefectDojo forwarding uses a dif
 
 | Stage | Gates enabled |
 |---|---|
-| Pilot (Phase 9) | Push protection (secrets), malicious packages. Everything else observe-only. |
+| First teams | Push protection (secrets), malicious packages. Everything else observe-only. |
 | Rollout wave 1 (Tier 1/2) | + dependency review (new critical/high), + workflow-lint high, + code-scanning merge protection for new critical |
 | Steady state | + container fixable critical (Tier 1/2), + IaC high (Tier 1). Gates per tier are configured in `suite.yml` inputs derived from the platform-provided tier. |
 

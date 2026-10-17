@@ -83,7 +83,7 @@ Sponsor: CISO. Owner: AppSec lead. Decision forum: the **AppSec Governance Board
 
 ## 9. Assumptions
 
-GitHub Enterprise Cloud with GHAS covers in-scope orgs · Entra ID is the IdP · Azure (UK South) hosts the platform · Jira is available with API access · artifact attestations are available for private repos · 100–500 applications, 300–2,000 repos · a data-classification scheme exists. Each has a validation step in Phase 0 ([problem definition section 7](../../../docs/architecture/01-problem-definition.md#7-assumptions-to-be-validated-in-phase-0)).
+GitHub Enterprise Cloud with GHAS covers in-scope orgs · Entra ID is the IdP · Azure (UK South) hosts the platform · Jira is available with API access · artifact attestations are available for private repos · 100–500 applications, 300–2,000 repos · a data-classification scheme exists. Each has a validation step in Phase 0 ([problem definition section 7](../../../docs/architecture/01-problem-definition.md#7-assumptions-validate-them-for-your-organisation)).
 
 ## 10. Constraints
 

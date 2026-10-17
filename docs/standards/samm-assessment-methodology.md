@@ -15,7 +15,7 @@ This document covers **how assessments are run**. The calculation is defined in 
 | Continuous automated | Every application | Continuous | Platform | C1–C3 control states |
 | Application assessment | One application (non-automatable activities only) | Annually: Tier 1 (M2), Tier 2 (M1 + AppSec sample), Tier 3 (sampled 10%) | Champion + AppSec engineer | M1/M2 |
 | Organisational assessment | Governance practices (G-SM, G-PC, G-EG) and programme-level parts of others | Annually | Governance analyst + AppSec lead. External reviewer optional. | M2 |
-| Baseline | Pilot apps + organisation | Phase 0/6 | AppSec | M2 |
+| Baseline | First applications + organisation | At adoption | AppSec | M2 |
 
 ## 2. Application assessment procedure
 

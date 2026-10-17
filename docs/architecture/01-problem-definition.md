@@ -28,7 +28,7 @@ The single question behind the 25 questions in the programme brief is:
 
 The organisational questions ("where are our biggest gaps?", "which apps are affected by CVE-X?", "what is our SAMM maturity?") are aggregations over that per-application answer. If the per-application answer is wrong, every aggregate is wrong. **The core product is therefore the Control → Evidence → Risk → Maturity engine, not the dashboard.**
 
-## 3. Current state: what exists (verified from the earlier prototype scaffold, 2026-10-07)
+## 3. A worked example: the starting point this project was designed from
 
 | Capability | State | Notes |
 |---|---|---|
@@ -81,7 +81,7 @@ These are not criticisms of an MVP that is explicitly marked "not yet deployed".
 
 See [ADR-001](../../adr/ADR-001-platform-purpose-and-scope.md). In short: the platform does **not** replace GHAS, Dependency-Track, DefectDojo, Defender or Sentinel. It does not run scanners itself. It is not a GRC suite for non-software risk. It does not produce a single "security score".
 
-## 7. Assumptions (to be validated in Phase 0)
+## 7. Assumptions (validate them for your organisation)
 
 | ID | Assumption | Validation |
 |---|---|---|
@@ -90,6 +90,6 @@ See [ADR-001](../../adr/ADR-001-platform-purpose-and-scope.md). In short: the pl
 | A-03 | Azure is the hosting platform for the platform itself | The project creates its own network and resources (ADR-031); see RAID A-03 |
 | A-04 | Jira Cloud is the ticketing system | The project creates the site/project (ADR-031); see RAID A-04 |
 | A-05 | Artifact attestations (Sigstore-backed) are available for private/internal repos | Requires GitHub Enterprise Cloud; verify on the org |
-| A-06 | Order of magnitude: 100–500 applications, 300–2,000 repositories | Discovery in Phase 0 |
+| A-06 | Order of magnitude: 100–500 applications, 300–2,000 repositories | Estate discovery |
 | A-07 | Data classification scheme exists (labels are configurable, not hard-coded) | Obtain from information governance |
 | A-08 | The organisation has a SIEM: Sentinel, or another that accepts events over HTTPS or syslog | Confirm with SOC |

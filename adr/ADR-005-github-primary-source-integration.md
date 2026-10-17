@@ -34,7 +34,7 @@ No secrets in consumer repos · independent verification · least privilege · r
 
 - One App installation covers all repos. Its private key is the platform's most sensitive credential (threat T-10).
 - Rate limits: an App installation has higher limits than a user token, and scales with org size. Reconciliation is staggered and uses conditional requests (ETags).
-- The infra repo's per-repo DD/DT secrets are retired in Phase 3 ([pipeline migration](../docs/architecture/05-pipeline-architecture.md#7-migration-from-the-existing-reusable-workflows)).
+- The infra repo's per-repo DD/DT secrets are retired in Phase 3 ([pipeline migration](../docs/architecture/05-pipeline-architecture.md#7-migrating-from-workflows-you-already-have)).
 
 ## Security implications
 
