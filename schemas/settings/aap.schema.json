@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://example.org/aap/settings.schema.json",
+  "$id": "https://cipherfort.github.io/attestra/schemas/settings/aap.schema.json",
   "title": "aap.yaml: deployment settings",
   "description": "Endpoints and choices for one deployment. NO SECRETS: credentials live in the secret store; the database URL can be read from a mounted file (database.url_file). Environment variables (AAP_*) override every value.",
   "type": "object",
