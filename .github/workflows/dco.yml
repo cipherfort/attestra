@@ -17,10 +17,16 @@ jobs:
         env:
           BASE: ${{ github.event.pull_request.base.sha }}
           HEAD: ${{ github.event.pull_request.head.sha }}
+          OPENED_BY: ${{ github.event.pull_request.user.login }}
         run: |
           fail=0
           for c in $(git rev-list --no-merges "$BASE..$HEAD"); do
             author=$(git log -1 --format='%an <%ae>' "$c")
+            # Dependabot cannot sign off. Exempt its commits only on pull requests Dependabot itself opened, so a
+            # human cannot skip the check by borrowing the bot's author name.
+            if [ "$OPENED_BY" = "dependabot[bot]" ] && [ "$author" = "dependabot[bot] <49699333+dependabot[bot]@users.noreply.github.com>" ]; then
+              continue
+            fi
             if ! git log -1 --format='%B' "$c" | grep -qiF "Signed-off-by: $author"; then
               echo "::error::commit $c is not signed off by its author ($author). Use: git commit -s"
               fail=1

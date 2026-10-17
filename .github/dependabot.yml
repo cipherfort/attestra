@@ -19,6 +19,14 @@ updates:
   - package-ecosystem: docker
     directory: /
     schedule: { interval: weekly }
+    cooldown: { default-days: 3 }
+    # Runtime upgrades (Python 3.12 -> 3.13, Node 22 LTS -> the next LTS) are deliberate changes with their own
+    # pull request and test run, not a weekly bump. Patch and digest updates still arrive.
+    ignore:
+      - dependency-name: python
+        update-types: [version-update:semver-major, version-update:semver-minor]
+      - dependency-name: node
+        update-types: [version-update:semver-major]
   - package-ecosystem: terraform
     directories: [/examples/terraform/aws, /examples/terraform/azure/envs/azure, /examples/terraform/azure/envs/aws,
                   /examples/terraform/azure/envs/github, /examples/terraform/azure/state-bootstrap]
