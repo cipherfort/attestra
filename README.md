@@ -56,6 +56,7 @@ including GitLab CE and the scanners: [`deploy/local/`](deploy/local/README.md).
 
 | If you want to… | Read |
 |---|---|
+| Read it all online | [cipherfort.github.io/attestra](https://cipherfort.github.io/attestra/) |
 | Understand how it works | [Platform architecture](docs/architecture/02-platform-architecture.md) · [Evidence model](docs/architecture/04-evidence-model.md) · [Control framework](docs/standards/control-framework.md) |
 | See every control | [Control catalogue](docs/standards/control-catalogue.md) (rendered from [`catalogue/controls/controls.yaml`](catalogue/controls/controls.yaml)) |
 | Run it with real integrations | [Local integration stack](deploy/local/README.md) · [Integration bootstrap runbook](docs/operations/integration-bootstrap.md) · [Infrastructure](examples/terraform/azure/README.md) |
@@ -86,6 +87,8 @@ tools/          validators: catalogue, config, metrics, links, licences
 ## Contributing and security
 
 Contributions are welcome: plugins for systems we don't support yet are a good place to start. See [CONTRIBUTING.md](CONTRIBUTING.md) (DCO sign-off, no CLA), [GOVERNANCE.md](GOVERNANCE.md) and the [Code of Conduct](CODE_OF_CONDUCT.md).
+
+Questions and ideas: [Discussions](https://github.com/cipherfort/attestra/discussions). Bugs and feature requests: [Issues](https://github.com/cipherfort/attestra/issues).
 
 Found a vulnerability? Please report it privately: [SECURITY.md](SECURITY.md).
 
