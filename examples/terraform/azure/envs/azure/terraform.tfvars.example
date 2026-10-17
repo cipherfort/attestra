@@ -6,7 +6,7 @@ production                = false
 secret_officer_object_ids = ["<object id of each person who runs aap bootstrap>"]
 operator_ip_ranges        = ["<your egress IP>/32"] # only while bootstrapping from a workstation
 defender_scopes           = ["/subscriptions/00000000-0000-0000-0000-000000000000"]
-scoped_groups             = ["champion-claims", "directorate-lead-benefits"]
+scoped_groups             = ["champion-claims", "unit-lead-benefits"]
 # after `aap bootstrap github-app` / `aap bootstrap jira` / envs/aws:
 github_org                = ""
 github_app_client_id      = ""

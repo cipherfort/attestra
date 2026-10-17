@@ -110,7 +110,7 @@ Errors are `application/problem+json`. Out-of-scope objects return 404, never 40
 
 | Operation | Request | Permission | Summary |
 |---|---|---|---|
-| `listOrgUnits` | `GET /org-units` | `org_unit.read` | Directorates and teams visible to the caller |
+| `listOrgUnits` | `GET /org-units` | `org_unit.read` | Business units and teams visible to the caller |
 | `getOrgUnit` *(designed)* | `GET /org-units/{orgUnitId}` | `org_unit.read` |  |
 | `getCurrentUser` | `GET /users/me` | `authenticated` | Current caller, roles and visible scope |
 

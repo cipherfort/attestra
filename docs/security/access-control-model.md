@@ -3,7 +3,7 @@
 | | |
 |---|---|
 | Status | IMPLEMENTED (policy module, RLS, Entra OIDC BFF, app roles from groups). Groups and app-role assignments are created by `examples/terraform/azure/modules/entra` (ADR-031). |
-| Decision records | [ADR-013](../../adr/ADR-013-rbac-model.md), [ADR-014](../../adr/ADR-014-authentication-architecture.md), [ADR-022](../../adr/ADR-022-multi-directorate-model.md) |
+| Decision records | [ADR-013](../../adr/ADR-013-rbac-model.md), [ADR-014](../../adr/ADR-014-authentication-architecture.md), [ADR-022](../../adr/ADR-022-multi-unit-model.md) |
 | Enforcement | API policy module (primary) + PostgreSQL RLS (defence in depth, tested T5–T9) |
 
 ## 1. Principals

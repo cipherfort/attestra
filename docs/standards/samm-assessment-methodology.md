@@ -14,7 +14,7 @@ This document covers **how assessments are run**. The calculation is defined in 
 |---|---|---|---|---|
 | Continuous automated | Every application | Continuous | Platform | C1–C3 control states |
 | Application assessment | One application (non-automatable activities only) | Annually: Tier 1 (M2), Tier 2 (M1 + AppSec sample), Tier 3 (sampled 10%) | Champion + AppSec engineer | M1/M2 |
-| Organisational assessment | Governance practices (G-SM, G-PC, G-EG) and programme-level parts of others | Annually | Governance analyst + Head of AppSec. External reviewer optional. | M2 |
+| Organisational assessment | Governance practices (G-SM, G-PC, G-EG) and programme-level parts of others | Annually | Governance analyst + AppSec lead. External reviewer optional. | M2 |
 | Baseline | First applications + organisation | At adoption | AppSec | M2 |
 
 ## 2. Application assessment procedure
@@ -28,7 +28,7 @@ This document covers **how assessments are run**. The calculation is defined in 
 
 ## 3. Organisational assessment procedure
 
-Document review (charter, standards, KPI packs, training records, champion programme) → interviews with Security Governance, AppSec, two directorate leads and three champions → answers for Governance practices plus programme-level parts of other practices → Board review → published as an organisation-scope assessment.
+Document review (charter, standards, KPI packs, training records, champion programme) → interviews with Security Governance, AppSec, two business unit leads and three champions → answers for Governance practices plus programme-level parts of other practices → Board review → published as an organisation-scope assessment.
 
 ## 4. Quality controls
 
@@ -42,4 +42,4 @@ Document review (charter, standards, KPI packs, training records, champion progr
 
 ## 5. Outputs
 
-Application maturity report (practice/stream scores, target comparison, provenance, improvement actions) · directorate roll-up (distribution, % meeting target) · organisation report (Governance practices plus application distributions, trend).
+Application maturity report (practice/stream scores, target comparison, provenance, improvement actions) · business unit roll-up (distribution, % meeting target) · organisation report (Governance practices plus application distributions, trend).

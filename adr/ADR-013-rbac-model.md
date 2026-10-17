@@ -15,7 +15,7 @@ Users range from engineers (their team's apps) to executives (aggregates) to aud
 | `engineer` | Own team's apps (derived from GitHub team ↔ Entra group) | View app, findings, controls, evidence. Triage P3/P4. Request exceptions. | Approve anything. See other teams' apps. |
 | `champion` | Own team's apps | + triage all priorities, mark false positive (P1/P2 needs a second reviewer), record M1 evidence | Approve own team's exceptions or M2 evidence |
 | `app_owner` | Owned apps | + co-sign Tier 1/2 exceptions, approve classification inputs | |
-| `unit_lead` | Directorate subtree | View all directorate apps. Approve exceptions per threshold table. | Approve where they are the requester |
+| `unit_lead` | Business unit subtree | View all business unit apps. Approve exceptions per threshold table. | Approve where they are the requester |
 | `appsec_engineer` | Org-wide read | Record M2 evidence (not for own apps), confirm FPs, approve exceptions per threshold, approve tier changes | Change catalogue/config at runtime (PR only) |
 | `governance_analyst` | Org-wide read | Manage exception workflow admin, reporting packs | Approve exceptions |
 | `security_leadership` | Org-wide | All read, approve per threshold (CISO: P1) | |
@@ -36,7 +36,7 @@ Rules:
 |---|---|
 | ABAC with OPA/Rego or Cedar | More expressive. Not needed for v1's rules. Policy-as-code engines add a dependency. **The policy module is written so it can be swapped for Cedar** if rules grow. |
 | Entra app roles only | Cannot express per-application scope or SoD. |
-| Per-directorate deployments | Breaks org-wide views (ADR-022). |
+| Per-business unit deployments | Breaks org-wide views (ADR-022). |
 
 ## Decision drivers
 

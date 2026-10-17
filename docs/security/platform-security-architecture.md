@@ -13,7 +13,7 @@ The platform holds an **organisation-wide map of exploitable weaknesses**: which
 
 | ID | Objective |
 |---|---|
-| SO-1 | Unauthorised parties cannot read vulnerability or evidence data, including other directorates' data where scoped. |
+| SO-1 | Unauthorised parties cannot read vulnerability or evidence data, including other business units' data where scoped. |
 | SO-2 | Evidence cannot be forged, altered or deleted undetectably, including by platform administrators. |
 | SO-3 | A compromise of any consumer repository cannot compromise the platform or other repositories' evidence. |
 | SO-4 | A compromise of the platform cannot be used to change code in consumer repositories (GitHub App is **read-only**). |
@@ -106,7 +106,7 @@ Scope: the components and trust boundaries above. Ratings are inherent → resid
 | T-03 | Reusable workflow running on a persistent self-hosted runner | **T**ampering | A prior job on the same runner poisons the toolchain (e.g. replaces the scanner binary) | M | Ephemeral runners for security workflows (ARC/ephemeral VM, or GitHub-hosted). Tool binaries are verified by checksum. Recorded as the `runner_environment` attribute; evidence from non-ephemeral runners is capped at confidence C2. | M (until ephemeral runners exist) |
 | T-04 | Webhook receiver | **S**poofing / **D**oS | Forged or replayed webhooks; flooding | M | HMAC, replay cache, payload-as-hint, ingress IP restriction to GitHub `hooks` ranges (from `/meta`), rate limits, scale ceiling | L |
 | T-05 | Workers parsing scanner output | **E**levation | Malicious SARIF/SBOM exploits a parser (e.g. YAML deserialisation, zip bomb, XXE) | M | Safe loaders, limits, isolated worker identity with no Key Vault access beyond needs, no outbound except allowlist | L |
-| T-06 | API | **I**nfo disclosure | IDOR: user in directorate A reads app B's findings | H | Scoped repository layer + RLS + authZ test matrix in CI | L |
+| T-06 | API | **I**nfo disclosure | IDOR: user in business unit A reads app B's findings | H | Scoped repository layer + RLS + authZ test matrix in CI | L |
 | T-07 | API | **E**levation | User self-approves an exception or confirms their own false positive | M | SoD enforced in the workflow engine. Audit event. Sentinel analytics rule on SoD-override attempts. | L |
 | T-08 | DB | **T**ampering | DBA or compromised admin rewrites evidence or control states to inflate maturity | M | Append-only grants and trigger, hash chain, external checkpoint, daily verification, PIM for DB admin | L |
 | T-09 | DB / Blob | **I**nfo disclosure | Exfiltration of the vulnerability map | H | Private endpoints, no public network access, Entra auth to PG, Defender for Databases/Storage, egress allowlist, audit of bulk export | M |
@@ -148,7 +148,7 @@ deployment forms. Each new threat below names its control and the test that hold
 |---|---|---|---|
 | AC-01 | repo maintainer | upload a hand-crafted `evidence-manifest.json` from my own workflow | Rejected: `UNTRUSTED_PRODUCER`. Audit event. |
 | AC-02 | repo maintainer | reference the approved workflow at an unapproved SHA (my fork of it) | Rejected: `UNAPPROVED_WORKFLOW_REF` |
-| AC-03 | directorate user | GET `/api/v1/applications/{id-of-other-directorate}` | 404 (not 403, to avoid enumeration) |
+| AC-03 | business unit user | GET `/api/v1/applications/{id-of-other-business unit}` | 404 (not 403, to avoid enumeration) |
 | AC-04 | exception requester | approve my own exception via the API | 403 `SOD_VIOLATION`. Audit event. |
 | AC-05 | platform admin | UPDATE an evidence row via SQL | Error from trigger. The chain verification also detects superuser bypass. |
 | AC-06 | anyone | send a webhook with a valid shape and wrong HMAC | 401. No enqueue. |

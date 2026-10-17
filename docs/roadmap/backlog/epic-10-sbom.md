@@ -20,7 +20,7 @@
 ## F02: CVE impact
 
 ### E10-F02-S01: "Which applications are affected by CVE-X?" · M · Phase 5
-- **Story:** As Head of AppSec during a CVE emergency, I want affected / possibly affected / not affected applications with tier, exposure, owner and deployed environments, so that response starts in minutes.
+- **Story:** As AppSec lead during a CVE emergency, I want affected / possibly affected / not affected applications with tier, exposure, owner and deployed environments, so that response starts in minutes.
 - **Technical:** `GET /vulnerabilities/{id}/affected-applications` (accepts CVE/GHSA/OSV and resolves aliases). Also `GET /components?purl=pkg:maven/org.apache.logging.log4j/log4j-core&version_range=...` for pre-CVE component searches.
 - **AC:** Seeded-CVE ground-truth test passes (PS-8). Apps with stale or no SBOM appear as *possibly affected*. Response < 5 s at design scale (2M components). CSV export (audited).
 - **Security:** Results scoped by the caller's RLS. Org-wide only for security roles. Export audited.

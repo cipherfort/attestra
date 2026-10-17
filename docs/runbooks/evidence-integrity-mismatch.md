@@ -8,7 +8,7 @@
 
 ## 1. Immediate actions (first hour)
 
-1. Page platform on-call and inform the Head of AppSec and the SOC.
+1. Page platform on-call and inform the AppSec lead and the SOC.
 2. **Freeze:** `INGESTION_PAUSED=true`. Disable the evaluator sweep and maturity snapshot jobs (prevents derived data built on suspect ledgers).
 3. **Preserve:** note the current time as a PITR marker. Export the verification job output. Export the relevant `checkpoint.daily` events from Sentinel (the external anchor).
 4. Put a banner in the UI: "Assurance data under integrity investigation. Figures may change."

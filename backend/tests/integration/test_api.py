@@ -47,7 +47,7 @@ def test_unauthenticated_is_problem_json(client):
 
 def test_team_scoping(client):
     assert app_names(client, "ajones") == {"Claims API"}
-    assert app_names(client, "dlee") == {"Claims API", "Payments Portal"}  # directorate lead: Benefits subtree
+    assert app_names(client, "dlee") == {"Claims API", "Payments Portal"}  # business unit lead: Benefits subtree
     assert app_names(client, "cpatel") == {"Claims API", "Payments Portal", "HR Leave Tracker", "Team Wiki Helper"}
 
 

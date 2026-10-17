@@ -21,7 +21,7 @@ Mechanics: monthly partitions are exported to Parquet in an immutable archive co
 
 ## Alternatives considered
 
-Keep everything indefinitely (cost, minimisation conflict) · 12 months only (insufficient for audit and investigations) · per-directorate retention (complexity without benefit).
+Keep everything indefinitely (cost, minimisation conflict) · 12 months only (insufficient for audit and investigations) · per-business unit retention (complexity without benefit).
 
 ## Decision drivers
 

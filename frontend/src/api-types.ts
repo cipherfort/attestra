@@ -82,7 +82,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** Directorates and teams visible to the caller */
+        /** Business units and teams visible to the caller */
         get: operations["listOrgUnits"];
         put?: never;
         post?: never;

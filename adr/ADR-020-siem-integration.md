@@ -8,7 +8,7 @@ Sending every scanner finding to the SOC creates noise the SOC cannot act on. So
 
 ## Decision
 
-Emit a **curated set of events** as structured JSON to **Microsoft Sentinel** via the Azure Monitor **Logs Ingestion API** (DCR + custom table `AppSecPlatform_CL`), authenticated with managed identity. Exabeam (if in use) receives the same events via its HTTP/syslog collector (PROPOSED, to be confirmed with the SOC).
+Emit a **curated set of events** as structured JSON to **Microsoft Sentinel** via the Azure Monitor **Logs Ingestion API** (DCR + custom table `AppSecPlatform_CL`), authenticated with managed identity. Other SIEMs (Splunk, Elastic, Exabeam, …) receive the same events through the HTTPS sink (JSON or Splunk HEC) or the syslog sink (RFC 5424 over TLS); one SIEM sink is active per deployment.
 
 | Event type | Severity | Why the SOC needs it | Suggested SOC action |
 |---|---|---|---|

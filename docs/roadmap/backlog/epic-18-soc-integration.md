@@ -1,6 +1,6 @@
 # E18: SOC Integration
 
-**Goal:** Curated, actionable AppSec events in Sentinel (and Exabeam where used). Design: [ADR-020](../../../adr/ADR-020-siem-integration.md).
+**Goal:** Curated, actionable AppSec events in the organization's SIEM (Sentinel, or another over HTTPS or syslog). Design: [ADR-020](../../../adr/ADR-020-siem-integration.md).
 
 **Progress (Stage 9):** curated event derivation (8 types), per-window dedup, daily chain checkpoint, at-least-once dispatch to the Logs Ingestion API, Terraform table/DCR/rules IMPLEMENTED. Event list still REQUIRES HUMAN APPROVAL (SOC lead).
 

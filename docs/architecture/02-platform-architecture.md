@@ -15,7 +15,7 @@ The platform is an **assurance layer**. It does not replace the security tools t
 | SBOM component inventory and continuous CVE matching | **Dependency-Track** | Re-scores existing SBOMs as new CVEs land, without re-running CI. Infra ADR-0001. |
 | Scanner output normalisation and cross-tool dedup (200+ parsers) | **DefectDojo** | Writing parsers is undifferentiated work. |
 | Cloud posture findings | **Defender for Cloud / AWS Security Hub** | Authoritative per cloud. |
-| Security events and incidents | **Sentinel** (or Exabeam) | SOC tooling. |
+| Security events and incidents | **Your SIEM**: Sentinel, or any SIEM over HTTPS (Splunk HEC, Elastic, …) or syslog | SOC tooling. |
 | Work tracking | **Jira** | Where engineers work. |
 | **Applications, ownership, classification** | **Platform** | Nobody else has it. |
 | **Controls, framework mappings, control state** | **Platform** | |
@@ -54,7 +54,7 @@ flowchart LR
   subgraph Ext[Enterprise services]
     ENTRA[Entra ID]
     JIRA[Jira]
-    SENT[Sentinel / Exabeam]
+    SENT[SIEM: Sentinel / HTTPS / syslog]
     DFC[Defender for Cloud]
     SH[AWS Security Hub]
     FEEDS[EPSS · CISA KEV · OSV]
@@ -210,7 +210,7 @@ A scheduled sweep (hourly) re-evaluates time-based freshness so that controls fa
 
 ## 6. Multi-tenancy
 
-One organisation, many units (levels configured in `config/organization.yaml`). This is not SaaS multi-tenancy. The model is a **single deployment with row-level scoping by organisational unit**, enforced in the API and backed by **PostgreSQL row-level security** as defence in depth ([ADR-022](../../adr/ADR-022-multi-directorate-model.md)). Hard isolation per directorate (separate deployments) is rejected: it would break the organisation-wide views that are the point of the platform.
+One organisation, many units (levels configured in `config/organization.yaml`). This is not SaaS multi-tenancy. The model is a **single deployment with row-level scoping by organisational unit**, enforced in the API and backed by **PostgreSQL row-level security** as defence in depth ([ADR-022](../../adr/ADR-022-multi-unit-model.md)). Hard isolation per business unit (separate deployments) is rejected: it would break the organisation-wide views that are the point of the platform.
 
 ## 7. Scale envelope (design target)
 
@@ -241,5 +241,5 @@ Every system below is created and owned by this project ([ADR-031](../../adr/ADR
 | Sentinel | IMPLEMENTED (curated events, dedup, daily checkpoint, dispatch), tested against recorded responses. Table/DCR/rules: `modules/sentinel`. |
 | Entra ID sign-in | IMPLEMENTED (OIDC BFF, sessions, CSRF, bearer for services), tested against a real OIDC server. Apps, roles, groups, federated credential: `modules/entra`. |
 | Evidence WORM store | IMPLEMENTED (`AzureBlobStore`), tested against Azurite; WORM policy by `modules/platform` (locking: decision D-016). |
-| Exabeam | PROPOSED: via syslog/CEF or HTTP collector, if the organization adopts it |
+| Other SIEMs (Splunk, Elastic, Exabeam, …) | IMPLEMENTED: HTTPS sink (JSON or Splunk HEC) and syslog sink (RFC 5424 over TLS) |
 | EPSS / CISA KEV | DESIGNED. Public feeds, no auth. |

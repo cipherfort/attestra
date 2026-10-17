@@ -12,7 +12,7 @@ The platform was designed for one organization. Teams elsewhere face the same pr
 2. **A vendor-neutral core plus plugins.** The core is the evidence engine, rules, ledgers, evaluation, risk, maturity, API and UI. It runs with no external system configured. Source control, identity, ticketing, vulnerability intelligence, cloud posture, SIEM export, evidence storage and secrets are plugins behind interfaces.
 3. **Source control: GitHub and GitLab at 1.0.** GitLab's evidence trust model gets a spike first (GitLab does not prove which shared CI component ran). The outcome becomes ADR-033.
 4. **Deployment:** Docker Compose for evaluation and small organizations; a Helm chart for production on any Kubernetes. The Azure and AWS Terraform are reference examples, not the supported path.
-5. **Organization model and classification become configuration** (`config/organization.yaml`, profiles): no fixed "organisation → directorate → team" hierarchy, no single country's regulations.
+5. **Organization model and classification become configuration** (`config/organization.yaml`, profiles): no fixed "organisation → business unit → team" hierarchy, no single country's regulations.
 6. **One deployment per organization; no multi-tenancy in 1.0. No telemetry.**
 7. **Governance:** a maintainer model in the project's own GitHub organization, with an application to OWASP after 1.0, once there are external users and contributors.
 8. **The programme documents become an adoption kit** (`adoption-kit/`): a worked example any organization can adapt. They are not product requirements.

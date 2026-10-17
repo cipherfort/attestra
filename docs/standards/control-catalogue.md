@@ -764,7 +764,7 @@ Quarterly, the team reviews its top recurring CWE classes (computed by the platf
 
 **Security-relevant application logs reach the SIEM** · domain `OPS` · activity · owner `appsec-governance` · review every 12 months
 
-Authentication, authorisation failures, admin actions and security exceptions are logged and delivered to Sentinel (or Exabeam) with the application identifier; the log source is healthy.
+Authentication, authorisation failures, admin actions and security exceptions are logged and delivered to the organization's SIEM (Sentinel, an HTTPS collector such as Splunk HEC, or syslog) with the application identifier; the log source is healthy.
 
 - **Rationale:** Detection and incident response depend on it.
 - **Applies when:** deployed

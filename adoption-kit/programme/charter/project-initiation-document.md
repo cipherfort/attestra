@@ -22,7 +22,7 @@ Defines **how** the first two phases are delivered and controlled: Phase 0 (Disc
 
 | Work package | Products | Acceptance |
 |---|---|---|
-| WP0.1 Estate discovery | Repo inventory (GitHub API): languages, activity, visibility, GHAS enablement, Actions usage. Candidate application groupings. Cloud subscription/account list. | Inventory reviewed with 3 directorates. Order-of-magnitude assumption A-06 confirmed. |
+| WP0.1 Estate discovery | Repo inventory (GitHub API): languages, activity, visibility, GHAS enablement, Actions usage. Candidate application groupings. Cloud subscription/account list. | Inventory reviewed with 3 business units. Order-of-magnitude assumption A-06 confirmed. |
 | WP0.2 Assumption validation | A-01…A-08 verified (GHEC + GHAS scope, Entra, Jira edition, artifact attestations for private repos, org ruleset "require workflows" availability) | Each assumption marked confirmed/changed, with design impact noted |
 | WP0.3 Governance set-up | Board ToR, membership, decision log. Sponsor sign-off of the charter. | Board meets once. Charter approved. |
 | WP0.4 Catalogue and model approval | Catalogue v0.1 review. Tier model and ASVS levels. Risk model and SLAs. Retention proposal. | Decisions recorded. Catalogue → v0.2. |
@@ -53,7 +53,7 @@ Defines **how** the first two phases are delivered and controlled: Phase 0 (Disc
 | Role | Name | Responsibility |
 |---|---|---|
 | Sponsor | TBC (CISO) | Funding, escalation, charter approval |
-| Programme owner | TBC (Head of AppSec) | Delivery accountability, Board chair |
+| Programme owner | TBC (AppSec lead) | Delivery accountability, Board chair |
 | Product owner | TBC | Backlog, acceptance, stakeholder management |
 | Tech lead | TBC | Architecture integrity, ADRs |
 | Platform engineers | TBC (×2 in Phase 0–1) | Build |

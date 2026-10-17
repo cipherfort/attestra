@@ -5,7 +5,7 @@
 ## F01: Governance forums
 
 ### E01-F01-S01: Stand up the AppSec Governance Board · M · Phase 0
-- **Story:** As Head of AppSec, I want a Board with agreed ToR and membership so that catalogue, risk-model and exception decisions have a legitimate forum.
+- **Story:** As AppSec lead, I want a Board with agreed ToR and membership so that catalogue, risk-model and exception decisions have a legitimate forum.
 - **Value:** Decisions stop being ad hoc. The catalogue gains authority.
 - **Technical:** ToR document. Decision log in the repo (`adoption-kit/governance/decision-log.md`). Board pack template.
 - **Depends on:** Charter sign-off (E01-F02-S01).
@@ -34,7 +34,7 @@
 ### E01-F02-S02: Policy statement mandating application registration · M · Phase 0–2
 - **Story:** As CISO, I want a policy requiring production applications to be registered so that coverage targets are enforceable.
 - **AC:** Policy published. Effective date set. Exception route defined (via platform exceptions).
-- **Tasks:** draft · consult directorates · publish · communicate.
+- **Tasks:** draft · consult business units · publish · communicate.
 
 ## F03: Programme reporting
 

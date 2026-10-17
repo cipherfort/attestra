@@ -74,7 +74,7 @@ These are not criticisms of an MVP that is explicitly marked "not yet deployed".
 - Every required control has a **machine-evaluated state** with a traceable chain: control → rule version → evidence IDs → raw artefact hash.
 - Automated and manual evidence are **visibly distinguished**. Configuration presence alone never satisfies an execution control.
 - "Which applications are affected by CVE-X?" is answered in seconds from SBOM inventory, including applications whose scan is stale. Those are flagged as *unknown*, not *unaffected*.
-- SAMM maturity per application and per directorate is **derived from control states plus scheduled manual assessments**, with every score explainable.
+- SAMM maturity per application and per business unit is **derived from control states plus scheduled manual assessments**, with every score explainable.
 - Exceptions are time-bound, owned, approved, and become findings automatically when they expire.
 
 ## 6. Non-goals
@@ -92,4 +92,4 @@ See [ADR-001](../../adr/ADR-001-platform-purpose-and-scope.md). In short: the pl
 | A-05 | Artifact attestations (Sigstore-backed) are available for private/internal repos | Requires GitHub Enterprise Cloud; verify on the org |
 | A-06 | Order of magnitude: 100–500 applications, 300–2,000 repositories | Estate discovery |
 | A-07 | Data classification scheme exists (labels are configurable, not hard-coded) | Obtain from information governance |
-| A-08 | Sentinel is the primary SIEM; Exabeam may be present in parts of the organisation | Confirm with SOC |
+| A-08 | The organisation has a SIEM: Sentinel, or another that accepts events over HTTPS or syslog | Confirm with SOC |

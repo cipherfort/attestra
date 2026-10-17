@@ -30,7 +30,7 @@ variable "owner_object_ids" {
 }
 
 variable "scoped_groups" {
-  description = "Scoped role groups to create, e.g. [\"champion-claims\", \"directorate-lead-benefits\"]"
+  description = "Scoped role groups to create, e.g. [\"champion-claims\", \"unit-lead-benefits\"]"
   type        = list(string)
   default     = []
 }

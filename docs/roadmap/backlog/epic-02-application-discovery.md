@@ -23,7 +23,7 @@
 ## F02: Runtime discovery
 
 ### E02-F02-S01: Discover production deployments without a registered application · S · Phase 5–8
-- **Story:** As Head of AppSec, I want to find repos deploying to production (GitHub deployments to `prod*` environments, images running in cloud) that are not linked to a registered app, so that "dark" applications are surfaced.
+- **Story:** As AppSec lead, I want to find repos deploying to production (GitHub deployments to `prod*` environments, images running in cloud) that are not linked to a registered app, so that "dark" applications are surfaced.
 - **AC:** A KRI "unregistered repos with production deployments" is computed daily. Each item links to its evidence (deployment record or resource).
 - **Depends on:** E06-F02, E15-F01.
 - **Tasks:** deployment scan · cloud image correlation · KRI metric.
