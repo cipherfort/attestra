@@ -33,7 +33,7 @@
 
 In the platform (Application → Settings): `jira_project`, optional `jira_component`, `p4_ticket_batching`. This is not stored in `application.yaml`, because it is platform-owned and avoids leaking Jira structure into public repos.
 
-Example project mapping (platform config, Stage 8):
+Example project mapping (platform config):
 ```yaml
 jira:
   base_url: https://example.atlassian.net

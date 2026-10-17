@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Status | DESIGNED: requires review by AppSec (independent of the platform team) before Phase 1 exit |
+| Status | IMPLEMENTED; independent review pending ([review scope](review-scope.md), REQUIRES HUMAN ACTION) |
 | Classification of this document | Internal |
 | Related ADRs | 013–017, 022, 025, 027, 028, 030, 032, 033 |
 | Last threat-model refresh | 2026-10-16 (M5: open-source product, plugins, GitLab, packaging; section 4.1) |
@@ -84,7 +84,7 @@ Covered in [ADR-028](../../adr/ADR-028-supply-chain-security.md) and [ADR-030](.
 - dependencies pinned via lockfiles (`uv.lock`, `package-lock.json`); third-party Actions pinned by SHA; Dependabot/Renovate updates;
 - container images built from minimal base images pinned by digest; signed (Sigstore) and provenance-attested;
 - deployment verifies the attestation before rollout (`gh attestation verify` in CD, and Container Apps pulls only from the platform ACR by digest);
-- the platform consumes **its own** reusable security workflows. Dogfooding is a Phase 1 exit criterion.
+- the platform consumes **its own** reusable security workflows. Dogfooding is planned before 1.0 ([ROADMAP](../../ROADMAP.md)).
 
 ### 3.6 Resilience
 

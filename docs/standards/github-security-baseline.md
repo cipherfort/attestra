@@ -7,7 +7,7 @@
 | Applies to | All GitHub organisations holding in-scope code (e.g. `example-org`) |
 | Implementation | Settings as code via the Terraform `integrations/github` provider in a dedicated `github-org-config` repository (PROPOSED). Drift is detected by the platform's GitHub connector. |
 
-> Feature names and availability change. **Verify each setting against current GitHub Enterprise Cloud documentation and the organisation's plan during Phase 0** (assumption A-01). Where a setting is unavailable, record the gap and the compensating control.
+> Feature names and availability change. **Verify each setting against current GitHub Enterprise Cloud documentation and the organisation's plan before you adopt it** (assumption A-01). Where a setting is unavailable, record the gap and the compensating control.
 
 ## 1. Enterprise and organisation settings
 

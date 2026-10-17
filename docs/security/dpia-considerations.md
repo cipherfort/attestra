@@ -34,7 +34,7 @@
 
 DPO · Information Governance · HR/employee relations (monitoring concern) · trade union / staff representatives if required by organisational policy · SOC (data sharing).
 
-## 4. Actions before go-live (pilot)
+## 4. Actions before go-live
 
 1. DPO screening decision recorded (decision log).
 2. Lawful basis documented.

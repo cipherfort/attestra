@@ -1063,7 +1063,7 @@ controls:
     proof: Azure Resource Graph / AWS Config resource inventory for mapped scopes compared to declared stores; encryption/backup properties checked.
     implementation: Declare data stores in application.yaml.
     remediation: Declare or remove undeclared stores; enable backups.
-    notes: PROPOSED for Phase 8+; depends on reliable cloud-scope mapping.
+    notes: PROPOSED for a later release; depends on reliable cloud-scope mapping.
 
   - id: ASC-OPS-06
     title: Retired applications are fully decommissioned

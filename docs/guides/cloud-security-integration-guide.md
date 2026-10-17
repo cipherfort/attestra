@@ -34,7 +34,7 @@ securityresources
 | Step | Detail |
 |---|---|
 | 1 | Security Hub enabled with a **delegated administrator** account and cross-region aggregation |
-| 2 | In the admin account, create an **IAM OIDC identity provider** for the platform's Entra tenant (issuer `https://sts.windows.net/<tenant-id>/` or v2 endpoint, as validated in Phase 0) with audience = the platform's app registration |
+| 2 | In the admin account, create an **IAM OIDC identity provider** for the platform's Entra tenant (issuer `https://sts.windows.net/<tenant-id>/` or the v2 endpoint; check which one your tenant issues) with audience = the platform's app registration |
 | 3 | Create role `aap-securityhub-reader` trusting that provider, with conditions on `aud` and `sub` (= the managed identity's object ID). Permissions: `securityhub:GetFindings`, `securityhub:DescribeHub`, `securityhub:ListFindingAggregators`, plus read-only `tag:GetResources` and `organizations:DescribeAccount`. Max session 1h. |
 | 4 | Tagging standard `aap-app-id` on workloads. AWS Config rule `required-tags` (PROPOSED). |
 

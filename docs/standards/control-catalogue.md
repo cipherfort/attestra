@@ -837,7 +837,7 @@ Data stores listed in application.yaml match discovered cloud data resources; en
 - **Remediation:** Declare or remove undeclared stores; enable backups.
 - **Exceptions:** allowed, max days T1:90 / T2:180 / T3:365 / T4:365
 - **Mappings:** SAMM: O-OM-A L1, O-OM-A L2 · ASVS 5.0: V14 · CSF 2.0: ID.AM-07, PR.DS-01
-- **Notes:** PROPOSED for Phase 8+; depends on reliable cloud-scope mapping.
+- **Notes:** PROPOSED for a later release; depends on reliable cloud-scope mapping.
 
 ### ASC-OPS-06
 

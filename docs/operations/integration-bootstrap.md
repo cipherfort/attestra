@@ -140,7 +140,7 @@ Verify: within 24 hours a `checkpoint.daily` row arrives. The rule "no evidence 
 | Decision | Default until decided |
 |---|---|
 | D-015 Defender / AWS coverage scopes | Only the scopes listed in tfvars |
-| D-016 Lock the evidence WORM policy (irreversible) | `Unlocked` (pilot) |
+| D-016 Lock the evidence WORM policy (irreversible) | `Unlocked` (evaluation) |
 | D-017 Jira projects per directorate | One `SEC` project |
 | D-018 GitHub plan (Enterprise for private-repo attestations and org rulesets) | Repository rulesets; private-repo evidence capped at C2 |
 | Records-management approval of retention (ADR-017) | 7-year WORM period, unlocked |

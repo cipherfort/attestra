@@ -36,7 +36,7 @@ Everything the platform runs on, and every external system it integrates with, c
 
 - The apps connect to PostgreSQL with the administrator login. Per-process database logins mapped to `aap_api`/`aap_worker`/`aap_hook` are backlog E19-F02-S03 (risk R-25).
 - Dependency-Track `/data` is ephemeral (indexes rebuild on restart).
-- No controlled egress yet (ADR-025 NAT Gateway + Azure Firewall allowlist): backlog E24-F04-S05, before pilot.
+- No controlled egress yet (ADR-025 NAT Gateway + Azure Firewall allowlist): backlog E24-F04-S05, before production use.
 - ACR is Standard: Premium with a private endpoint is proposed.
 - The Logs Ingestion endpoint is public (Entra-authenticated): AMPLS is a later hardening step.
 - azurerm 5.x exists. The upgrade is backlog, deliberately not mixed with first deployment.
