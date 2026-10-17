@@ -92,7 +92,7 @@ def main() -> int:
     exceptions: dict[str, str] = {}
     if exceptions_file.exists():
         for line in exceptions_file.read_text().splitlines():
-            m = re.match(r"^\s*([A-Za-z0-9_.@/-]+)\s*:\s*(.+)$", line)
+            m = re.match(r"^\s*\"?([A-Za-z0-9_.@/-]+)\"?\s*:\s*(.+)$", line)  # npm scopes are quoted (YAML)
             if m and not line.lstrip().startswith("#"):
                 exceptions[m[1].lower()] = m[2].strip()
     problems = 0

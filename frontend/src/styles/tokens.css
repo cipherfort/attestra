@@ -1,0 +1,59 @@
+/* SPDX-License-Identifier: Apache-2.0 */
+/* Design tokens: the validated data-viz palette (chrome, ink, status, series) plus UI roles. Dark is the default;
+   [data-theme="light"] is selected by public/theme-init.js from the viewer's choice. Every colour in the UI comes from
+   here: Tailwind utilities map onto these variables (styles/app.css), and so do the hand-built charts. */
+:root {
+  color-scheme: dark;
+  --page: #0d0d0d;
+  --surface: #1a1a19;
+  --surface-2: #232321;
+  --surface-3: #2c2c2a;
+  --sidebar: #121212;
+  --ink: #ffffff;
+  --ink-2: #c3c2b7;
+  --muted: #a3a29b;
+  --grid: #2c2c2a;
+  --axis: #383835;
+  --border: rgba(255, 255, 255, 0.1);
+  --border-strong: rgba(255, 255, 255, 0.18);
+  --accent: #3987e5;
+  --accent-ink: #86b6ef;
+  --accent-soft: rgba(57, 135, 229, 0.16);
+  --ring: #3987e5;
+  --series-1: #3987e5;
+  --good: #0ca30c;
+  --warning: #fab219;
+  --serious: #ec835a;
+  --critical: #d03b3b;
+  --neutral: #898781;
+  --unevaluated: #6b6a64;
+  --good-ink: #0ca30c;
+  --critical-ink: #e66767;
+  --banner: #2e2716;
+  --shadow: 0 1px 2px rgba(0, 0, 0, 0.4), 0 8px 24px rgba(0, 0, 0, 0.35);
+}
+:root[data-theme="light"] {
+  color-scheme: light;
+  --page: #f9f9f7;
+  --surface: #fcfcfb;
+  --surface-2: #f3f2ee;
+  --surface-3: #eceae4;
+  --sidebar: #f3f2ee;
+  --ink: #0b0b0b;
+  --ink-2: #52514e;
+  --muted: #6f6d68;
+  --grid: #e1e0d9;
+  --axis: #c3c2b7;
+  --border: rgba(11, 11, 11, 0.1);
+  --border-strong: rgba(11, 11, 11, 0.18);
+  --accent: #2a78d6;
+  --accent-ink: #1c5cab;
+  --accent-soft: rgba(42, 120, 214, 0.12);
+  --ring: #2a78d6;
+  --series-1: #2a78d6;
+  --unevaluated: #c3c2b7;
+  --good-ink: #006300;
+  --critical-ink: #b42828;
+  --banner: #fff6df;
+  --shadow: 0 1px 2px rgba(11, 11, 11, 0.06), 0 8px 24px rgba(11, 11, 11, 0.08);
+}

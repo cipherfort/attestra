@@ -34,3 +34,4 @@ deploy/compose/secrets/
 # test-tool caches
 .schemathesis/
 .hypothesis/
+*.tsbuildinfo

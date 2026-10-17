@@ -1,3 +1,5 @@
 # Dependencies whose licence the checker cannot read automatically, reviewed by a maintainer.
 # name: reason (licence, where verified, date)
 tzdata: Apache-2.0 per PyPI metadata; Windows-only dependency of psycopg, not installed elsewhere (verified 2026-10-15)
+"@fontsource-variable/inter": OFL-1.1 (SIL Open Font License 1.1, LICENSE in the package); the Inter font files are bundled unmodified into the UI, which OFL permits for embedding and redistribution with software of any licence; attributed in NOTICE (verified 2026-10-17)
+"@fontsource/jetbrains-mono": OFL-1.1 (SIL Open Font License 1.1, LICENSE in the package); the JetBrains Mono font files are bundled unmodified into the UI, which OFL permits for embedding and redistribution with software of any licence; attributed in NOTICE (verified 2026-10-17)
