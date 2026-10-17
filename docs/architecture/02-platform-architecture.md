@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Status | DESIGNED: awaiting approval before implementation |
+| Status | IMPLEMENTED (C1–C12); C13 snapshots in progress |
 | Related ADRs | 001, 004–008, 014, 018–020, 022–025, 027 |
 
 ## 1. Architectural stance
@@ -85,19 +85,19 @@ flowchart LR
 
 | # | Component | Responsibility | Status |
 |---|---|---|---|
-| C1 | **Web UI** | Role-based views (engineer, team, owner, leadership, exec). No business logic. | DESIGNED |
-| C2 | **API service + BFF** | REST `/api/v1`, OpenAPI 3.1. OIDC session for humans (BFF), Entra client credentials for service clients. AuthZ enforcement point. | DESIGNED |
-| C3 | **Webhook receiver** | Only internet-facing component. Verifies GitHub HMAC, dedups by delivery ID, enqueues, returns 202. **No read path to data.** | DESIGNED |
-| C4 | **Ingestion workers** | Fetch workflow-run artifacts via the GitHub App, verify identity and attestation, hash, store to WORM, write evidence records, forward to DT/DD. | DESIGNED |
-| C5 | **Connector workers** | Scheduled and event pulls: GitHub settings/GHAS, DefectDojo, Dependency-Track, Defender, Security Hub, EPSS/KEV. Each connector is a plugin behind one interface. | DESIGNED |
-| C6 | **Control evaluator** | Applies versioned control rules to evidence. Produces control-state records with an explanation. | DESIGNED |
-| C7 | **Risk engine** | Computes contextual priority and SLA per finding from a versioned, configurable model. | DESIGNED |
-| C8 | **Maturity engine** | Derives SAMM activity and practice scores from control states plus manual assessments. ASVS coverage. | DESIGNED |
-| C9 | **Workflow engine** | Exceptions, manual assessments, onboarding, approvals. State machines with audit. | DESIGNED |
-| C10 | **Ticketing integration** | Jira create/update/transition with deterministic dedup keys. | DESIGNED |
-| C11 | **Event export** | Curated security events to Sentinel/Exabeam; notifications to Teams and email. | DESIGNED |
-| C12 | **Scheduler** | Freshness expiry, exception expiry, SLA breach detection, feed refresh. | DESIGNED |
-| C13 | **Reporting / snapshots** | Monthly immutable snapshots for trend reporting. | DESIGNED |
+| C1 | **Web UI** | Role-based views (engineer, team, owner, leadership, exec). No business logic. | IMPLEMENTED (redesign in progress) |
+| C2 | **API service + BFF** | REST `/api/v1`, OpenAPI 3.1. OIDC session for humans (BFF), OIDC client credentials for service clients. AuthZ enforcement point. | IMPLEMENTED |
+| C3 | **Webhook receiver** | Only internet-facing component. Verifies the GitHub HMAC or GitLab secret token, dedups by delivery ID, enqueues, returns 202. **No read path to data.** | IMPLEMENTED |
+| C4 | **Ingestion workers** | Fetch workflow-run and job artifacts from the source control provider, verify identity and attestation, hash, store to WORM, write evidence records, optionally forward to Dependency-Track and DefectDojo. | IMPLEMENTED |
+| C5 | **Connector workers** | Scheduled and event pulls: GitHub and GitLab settings, OSV, CISA KEV, EPSS, endoflife.date, and optionally DefectDojo, Dependency-Track, Defender for Cloud and Security Hub. Each connector is a plugin behind one interface. | IMPLEMENTED |
+| C6 | **Control evaluator** | Applies versioned control rules to evidence. Produces control-state records with an explanation. | IMPLEMENTED (48 evaluators) |
+| C7 | **Risk engine** | Computes contextual priority and SLA per finding from a versioned, configurable model. | IMPLEMENTED |
+| C8 | **Maturity engine** | Derives SAMM activity and practice scores from control states plus manual assessments. ASVS coverage. | IMPLEMENTED (ASVS coverage per requirement: DESIGNED) |
+| C9 | **Workflow engine** | Exceptions, manual assessments, onboarding, approvals. State machines with audit. | IMPLEMENTED |
+| C10 | **Ticketing integration** | Jira, GitHub Issues or GitLab Issues: create, update and transition with deterministic dedup keys. | IMPLEMENTED |
+| C11 | **Event export** | Curated security events to one SIEM (Sentinel, HTTPS/Splunk HEC or syslog); notifications through chat webhooks (Slack, Teams). | IMPLEMENTED |
+| C12 | **Scheduler** | Freshness expiry, exception expiry, SLA breach detection, feed refresh. | IMPLEMENTED |
+| C13 | **Reporting / snapshots** | Monthly immutable snapshots for trend reporting. | DESIGNED (in progress) |
 
 The components are **logical**. Physically, they ship as **three deployables** to keep operational load proportionate ([ADR-025](../../adr/ADR-025-deployment-model.md)):
 

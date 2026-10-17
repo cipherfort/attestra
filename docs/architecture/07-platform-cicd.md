@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Status | Validation CI **IMPLEMENTED** in [`.github/workflows/ci.yml`](../../.github/workflows/ci.yml) (catalogue, metrics, config, schemas, OpenAPI, links, DB security tests; not yet run on GitHub because the directory is not a git repository). Build/deploy stages DESIGNED for Stage 7+. |
+| Status | IMPLEMENTED: [`ci.yml`](../../.github/workflows/ci.yml) runs on every pull request; the signed release pipeline [`release.yml`](../../.github/workflows/release.yml) runs on version tags (no release has been cut yet) |
 | Related | [ADR-028](../../adr/ADR-028-supply-chain-security.md), [ADR-030](../../adr/ADR-030-build-provenance-and-artifact-integrity.md), [Pipeline Security Standard](../standards/pipeline-security-standard.md), [Test strategy](../testing/test-strategy.md) |
 
 The platform repository must demonstrate every control it promotes. It is registered as a **Tier 1** application and onboarded to the platform itself (E19-F04-S01).

@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Status | DESIGNED. Database security-property tests IMPLEMENTED (`tests/database/`, 12 passing). Catalogue/config/OpenAPI validation IMPLEMENTED (`tools/`). |
+| Status | IMPLEMENTED: unit, PostgreSQL integration, database security-property, API contract (Schemathesis), parser fuzzing (Hypothesis) and Helm install/upgrade tests, all in CI |
 | Owner | Platform tech lead |
 | Backlog | [E22](../roadmap/backlog/epic-22-testing.md) |
 

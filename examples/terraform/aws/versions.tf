@@ -8,5 +8,5 @@ terraform {
 
 provider "aws" {
   region = var.region
-  default_tags { tags = { app = "appsec-assurance-platform", managed-by = "terraform" } }
+  default_tags { tags = { app = "attestra", managed-by = "terraform" } }
 }

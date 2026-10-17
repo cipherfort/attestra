@@ -2,14 +2,14 @@
 
 | | |
 |---|---|
-| Status | DESIGNED |
+| Status | IMPLEMENTED |
 | Related | [ADR-005](../../adr/ADR-005-github-primary-source-integration.md), [ADR-006](../../adr/ADR-006-github-actions-security-pipeline.md), [`schemas/repo-contract/`](../../schemas/repo-contract/), [`templates/repo-contract/`](../../templates/repo-contract/) |
 
 ## Part A: Repositories that make up the platform
 
 | Repository | Purpose | Why separate |
 |---|---|---|
-| **`devsec-dashboard`** (this repo; rename to `appsec-assurance-platform` is PROPOSED) | Platform code, catalogue, config, docs, IaC for the platform | |
+| **`attestra`** (this repository) | Platform code, catalogue, config, docs, IaC for the platform | |
 | **`security-workflows`** (new) | Reusable GitHub Actions workflows consumed by every application repo, released by tag and pinned by SHA | Consumers reference `org/security-workflows/.github/workflows/x.yml@<sha>`. A separate repo gives (a) its own stricter CODEOWNERS and release process, because write access here is effectively write access to every pipeline; (b) a release cadence independent of the platform; (c) a small, auditable trusted-producer surface. |
 | **Earlier prototype scaffold** (historical, not used) | Dependency-Track + DefectDojo IaC | Unchanged ownership. Its three reusable workflows migrate into `security-workflows` in Phase 3 ([migration plan](05-pipeline-architecture.md#7-migration-from-the-existing-reusable-workflows)). |
 | **`.github`** (org) | Org-default `SECURITY.md`, issue templates, workflow templates (starter `aap-security.yml`) | GitHub convention |
@@ -17,7 +17,7 @@
 ### A.1 This repository
 
 ```text
-devsec-dashboard/
+attestra/
 ├── README.md                     status, how to navigate, label legend
 ├── adr/                          ADR-001 … ADR-030 (+ index)
 ├── docs/

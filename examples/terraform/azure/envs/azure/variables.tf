@@ -14,7 +14,7 @@ variable "production" {
 }
 variable "tags" {
   type    = map(string)
-  default = { service = "appsec-assurance-platform" }
+  default = { service = "attestra" }
 }
 variable "image" {
   description = "<registry>/aap:<git sha>, set by the release pipeline. Empty on the very first apply."
@@ -87,7 +87,7 @@ variable "aws_accounts" {
   default = []
 }
 variable "github_deploy_subjects" {
-  description = "e.g. [\"repo:acme/devsec-dashboard:environment:production\"]"
+  description = "e.g. [\"repo:acme/attestra:environment:production\"]"
   type        = list(string)
   default     = []
 }
