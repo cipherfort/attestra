@@ -2,7 +2,11 @@
 
 > A [CipherFort](https://github.com/cipherfort) open-source project. The command line, settings (`AAP_*`) and database roles keep the technical prefix `aap`.
 
-[![Licence: Apache-2.0](https://img.shields.io/badge/licence-Apache--2.0-blue)](LICENSE) · Status: **pre-release (0.x)**, not yet production-ready · [Roadmap to 1.0](ROADMAP.md)
+[![Licence: Apache-2.0](https://img.shields.io/badge/licence-Apache--2.0-blue)](LICENSE)
+[![OpenSSF Best Practices](https://www.bestpractices.dev/projects/15625/badge)](https://www.bestpractices.dev/projects/15625)
+[![OpenSSF Scorecard](https://api.securityscorecards.dev/projects/github.com/cipherfort/attestra/badge)](https://scorecard.dev/viewer/?uri=github.com/cipherfort/attestra)
+
+Status: **pre-release (0.x)**, not yet production-ready · [Roadmap to 1.0](ROADMAP.md)
 
 **An open-source engine that answers one question for every application your organization runs: is it built and run securely, and what is the proof?**
 
