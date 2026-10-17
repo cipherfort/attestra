@@ -147,9 +147,28 @@ class GitLabIssues:
         self._http = http or httpx.Client(
             base_url=f"{base_url.rstrip('/')}/api/v4", timeout=30.0, follow_redirects=False
         )
+        self._known_labels: set[tuple[str, str]] = set()
 
     def _h(self) -> dict[str, str]:
         return {"PRIVATE-TOKEN": self._token()}
+
+    def _ensure_labels(self, project: str, names: Sequence[str]) -> None:
+        """Create the labels before the issue. GitLab silently drops labels it cannot create, and an issue without
+        its dedup label would be created again on every sync, so a refusal stops here, before anything is created."""
+        for name in names:
+            if (project, name) in self._known_labels:
+                continue
+            r = self._http.post(
+                f"/projects/{quote(project, safe='')}/labels",
+                json={"name": name, "color": "#6f6d68"},
+                headers=self._h(),
+            )
+            if r.status_code not in (201, 409):  # 409: the label exists already
+                raise IssueError(
+                    f"create label {name!r}: HTTP {r.status_code} (the issues token needs a role that can create "
+                    "labels: Planner or higher)"
+                )
+            self._known_labels.add((project, name))
 
     @staticmethod
     def _issue(project: str, i: Mapping[str, Any]) -> Issue:
@@ -188,10 +207,12 @@ class GitLabIssues:
         priority: str | None,
         due: date | None,
     ) -> Issue:
+        wanted = sorted({MANAGED_LABEL, dedup_label(dedup_key), *labels})
+        self._ensure_labels(project, wanted)
         payload: dict[str, Any] = {
             "title": summary[:250],
             "description": adf_to_markdown(description),
-            "labels": ",".join(sorted({MANAGED_LABEL, dedup_label(dedup_key), *labels})),
+            "labels": ",".join(wanted),
         }
         if due:
             payload["due_date"] = due.isoformat()

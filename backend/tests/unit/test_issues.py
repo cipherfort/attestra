@@ -1,5 +1,6 @@
 # SPDX-License-Identifier: Apache-2.0
-"""GitHub Issues as a ticket system: idempotent by label, Markdown body without scanner markup, close/reopen."""
+"""GitHub and GitLab Issues as ticket systems: idempotent by label, Markdown body without scanner markup,
+close/reopen, and no unlabelled issue when GitLab refuses to create a label."""
 
 from __future__ import annotations
 
@@ -7,8 +8,9 @@ import json
 from datetime import date
 
 import httpx
+import pytest
 
-from aap.connectors.issues import GitHubIssues, adf_to_markdown
+from aap.connectors.issues import GitHubIssues, GitLabIssues, IssueError, adf_to_markdown
 from aap.connectors.jira import adf, dedup_label
 
 
@@ -77,3 +79,73 @@ def test_github_issues_lifecycle():
     assert gh.transition_to(issue.key, "indeterminate") and gh.get(issue.key).status_category == "new"
     gh.comment(issue.key, adf("still detected"))
     assert all(auth == "Bearer tok-acme" for _, _, auth in calls)
+
+
+def _gitlab(label_status: int = 201):
+    """A GitLab project like GitLab itself: labels that were never created are dropped from a new issue."""
+    labels: set[str] = set()
+    issues: dict[int, dict] = {}
+    calls: list[tuple[str, str]] = []
+    base = "/api/v4/projects/acme%2Fsecurity"
+
+    def handler(req: httpx.Request) -> httpx.Response:
+        path = req.url.raw_path.decode().split("?")[0]
+        calls.append((req.method, path))
+        if req.method == "POST" and path == f"{base}/labels":
+            name = json.loads(req.content)["name"]
+            if label_status != 201:
+                return httpx.Response(label_status, json={"message": "403 Forbidden"})
+            if name in labels:
+                return httpx.Response(409, json={"message": "Label already exists"})
+            labels.add(name)
+            return httpx.Response(201, json={"name": name})
+        if req.method == "GET" and path == f"{base}/issues":
+            wanted = req.url.params["labels"]
+            return httpx.Response(200, json=[i for i in issues.values() if wanted in i["labels"]])
+        if req.method == "POST" and path == f"{base}/issues":
+            body = json.loads(req.content)
+            n = len(issues) + 1
+            kept = [lbl for lbl in body["labels"].split(",") if lbl in labels]
+            issues[n] = {"iid": n, "state": "opened", "labels": kept, "web_url": f"https://gitlab.test/i/{n}"}
+            return httpx.Response(201, json=issues[n])
+        if req.method == "GET" and path.startswith(f"{base}/issues/"):
+            return httpx.Response(200, json=issues[int(path.rsplit("/", 1)[1])])
+        return httpx.Response(404)
+
+    client = GitLabIssues(
+        lambda: "tok",
+        "https://gitlab.test",
+        http=httpx.Client(base_url="https://gitlab.test/api/v4", transport=httpx.MockTransport(handler)),
+    )
+    return client, issues, calls
+
+
+def _create(client: GitLabIssues, key: str = "k1"):
+    return client.create(
+        project="acme/security",
+        issue_type="Task",
+        summary="[P1] Claims: SQLi",
+        description=adf("x"),
+        dedup_key=key,
+        labels=["appsec"],
+        priority=None,
+        due=None,
+    )
+
+
+def test_gitlab_issues_create_their_labels_first_so_dedup_works():
+    client, _, calls = _gitlab()
+    issue = _create(client)
+    assert dedup_label("k1") in issue.labels and "aap-managed" in issue.labels and "appsec" in issue.labels
+    found = client.find_by_dedup("k1", "acme/security")
+    assert found is not None and found.key == issue.key
+    _create(client, "k2")  # shared labels are not created twice; only the new dedup label is
+    label_posts = [p for m, p in calls if m == "POST" and p.endswith("/labels")]
+    assert len(label_posts) == 4  # aap-managed, appsec, and one dedup label per issue
+
+
+def test_gitlab_refused_label_creates_no_issue():
+    client, issues, _ = _gitlab(label_status=403)
+    with pytest.raises(IssueError, match="Planner or higher"):
+        _create(client)
+    assert issues == {}  # nothing created that a later sync could not find
