@@ -3,7 +3,7 @@
 Goal: the platform running on your machine with the demo world, in about 15 minutes, with nothing but Docker.
 
 ```bash
-git clone https://github.com/cipherfort/attestra && cd REPO
+git clone https://github.com/cipherfort/attestra && cd attestra
 deploy/compose/setup.sh
 ```
 

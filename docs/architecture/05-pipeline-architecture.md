@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Status | DESIGNED. `security-workflows` repo not yet created (Stage 6). Existing reusable workflows in the earlier prototype scaffold are IMPLEMENTED (piloted on one repo). |
+| Status | IMPLEMENTED: GitHub workflows in [`pipelines/github/`](../../pipelines/github/) and GitLab CI components in [`pipelines/gitlab/`](../../pipelines/gitlab/), rendered with `aap pipelines export` and trusted with `aap pipelines approve` |
 | Related | [ADR-006](../../adr/ADR-006-github-actions-security-pipeline.md), [ADR-028](../../adr/ADR-028-supply-chain-security.md), [ADR-030](../../adr/ADR-030-build-provenance-and-artifact-integrity.md), [Evidence model](04-evidence-model.md) |
 
 ## 1. Goals

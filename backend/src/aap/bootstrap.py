@@ -232,7 +232,7 @@ def gitlab(
     r = gl.post(
         f"/groups/{gid}/access_tokens",
         json={
-            "name": "appsec-assurance-platform",
+            "name": "attestra",
             "scopes": ["read_api", "read_repository"],
             "access_level": 20,
             "expires_at": (date.today() + timedelta(days=364)).isoformat(),
@@ -247,7 +247,7 @@ def gitlab(
         r = gl.post(
             f"/groups/{gid}/access_tokens",
             json={
-                "name": "appsec-assurance-platform-issues",
+                "name": "attestra-issues",
                 "scopes": ["api"],
                 "access_level": 20,
                 "expires_at": (date.today() + timedelta(days=364)).isoformat(),

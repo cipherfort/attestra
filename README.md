@@ -49,13 +49,13 @@ including GitLab CE and the scanners: [`deploy/local/`](deploy/local/README.md).
 
 ## What works today, and what doesn't
 
-| Works (tested) | Not yet (planned for 1.0) |
+| Works (tested) | Not yet |
 |---|---|
-| Evidence verification, ledgers, all 48 control evaluators, risk scoring, maturity, a role-scoped API and web UI, OIDC sign-in; application registration with AppSec approval; exceptions; manual assessments; admin screens; CSV export | An end-to-end run of the shipped pipelines on a real GitHub organization (M2 exit test) |
-| Shipped GitHub security pipelines with a signed evidence manifest; built-in OSV, CISA KEV, EPSS and end-of-life feeds; integrations as plugins (GitHub, Jira, Dependency-Track, DefectDojo, Defender for Cloud, Security Hub, Sentinel, chat webhooks); S3 (Object Lock), Azure Blob or disk evidence storage; one `aap.yaml`; per-process database logins | Helm chart and signed images (M4) |
-| GitLab (settings, CI components, issues; evidence capped at C2, ADR-033); a Helm chart (tested on kind), a Compose evaluation stack, AWS and Azure Terraform examples | Independent security review (M5); the first signed release |
+| Evidence verification, ledgers, all 48 control evaluators, risk scoring, maturity, a role-scoped API and web UI, OIDC sign-in; application registration with AppSec approval; exceptions; manual assessments; admin screens; CSV export | Maturity trends over time and an organization-wide rollup; a richer web UI (in progress) |
+| Shipped GitHub security pipelines with a signed evidence manifest; built-in OSV, CISA KEV, EPSS and end-of-life feeds; integrations as plugins (GitHub, GitLab, Jira, GitHub and GitLab Issues, Dependency-Track, DefectDojo, Defender for Cloud, Security Hub, Sentinel, SIEM over HTTPS or syslog, chat webhooks); S3 (Object Lock), Azure Blob or disk evidence storage; one `aap.yaml`; per-process database logins | The first tagged release with signed images and chart (the release pipeline is built and tested; no release has been cut yet) |
+| GitLab (settings, CI components, issues; evidence capped at C2, [ADR-033](adr/ADR-033-gitlab-evidence-trust.md)); a Helm chart tested on kind; a Compose evaluation stack; AWS and Azure Terraform examples | An independent security review; a recorded end-to-end run on a real GitHub organization (the shipped workflows already run there) |
 
-329 automated tests, plus 8 against real services (including a GitLab CE end-to-end run), an API contract fuzz test and a Helm install/upgrade on kind. Details: [ROADMAP](ROADMAP.md).
+345 automated tests run on every change (unit, PostgreSQL integration, database security properties and parser fuzzing), plus 5 opt-in tests against real services, a nightly GitLab CE end-to-end run, an API contract fuzz test and a Helm install and upgrade on kind. Details: [ROADMAP](ROADMAP.md).
 
 ## Documentation
 

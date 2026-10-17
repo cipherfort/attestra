@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Status | DESIGNED |
+| Status | IMPLEMENTED: verification, confidence levels and ledgers in [`domain/evidence.py`](../../backend/src/aap/domain/evidence.py) and [`store/evidence_store.py`](../../backend/src/aap/store/evidence_store.py) |
 | Related | [ADR-004](../../adr/ADR-004-evidence-driven-security-model.md), [ADR-007](../../adr/ADR-007-evidence-storage-architecture.md), [ADR-016](../../adr/ADR-016-evidence-immutability.md), [ADR-017](../../adr/ADR-017-evidence-retention.md), [`config/evidence-types.yaml`](../../config/evidence-types.yaml), [`schemas/evidence/evidence-manifest.schema.json`](../../schemas/evidence/evidence-manifest.schema.json) |
 
 ## 1. Principles

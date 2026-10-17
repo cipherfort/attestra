@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Status | DESIGNED: Stage 1 output, awaiting review |
+| Status | Reference: the problem this project addresses and the reasoning behind its design |
 | Owner | Application Security Engineering |
 | Related | [Programme Charter](../../adoption-kit/programme/charter/programme-charter.md), [ADR-001](../../adr/ADR-001-platform-purpose-and-scope.md) |
 
