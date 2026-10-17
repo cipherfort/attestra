@@ -54,7 +54,7 @@ requires-dist = [
     { name = "jsonschema", specifier = ">=4.23" },
     { name = "psycopg", extras = ["binary"], specifier = ">=3.2" },
     { name = "pydantic", specifier = ">=2.9" },
-    { name = "pyjwt", extras = ["crypto"], specifier = ">=2.10" },
+    { name = "pyjwt", extras = ["crypto"], specifier = ">=2.15.1" },
     { name = "pyyaml", specifier = ">=6.0.2" },
     { name = "sigstore", specifier = ">=3.6" },
     { name = "sqlalchemy", specifier = ">=2.0.36" },
