@@ -20,11 +20,11 @@
 
 ## 2. Roles
 
-Incident lead: platform tech lead · Decision to fail over regionally: Head of AppSec (or delegate) · Communications: platform PO · SOC informed for S6.
+Incident lead: platform tech lead · Decision to fail over regionally: AppSec lead (or delegate) · Communications: platform PO · SOC informed for S6.
 
 ## 3. Regional failover procedure (S4)
 
-1. Declare DR (Head of AppSec). Communicate "read-only/unavailable" status.
+1. Declare DR (AppSec lead). Communicate "read-only/unavailable" status.
 2. `terraform apply` `infrastructure/envs/prod-dr` (pre-provisioned network, Key Vault, ACR replica). Parameter: restore point.
 3. Restore PG Flexible Server from geo-backup to UK West (server name in `prod-dr` vars).
 4. If the primary storage account is unavailable, initiate the storage account failover. Confirm the immutability policies persist.

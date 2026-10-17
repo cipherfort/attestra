@@ -6,7 +6,7 @@
 #   the app-assigned groups only (`ApplicationGroup`, so no group overage).
 # * aap-api: resource for service clients (client credentials) with app role Reports.Read.
 # * Groups aap-role-<role>, assigned to the matching app role. Membership is managed by people (or access packages),
-#   never by the platform. Scoped roles (champion, directorate lead) are platform role assignments keyed by group.
+#   never by the platform. Scoped roles (champion, business unit lead) are platform role assignments keyed by group.
 #
 # Who can apply: an Entra role holder with Application Administrator + Groups Administrator (or Privileged Role
 # Administrator for the app role assignments). That person is part of THIS project (RACI), not another team.
@@ -23,7 +23,7 @@ locals {
     platform_admin      = "Platform administrator: operations only, no finding detail (PIM eligible only)"
     engineer            = "Engineer: team scope via platform team membership"
   }
-  scoped_groups = toset(var.scoped_groups) # e.g. champion-claims, directorate-lead-benefits
+  scoped_groups = toset(var.scoped_groups) # e.g. champion-claims, unit-lead-benefits
 }
 
 resource "random_uuid" "role" {

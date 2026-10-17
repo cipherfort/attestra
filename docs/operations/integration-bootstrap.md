@@ -70,7 +70,7 @@ Then add an NVD API key to Dependency-Track (free; request it at nvd.nist.gov/de
 ## 5. Sign-in (people with Entra Groups Administrator)
 
 1. Add people to the `aap-role-*` groups: `aap-role-appsec-engineer`, `aap-role-security-leadership`, and so on. Make `platform_admin` PIM-eligible only.
-2. Scoped roles (champion, directorate lead): add people to the `aap-<scoped group>` groups. A platform admin then maps each group to a scoped role assignment (`role_assignments`, `principal_type = entra_group`). There is no admin UI yet: backlog E13-F01-S03.
+2. Scoped roles (champion, business unit lead): add people to the `aap-<scoped group>` groups. A platform admin then maps each group to a scoped role assignment (`role_assignments`, `principal_type = entra_group`). There is no admin UI yet: backlog E13-F01-S03.
 
 Verify: sign in at `public_url`. `/api/v1/users/me` lists the expected roles. A user in no group is refused by Entra ("assignment required").
 
@@ -141,7 +141,7 @@ Verify: within 24 hours a `checkpoint.daily` row arrives. The rule "no evidence 
 |---|---|
 | D-015 Defender / AWS coverage scopes | Only the scopes listed in tfvars |
 | D-016 Lock the evidence WORM policy (irreversible) | `Unlocked` (pilot) |
-| D-017 Jira projects per directorate | One `SEC` project |
+| D-017 Jira projects per business unit | One `SEC` project |
 | D-018 GitHub plan (Enterprise for private-repo attestations and org rulesets) | Repository rulesets; private-repo evidence capped at C2 |
 | Records-management approval of retention (ADR-017) | 7-year WORM period, unlocked |
 

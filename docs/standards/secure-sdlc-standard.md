@@ -52,7 +52,7 @@ Defines the security activities each application must perform at each lifecycle 
 
 ## 4. Roles
 
-Technical owner: accountable for meeting this standard. Security champion: drives activities within the team. AppSec: facilitates threat models and reviews, and maintains the paved road. Directorate Security Lead: accountable for directorate compliance. See the [RACI](../../adoption-kit/programme/raci/raci.md).
+Technical owner: accountable for meeting this standard. Security champion: drives activities within the team. AppSec: facilitates threat models and reviews, and maintains the paved road. Business Unit Security Lead: accountable for business unit compliance. See the [RACI](../../adoption-kit/programme/raci/raci.md).
 
 ## 5. Related standards
 

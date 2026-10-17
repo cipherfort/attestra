@@ -15,7 +15,7 @@ SAMM assesses an organisation's (or a unit's) software assurance practices. Some
 
 | Assessment scope | Practices | Source |
 |---|---|---|
-| **Organisation / directorate** | G-SM, G-PC, G-EG (and the programme-level parts of others) | Annual SAMM interview (M2) with governance evidence |
+| **Organisation / business unit** | G-SM, G-PC, G-EG (and the programme-level parts of others) | Annual SAMM interview (M2) with governance evidence |
 | **Application** | D-TA, D-SR, D-SA, I-SB, I-SD, I-DM, V-AA, V-RT, V-ST, O-IM, O-EM, O-OM | Control states (automated) + targeted manual answers |
 
 ### A.2 Practice-by-practice mapping
@@ -93,8 +93,8 @@ else:                       answer = 0, provenance: UNASSESSED
 
 **Step 3: report with provenance.** Every score is displayed with its **evidence mix** (% of answers from automated evidence, from M2, from M1, and unassessed) and is drillable to the control states and evidence IDs behind it.
 
-**Organisation and directorate roll-up.** Means hide distribution, so roll-ups show:
-- the **distribution** (box plot) of app practice scores per directorate;
+**Organisation and business unit roll-up.** Means hide distribution, so roll-ups show:
+- the **distribution** (box plot) of app practice scores per business unit;
 - the **% of Tier 1/2 apps meeting their tier's target profile**, which is the headline maturity KPI;
 - organisation-level Governance practice scores from the organisational assessment.
 

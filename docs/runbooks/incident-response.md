@@ -4,13 +4,13 @@
 |---|---|
 | Scope | Security incidents **affecting the platform itself** (compromise, data exposure, evidence tampering, credential leak). For incidents in *applications*, teams follow the organisation's IR process and their app runbook ([template](application-incident-runbook-template.md)). |
 | Status | DESIGNED. Aligns with the organisation's IR policy; the SOC leads major incidents. |
-| Contacts | Platform on-call · platform tech lead · Head of AppSec · SOC (24×7) · DPO (personal data) |
+| Contacts | Platform on-call · platform tech lead · AppSec lead · SOC (24×7) · DPO (personal data) |
 
 ## 1. Severity
 
 | Sev | Examples | Response |
 |---|---|---|
-| **P1** | GitHub App private key exposed · evidence integrity failure (chain mismatch) · confirmed unauthorised access to finding data · compromise of `security-workflows` | Immediate. SOC engaged. Head of AppSec informed. |
+| **P1** | GitHub App private key exposed · evidence integrity failure (chain mismatch) · confirmed unauthorised access to finding data · compromise of `security-workflows` | Immediate. SOC engaged. AppSec lead informed. |
 | **P2** | Repeated forged-evidence attempts · SoD-bypass attempt · webhook secret exposure · suspicious bulk export | Within 1 business hour |
 | **P3** | Single rejected forged-evidence attempt · misconfiguration without exposure | Next business day |
 

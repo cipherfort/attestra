@@ -7,7 +7,7 @@
 
 **R** Responsible (does the work) · **A** Accountable (one per row) · **C** Consulted · **I** Informed
 
-Role keys: **CISO** · **HAS** Head of Application Security · **PO** AppSec Platform Product Owner · **PE** Platform Engineers · **ASE** AppSec Engineers · **GOV** Security Governance / GRC analyst · **DSL** Directorate Security Lead · **BO** Application Business Owner · **TO** Technical Owner · **SC** Security Champion · **CS** Cloud Security · **SOC** · **IAM** Identity administrator · **DPO** Data Protection Officer · **ENT** GitHub organization owner
+Role keys: **CISO** · **HAS** Head of Application Security · **PO** AppSec Platform Product Owner · **PE** Platform Engineers · **ASE** AppSec Engineers · **GOV** Security Governance / GRC analyst · **DSL** Business Unit Security Lead · **BO** Application Business Owner · **TO** Technical Owner · **SC** Security Champion · **CS** Cloud Security · **SOC** · **IAM** Identity administrator · **DPO** Data Protection Officer · **ENT** GitHub organization owner
 
 Since [ADR-031](../../../adr/ADR-031-integrations-owned-and-bootstrapped-by-the-project.md), **CS, SOC, IAM and ENT are roles held by named people on this project** (during bootstrap, time-bound), not other teams. If the organization later has such teams, they take these roles over.
 
@@ -41,7 +41,7 @@ Since [ADR-031](../../../adr/ADR-031-integrations-owned-and-bootstrapped-by-the-
 | Evidence integrity verification | | A | I | R | C | I | | | | | | I | | | |
 | Backup, restore and DR tests | | I | A | R | | I | | | | | | | | | |
 | Connector config: Defender / Security Hub | | I | C | R | | | | | | | A | | | | |
-| Connector config: Sentinel / Exabeam | | I | C | R | | | | | | | | A | | | |
+| Connector config: SIEM (Sentinel, HTTPS or syslog) | | I | C | R | | | | | | | | A | | | |
 | Jira integration config | | I | A | R | | | | | | | | | | | C |
 
 ## Application security lifecycle

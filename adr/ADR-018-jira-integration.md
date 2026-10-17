@@ -23,7 +23,7 @@ Engineers work in Jira. Every pipeline run must not create duplicate tickets. De
    - Verification passes → finding `verified` → `closed`, with a comment on the ticket.
    - Verification fails → the ticket is **re-opened** with a comment ("still detected in run X").
    - A finding that disappears on re-scan while the ticket is open → auto-transition to Done with an evidence link.
-6. **Routing:** Jira project/component per app from `application.yaml` (`jira_project`, default = the directorate's security project). Assignee = technical owner or champion.
+6. **Routing:** Jira project/component per app from `application.yaml` (`jira_project`, default = the business unit's security project). Assignee = technical owner or champion.
 7. **Sync mechanism:** Jira webhooks as hints, plus polling via JQL `updated >= -15m` on platform-managed issues. Rate limiting and backoff included.
 8. **Auth:** Jira Cloud via a service account API token stored by `aap bootstrap jira`; Jira Data Center via PAT. The site, project and service account are created by the project (ADR-031). IMPLEMENTED: `connectors/jira.py`, `services/ticketing.py`. Idempotency uses a deterministic label `aap-k-<hash>` because entity properties are not JQL-searchable without a Jira app.
 

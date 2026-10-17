@@ -112,7 +112,7 @@ paths:
     get:
       tags: [Organisation]
       operationId: listOrgUnits
-      summary: Directorates and teams visible to the caller
+      summary: Business units and teams visible to the caller
       x-permission: org_unit.read
       parameters:
         - $ref: "#/components/parameters/Cursor"

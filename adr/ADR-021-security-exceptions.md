@@ -13,7 +13,7 @@ Not every control or finding can be met on time. Today "risk accepted" is a tool
 3. **Required fields:** app, target, justification, risk description, residual priority, compensating controls, remediation plan with date, owner, requester, approver, created/approved/start/expiry/review dates. Enforced in schema (approved ⇒ approver + expiry; approver ≠ requester).
 4. **Approver** by residual priority × tier (governance table). Tier 1/2 business-owner co-sign. SoD enforced in code and schema.
 5. **Max duration** per control (catalogue) and per priority. Renewals need fresh approval. More than 2 renewals escalate a level.
-6. **Expiry:** a scheduler job flips status → `expired`, creates an `exception_expired` finding with a half-length SLA, re-opens the original finding/control gap, and notifies the owner, approver and directorate lead.
+6. **Expiry:** a scheduler job flips status → `expired`, creates an `exception_expired` finding with a half-length SLA, re-opens the original finding/control gap, and notifies the owner, approver and business unit lead.
 7. **Compensating controls** reduce impact by at most one level in the risk model, and only when recorded and approved (ADR-011).
 8. **Tool-level suppressions are tracked, not trusted.** DefectDojo "risk accepted", GHAS "won't fix" and Checkov `skip` comments are ingested as *suppressions*. A suppression without a matching platform exception shows as "unmanaged suppression" and does **not** change the finding's platform status. Unmanaged suppressions are a team metric.
 9. **Not applicable ≠ exception.** N/A (control doesn't apply) has its own lighter approval and is reviewed at classification review.

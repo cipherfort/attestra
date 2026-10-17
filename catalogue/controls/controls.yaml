@@ -1,6 +1,6 @@
 # Internal Application Security Control Catalogue: SOURCE OF TRUTH.
 # Status: DESIGNED (v1 draft). Control content REQUIRES HUMAN APPROVAL by the Control Catalogue Owner
-# (Head of AppSec) before it drives any reporting. Changes are made by PR only; the evaluator loads the
+# (AppSec lead) before it drives any reporting. Changes are made by PR only; the evaluator loads the
 # catalogue by git SHA, and every control evaluation records the catalogue version it used (ADR-016, T-12).
 #
 # Validate + render:   python3 tools/catalogue/validate.py   (renders docs/standards/control-catalogue.md)
@@ -967,7 +967,7 @@ controls:
     title: Security-relevant application logs reach the SIEM
     domain: OPS
     objective_type: activity
-    description: Authentication, authorisation failures, admin actions and security exceptions are logged and delivered to Sentinel (or Exabeam) with the application identifier; the log source is healthy.
+    description: Authentication, authorisation failures, admin actions and security exceptions are logged and delivered to the organization's SIEM (Sentinel, an HTTPS collector such as Splunk HEC, or syslog) with the application identifier; the log source is healthy.
     rationale: Detection and incident response depend on it.
     applicability: { tiers: { 1: mandatory, 2: mandatory, 3: recommended, 4: n/a }, conditions: [ deployed ] }
     mappings:
