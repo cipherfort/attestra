@@ -1,0 +1,43 @@
+# SPDX-License-Identifier: Apache-2.0
+# Nightly: the GitLab adapter end to end against a fresh GitLab CE + runner (ADR-033). Publishes the shipped
+# components, runs real pipelines, ingests their evidence with a read-only token, and checks a forged job is rejected.
+name: gitlab-live
+
+on:
+  schedule:
+    - cron: "41 2 * * *"
+  workflow_dispatch:
+
+permissions: {}
+
+jobs:
+  gitlab:
+    # private repos on the Free plan: no code scanning, limited Actions minutes; runs once the repo is public
+    if: ${{ !github.event.repository.private }}
+    name: GitLab CE end to end
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: astral-sh/setup-uv@c18668ad3cf93ea998bef934396af7bb5c839dc7 # v10.2.0
+      - name: GitLab, group, read-only platform token, runner (deploy/local/gitlab.sh)
+        env:
+          AAP_SECRETS_DIR: ${{ runner.temp }}/secrets
+        run: |
+          cd backend && uv sync --locked --python 3.12 && cd ..
+          # job containers resolve GitLab by the hostname in its external_url
+          echo "127.0.0.1 gitlab.local.test" | sudo tee -a /etc/hosts
+          deploy/local/gitlab.sh
+      - name: Live end-to-end test
+        working-directory: backend
+        env:
+          AAP_TEST_SERVICES: "1"
+          AAP_TEST_GITLAB_URL: http://127.0.0.1:8929
+          AAP_TEST_GITLAB_HOST: gitlab.local.test:8929
+          AAP_TEST_GITLAB_ADMIN_TOKEN_FILE: ${{ github.workspace }}/deploy/local/.gitlab-admin-token
+          AAP_TEST_GITLAB_RO_TOKEN_FILE: ${{ runner.temp }}/secrets/gitlab-token
+        run: uv run pytest -m service tests/integration/test_gitlab_live.py -q

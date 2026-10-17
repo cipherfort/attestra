@@ -1,0 +1,35 @@
+{{/* SPDX-License-Identifier: Apache-2.0 */}}
+{{- if .Values.ingress.enabled }}
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: {{ include "aap.fullname" . }}
+  labels: {{- include "aap.labels" . | nindent 4 }}
+  {{- with .Values.ingress.annotations }}
+  annotations: {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  {{- with .Values.ingress.className }}
+  ingressClassName: {{ . }}
+  {{- end }}
+  {{- with .Values.ingress.tls }}
+  tls: {{- toYaml . | nindent 4 }}
+  {{- end }}
+  rules:
+    - host: {{ .Values.ingress.host }}
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend: { service: { name: {{ include "aap.fullname" . }}-api, port: { name: http } } }
+    {{- if and .Values.hook.enabled .Values.ingress.hookHost }}
+    - host: {{ .Values.ingress.hookHost }}
+      http:
+        paths:
+          {{- range list "/github/webhook" "/gitlab/webhook" }}
+          - path: {{ . }}
+            pathType: Exact
+            backend: { service: { name: {{ include "aap.fullname" $ }}-hook, port: { name: http } } }
+          {{- end }}
+    {{- end }}
+{{- end }}

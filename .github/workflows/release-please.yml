@@ -1,0 +1,22 @@
+# SPDX-License-Identifier: Apache-2.0
+# Keeps a release pull request open with the changelog (from Conventional Commit messages) and the version bump.
+# Merging it creates the tag, which runs release.yml (signed images and chart). Tags are protected (ruleset).
+name: release-please
+
+on:
+  push:
+    branches: [main]
+
+permissions: {}
+
+jobs:
+  release-please:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+    steps:
+      - uses: googleapis/release-please-action@45996ed1f6d02564a971a2fa1b5860e934307cf7 # v5.0.0
+        with:
+          config-file: release-please-config.json
+          manifest-file: .release-please-manifest.json

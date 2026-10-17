@@ -1,0 +1,8 @@
+# Repository labels (apply with a label-sync action or `gh label create` once the public repository exists).
+- { name: "good first issue", color: "7057ff", description: "Small, well-described, mentored" }
+- { name: "help wanted", color: "008672", description: "Maintainers would welcome a contribution" }
+- { name: "plugin", color: "0e8a16", description: "A new or changed integration" }
+- { name: "security", color: "b60205", description: "Hardening (never for vulnerability reports: see SECURITY.md)" }
+- { name: "rules", color: "fbca04", description: "Controls, tiers, risk model, policies (config/, catalogue/)" }
+- { name: "docs", color: "0075ca", description: "Documentation" }
+- { name: "breaking", color: "d93f0b", description: "Needs a major version after 1.0" }

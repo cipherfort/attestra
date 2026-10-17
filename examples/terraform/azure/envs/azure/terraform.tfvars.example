@@ -1,0 +1,17 @@
+# Copy to <env>.tfvars (not committed if it contains anything sensitive; nothing here is a secret).
+subscription_id           = "00000000-0000-0000-0000-000000000000"
+name                      = "aap-dev"
+location                  = "westeurope" # your Azure region
+production                = false
+secret_officer_object_ids = ["<object id of each person who runs aap bootstrap>"]
+operator_ip_ranges        = ["<your egress IP>/32"] # only while bootstrapping from a workstation
+defender_scopes           = ["/subscriptions/00000000-0000-0000-0000-000000000000"]
+scoped_groups             = ["champion-claims", "directorate-lead-benefits"]
+# after `aap bootstrap github-app` / `aap bootstrap jira` / envs/aws:
+github_org                = ""
+github_app_client_id      = ""
+github_app_key_id         = ""
+jira_url                  = ""
+jira_email                = ""
+aws_role_arn              = ""
+aws_accounts              = []

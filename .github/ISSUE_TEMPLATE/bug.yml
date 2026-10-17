@@ -1,0 +1,24 @@
+name: Bug report
+description: Something does not work as documented
+labels: [bug, triage]
+body:
+  - type: markdown
+    attributes:
+      value: "Security problems go to private reporting (SECURITY.md), not here. Remove secrets, tokens and internal hostnames from anything you paste."
+  - type: input
+    id: version
+    attributes: { label: Version or commit, placeholder: "0.3.1 or a commit SHA" }
+    validations: { required: true }
+  - type: dropdown
+    id: component
+    attributes:
+      label: Component
+      options: [api, ui, worker, webhook receiver, evidence verification, a plugin/connector, pipelines, Helm chart, Compose, docs, other]
+    validations: { required: true }
+  - type: textarea
+    id: what
+    attributes: { label: What happened, description: "Steps to reproduce, what you expected, what you saw (with the reason text the platform showed, if any)." }
+    validations: { required: true }
+  - type: textarea
+    id: logs
+    attributes: { label: Logs or output, render: text }

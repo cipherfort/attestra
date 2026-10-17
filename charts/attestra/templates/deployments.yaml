@@ -1,0 +1,43 @@
+{{/* SPDX-License-Identifier: Apache-2.0 */}}
+{{- $probesApi := dict "readinessProbe" (dict "httpGet" (dict "path" "/api/v1/health/ready" "port" "http") "periodSeconds" 10)
+     "livenessProbe" (dict "httpGet" (dict "path" "/api/v1/health/live" "port" "http") "periodSeconds" 20) -}}
+{{- $probesHook := dict "readinessProbe" (dict "httpGet" (dict "path" "/health/live" "port" "http") "periodSeconds" 10)
+     "livenessProbe" (dict "httpGet" (dict "path" "/health/live" "port" "http") "periodSeconds" 20) -}}
+{{- $components := list
+  (dict "name" "api" "replicas" .Values.api.replicas "resources" .Values.api.resources "dbKey" "database-url-api"
+        "args" (list "aap" "api" "--host" "0.0.0.0" "--port" "8000") "probes" $probesApi
+        "ports" (list (dict "name" "http" "containerPort" 8000)))
+  (dict "name" "worker" "replicas" .Values.worker.replicas "resources" .Values.worker.resources
+        "dbKey" "database-url-worker" "args" (list "aap" "worker"))
+-}}
+{{- if .Values.hook.enabled }}
+{{- $components = append $components (dict "name" "hook" "replicas" .Values.hook.replicas "resources" .Values.hook.resources
+      "dbKey" "database-url-hook" "args" (list "aap" "hook" "--host" "0.0.0.0" "--port" "8001") "probes" $probesHook
+      "ports" (list (dict "name" "http" "containerPort" 8001))) }}
+{{- end }}
+{{- range $components }}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "aap.fullname" $ }}-{{ .name }}
+  labels: {{- include "aap.labels" $ | nindent 4 }}
+    app.kubernetes.io/component: {{ .name }}
+spec:
+  {{- if not (and (eq .name "api") $.Values.api.autoscaling.enabled) }}
+  replicas: {{ .replicas }}
+  {{- end }}
+  revisionHistoryLimit: 3
+  selector:
+    matchLabels: {{- include "aap.selector" $ | nindent 6 }}
+      app.kubernetes.io/component: {{ .name }}
+  template:
+    metadata:
+      labels: {{- include "aap.selector" $ | nindent 8 }}
+        app.kubernetes.io/component: {{ .name }}
+      annotations:
+        checksum/settings: {{ toYaml $.Values.settings | sha256sum }}
+    spec:
+      {{- include "aap.podSpec" (dict "ctx" $ "component" .name "keys" .name "dbKey" .dbKey "args" .args
+          "probes" .probes "ports" .ports "resources" .resources) | nindent 6 }}
+{{- end }}

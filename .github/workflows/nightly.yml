@@ -1,0 +1,29 @@
+# SPDX-License-Identifier: Apache-2.0
+# Nightly: deep property-based fuzzing of every untrusted-input parser (5,000 examples each; CI runs 200).
+name: nightly
+
+on:
+  schedule:
+    - cron: "13 3 * * *"
+  workflow_dispatch:
+
+permissions: {}
+
+jobs:
+  fuzz:
+    # private repos on the Free plan: no code scanning, limited Actions minutes; runs once the repo is public
+    if: ${{ !github.event.repository.private }}
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: astral-sh/setup-uv@c18668ad3cf93ea998bef934396af7bb5c839dc7 # v10.2.0
+      - name: Fuzz parsers (Hypothesis, profile "fuzz")
+        working-directory: backend
+        env:
+          HYPOTHESIS_PROFILE: fuzz
+        run: uv sync --locked --python 3.12 && uv run pytest tests/fuzz -q

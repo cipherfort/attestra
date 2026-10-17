@@ -1,0 +1,87 @@
+# Integration POLICY (changes by PR; CODEOWNERS: appsec-platform). ADR-031.
+#
+# Nothing here is a credential or an endpoint. Endpoints come from the deployment (Terraform outputs → container
+# environment, see examples/terraform/azure/README.md); credentials come from Key Vault (or the dev file store), written there by the
+# `aap bootstrap <integration>` commands. An integration whose endpoint/credential is absent is reported as
+# "not configured" by `aap integrations status`, and its evidence types stay NO_EVIDENCE (never assumed).
+
+version: 1
+
+github:
+  # Read-only GitHub App created by `aap bootstrap github-app` (manifest flow). Permissions: connectors/github_app.py.
+  settings_sync_interval: 6h          # repo.* evidence has a 24h TTL: four chances to refresh before it goes stale
+  sensitive_paths: [ ".github/workflows/", ".security/" ]   # CODEOWNERS coverage (ASC-SRC-04 params)
+  attestation:
+    trusted_root: config/sigstore/trusted_root.jsonl        # `gh attestation trusted-root`, refreshed by bootstrap
+    gh_backend: true                  # GitHub-instance (private repo, Enterprise Cloud) bundles via `gh attestation verify`
+
+gitlab:
+  # Group access token (Reporter; read_api + read_repository) created by `aap bootstrap gitlab`. ADR-033.
+  settings_sync_interval: 6h
+
+jira:
+  # ADR-018. The platform is the only ticket writer.
+  ticket_priorities: [ P1, P2, P3 ]   # P4 → monthly hygiene ticket (not yet implemented; E14-F02-S02)
+  issue_type: Task                    # `aap bootstrap jira` creates "Security Finding" if the admin allows; else Task
+  labels: [ appsec, aap-managed ]
+  priority_map: { P1: Highest, P2: High, P3: Medium, P4: Low }
+  reconcile_interval: 15m
+  default_project_by_org_unit: {}     # org unit slug → Jira project key; filled when projects exist (bootstrap prints them)
+  default_project: null               # fallback; null = do not ticket until a project is configured
+
+vuln_feeds:
+  # Built-in, no account needed (connectors/vuln_feeds.py). Disable only if the deployment has no egress to these
+  # hosts and no mirror; dependency findings then come from Dependency-Track alone, if it is configured.
+  enabled: true
+  osv_sync_interval: 6h               # api.osv.dev querybatch for every component in a current SBOM
+  kev_sync_interval: 24h              # CISA updates the catalogue on working days
+  epss_sync_interval: 24h             # FIRST publishes daily
+  eol_sync_interval: 24h              # endoflife.date (products: config/eol-products.yaml)
+
+notifications:
+  # Incoming-webhook notifications (services/notifications.py). Messages carry identifiers and links only.
+  dispatch_interval: 5m
+
+github_issues:
+  # Issues instead of Jira (connectors/issues.py). The App needs issues: write (`aap bootstrap github-app --with-issues`).
+  ticket_priorities: [ P1, P2, P3 ]
+  labels: [ appsec, aap-managed ]
+  reconcile_interval: 15m
+  default_project_by_org_unit: {}     # org unit slug → owner/repo that receives the issues
+  default_project: null               # null = do not ticket until a repository is configured
+
+gitlab_issues:
+  # Issues in a GitLab project; separate token (Reporter, api) from the read-only one (`aap bootstrap gitlab --with-issues`).
+  ticket_priorities: [ P1, P2, P3 ]
+  labels: [ appsec, aap-managed ]
+  reconcile_interval: 15m
+  default_project_by_org_unit: {}     # org unit slug → group/project path
+  default_project: null
+
+dependency_track:
+  # SBOM continuous analysis (optional; the built-in OSV feed covers matching without it). Projects named "<app_key>/<repo>", one version per default-branch SBOM ("latest").
+  upload_on_ingest: true
+  poll_interval: 2s
+  poll_timeout: 300s
+  findings_sync_interval: 6h
+
+defectdojo:
+  # Optional triage workbench for formats the platform does not parse natively (ZAP XML, Burp, ...). Never a ticket
+  # writer (ADR-018) and never the source of truth for finding state (closure stays evidence-based).
+  enabled: true
+  forward_scan_types: { scan.sast: SARIF, scan.iac: SARIF, scan.dast: ZAP Scan }
+  jira_push: false
+
+cloud:
+  azure:
+    defender_sync_interval: 12h
+    # Management-group or subscription scopes the platform's identity can read (Reader + Security Reader), from Terraform
+  aws:
+    securityhub_sync_interval: 12h
+    regions: [ eu-west-2 ]
+
+siem:
+  # Logs Ingestion API → Sentinel custom table AppSecPlatform_CL. Only config/siem-events.yaml event types are sent.
+  dispatch_interval: 1m
+  batch_max_events: 500
+  checkpoint_interval: 24h            # evidence chain heads exported daily (ADR-016)

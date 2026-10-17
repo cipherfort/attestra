@@ -1,0 +1,90 @@
+[project]
+name = "aap"
+version = "0.1.0"
+description = "Attestra: control, evidence, risk and maturity engine"
+readme = "README.md"
+requires-python = ">=3.12,<3.13"
+license = { text = "Apache-2.0" }
+dependencies = [
+    "fastapi>=0.115",
+    "uvicorn>=0.32",
+    "pydantic>=2.9",
+    "sqlalchemy>=2.0.36",
+    "psycopg[binary]>=3.2",
+    "alembic>=1.14",
+    "httpx>=0.28",
+    "pyyaml>=6.0.2",
+    "jsonschema>=4.23",
+    "pyjwt[crypto]>=2.10",
+    "cryptography>=44",
+    "azure-identity>=1.19",
+    "azure-storage-blob>=12.24",
+    "azure-keyvault-secrets>=4.9",
+    "boto3>=1.35",
+    "sigstore>=3.6",
+    "cramjam>=2.9",
+    "azure-keyvault-keys>=4.10",
+]
+
+[dependency-groups]
+dev = [
+    "pytest>=8.3",
+    "hypothesis>=6.120",
+    "ruff>=0.8",
+    "mypy>=1.13",
+    "types-pyyaml",
+    "types-jsonschema",
+    "respx>=0.22",
+    "moto[securityhub,sts]>=5.0",
+]
+
+[project.scripts]
+aap = "aap.cli:main"
+attestra = "aap.cli:main"   # the product name; `aap` stays the technical prefix
+
+# Integrations are plugins (ADR-032). Third-party packages add their own entry points to this group.
+[project.entry-points."aap.plugins"]
+builtin = "aap.plugins.builtin:PLUGINS"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/aap"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]  # shared test helpers: tests/oidc_idp.py
+markers = [
+    "db: needs a PostgreSQL instance (AAP_TEST_DATABASE_URL or docker)",
+    "service: runs a real third-party service container (opt in: AAP_TEST_SERVICES=1; needs network for advisory data)",
+]
+addopts = "-q"
+
+[tool.ruff]
+line-length = 120
+target-version = "py312"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "B", "UP", "S", "SIM", "RUF"]
+ignore = ["S101", "RUF001", "RUF002", "RUF003"]  # →, × and – are intentional in explanations
+
+[tool.ruff.lint.per-file-ignores]
+"tests/**" = ["S", "B", "E501", "SIM117"]
+# SQL text blocks: long lines are clearer than broken SQL; queries are parameterised (no string-built SQL)
+"src/aap/store/**" = ["E501"]
+"src/aap/services/**" = ["E501"]
+"src/aap/api/app.py" = ["E501"]
+"migrations/**" = ["E501"]
+"src/aap/demo/**" = ["E501"]
+"src/aap/cli.py" = ["E501"]
+
+[tool.ruff.lint.flake8-bugbear]
+extend-immutable-calls = ["fastapi.Depends", "fastapi.Header", "fastapi.Query"]
+
+[tool.mypy]
+python_version = "3.12"
+strict = true
+packages = ["aap.domain", "aap.evaluators"]
+mypy_path = "src"

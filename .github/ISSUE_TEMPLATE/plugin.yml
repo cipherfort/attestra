@@ -1,0 +1,22 @@
+name: Plugin request
+description: Support for another system (source control, ticketing, SIEM, cloud, storage, identity)
+labels: [plugin, triage]
+body:
+  - type: input
+    id: system
+    attributes: { label: System and version, placeholder: "e.g. GitLab 18.x self-managed, ServiceNow, Splunk Cloud" }
+    validations: { required: true }
+  - type: dropdown
+    id: kind
+    attributes:
+      label: Plugin type
+      options: [source control, ticketing, vulnerability intelligence, finding workbench, cloud posture, SIEM export, evidence storage, secrets, identity]
+    validations: { required: true }
+  - type: textarea
+    id: access
+    attributes: { label: Least-privilege access, description: "Which read-only scopes or roles would the platform need? Can it run in a container for tests?" }
+  - type: checkboxes
+    id: help
+    attributes:
+      label: Contribution
+      options: [{ label: "I can help build or test this plugin" }]

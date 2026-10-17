@@ -1,0 +1,62 @@
+# Contextual finding risk model (ADR-011, ADR-012).
+# Status: DESIGNED — weights, bands and SLAs are PROPOSED and REQUIRE HUMAN APPROVAL.
+#
+# This is a PRIORITISATION model, not an objective measure of risk. It exists to order work
+# consistently and explainably. Every score stores: inputs, model version, and a rendered explanation.
+#
+#   likelihood (1..5) = clamp( base_likelihood + Σ likelihood_modifiers , 1, 5 )
+#   impact     (1..5) = clamp( base_impact     + Σ impact_modifiers     , 1, 5 )
+#   score      (1..25) = likelihood × impact
+#   priority   = band(score), then override rules (which can only RAISE priority, except compensating
+#                controls, which can lower by at most one band and require an approved record)
+
+model_id: risk
+version: 1
+
+likelihood:
+  base:
+    # From the finding's own exploitability signal. Order of precedence: first available source wins.
+    sources:
+      - epss_percentile:       # EPSS v4 percentile; CVE-based findings only
+          bands: [ { gte: 0.95, value: 5 }, { gte: 0.80, value: 4 }, { gte: 0.50, value: 3 }, { gte: 0.10, value: 2 }, { gte: 0.0, value: 1 } ]
+      - cvss_exploitability:   # CVSS v4 (AV/AC/AT/PR/UI) or v3.1 exploitability sub-score mapped to 1..5
+          map: { very_high: 5, high: 4, medium: 3, low: 2, very_low: 1 }
+      - tool_severity:         # fallback for non-CVE findings (SAST, IaC, DAST)
+          map: { critical: 4, high: 3, medium: 2, low: 1, info: 1 }
+  modifiers:
+    - { id: kev,             when: "vuln.in_cisa_kev",                         delta: +2, note: Known exploited in the wild }
+    - { id: exploit_public,  when: "vuln.exploit_public and not vuln.in_cisa_kev", delta: +1 }
+    - { id: dast_confirmed,  when: "finding.confirmed_dynamically",            delta: +1, note: Confirmed exploitable by DAST/pen test }
+    - { id: internet,        when: "app.exposure in ['internet_public']",      delta: +1 }
+    - { id: unauth_path,     when: "finding.requires_auth == false",           delta: +1, note: Only when known (DAST/pentest/CVSS PR:N) }
+    - { id: not_reachable,   when: "finding.reachability == 'unreachable'",    delta: -2, note: Only from reachability analysis with evidence; never self-declared }
+    - { id: dev_dependency,  when: "component.scope == 'development'",         delta: -1 }
+    - { id: isolated,        when: "app.exposure in ['isolated']",             delta: -1 }
+
+impact:
+  base:
+    from_tier: { 1: 4, 2: 3, 3: 2, 4: 1 }
+  modifiers:
+    - { id: data_high,        when: "app.data_classification in ['highly_confidential'] or app.personal_data == 'special_category'", delta: +1 }
+    - { id: secret_valid,     when: "finding.type == 'secret' and finding.secret_validity == 'active'", delta: +1 }
+    - { id: integrity_high,   when: "finding.cvss_impact.integrity == 'high' and app.privileged_integration == 'high'", delta: +1 }
+    - { id: compensating,     when: "finding.compensating_control_approved", delta: -1, note: Requires approved compensating-control record (ADR-021) }
+
+bands:      # inclusive lower bounds
+  - { priority: P1, min_score: 20 }
+  - { priority: P2, min_score: 12 }
+  - { priority: P3, min_score: 6 }
+  - { priority: P4, min_score: 1 }
+
+overrides:  # evaluated after banding; can only raise priority
+  - { id: kev_internet,   when: "vuln.in_cisa_kev and app.exposure in ['internet_public','internet_authenticated']", min_priority: P1 }
+  - { id: active_secret,  when: "finding.type == 'secret' and finding.secret_validity == 'active'", min_priority: P1 }
+  - { id: malicious_pkg,  when: "finding.type == 'malicious_package'", min_priority: P1 }
+
+sla:        # calendar days from first detection (or exception expiry) to verified fix
+  triage: { P1: 1, P2: 3, P3: 10, P4: 30 }
+  remediate: { P1: 7, P2: 30, P3: 90, P4: 180 }
+
+soc_escalation:   # see ADR-020 — only these leave the platform as SIEM events
+  - { when: "priority == 'P1' and (vuln.in_cisa_kev or finding.type in ['secret','malicious_package'])" }
+  - { when: "priority == 'P1' and sla_breached" }

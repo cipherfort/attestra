@@ -1,0 +1,42 @@
+# schemas/repo-contract/threat-model.schema.json#/$defs/threatsFile. IDs are stable: never renumber.
+schema_version: "1"
+methodology: stride
+threats:
+  - id: TM-01
+    title: Customer accesses another customer's claim (broken object-level authorisation)
+    stride: [information_disclosure, elevation_of_privilege]
+    assets: [AS-01]
+    flows: [DF-01]
+    likelihood: high
+    impact: high
+    rating: critical
+    status: mitigated
+    cwe: [639]
+  - id: TM-02
+    title: Malicious document upload delivers malware to caseworkers
+    stride: [tampering, elevation_of_privilege]
+    assets: [AS-02]
+    flows: [DF-02]
+    likelihood: medium
+    impact: high
+    rating: high
+    status: mitigated
+    cwe: [434]
+  - id: TM-03
+    title: Notify API key leaked from configuration
+    stride: [spoofing, information_disclosure]
+    assets: [AS-04]
+    flows: [DF-06]
+    likelihood: low
+    impact: medium
+    rating: medium
+    status: mitigated
+  - id: TM-04
+    title: Bulk claim submission exhausts service capacity
+    stride: [denial_of_service]
+    assets: [AS-05]
+    flows: [DF-01]
+    likelihood: medium
+    impact: medium
+    rating: medium
+    status: accepted

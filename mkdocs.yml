@@ -1,0 +1,95 @@
+# Documentation site (M0 skeleton; reorganised into getting started / install / configure / guides in M6).
+# Build: uvx --with mkdocs-material mkdocs build    Serve: uvx --with mkdocs-material mkdocs serve
+site_name: Attestra
+site_description: Evidence-driven application security assurance (working name)
+repo_url: https://github.com/cipherfort/attestra
+edit_uri: edit/main/docs/
+docs_dir: docs
+site_dir: site
+strict: false
+theme:
+  name: material
+  features: [navigation.sections, navigation.top, search.suggest, content.code.copy]
+  palette:
+    - scheme: default
+      toggle: { icon: material/brightness-7, name: Dark mode }
+    - scheme: slate
+      toggle: { icon: material/brightness-4, name: Light mode }
+markdown_extensions:
+  - admonition
+  - tables
+  - toc: { permalink: true }
+  - pymdownx.superfences
+  - pymdownx.highlight
+validation:
+  # Several pages link to the ADRs, config and code outside docs/; those become repository links in M6.
+  links: { not_found: info, anchors: info, unrecognized_links: info }
+nav:
+  - Home: README.md
+  - Getting started: getting-started.md
+  - Install:
+      - Kubernetes (Helm): install/helm.md
+      - Evaluate (Docker Compose): install/compose.md
+  - Configure: configure/index.md
+  - User guide: guide/user-guide.md
+  - Security model: security/security-model.md
+  - Architecture:
+      - Problem: architecture/01-problem-definition.md
+      - Platform: architecture/02-platform-architecture.md
+      - Data model: architecture/03-data-model.md
+      - Evidence model: architecture/04-evidence-model.md
+      - Pipelines: architecture/05-pipeline-architecture.md
+      - Repositories: architecture/06-repository-structure.md
+      - Platform CI/CD: architecture/07-platform-cicd.md
+  - Standards and rules:
+      - Control framework: standards/control-framework.md
+      - Control catalogue: standards/control-catalogue.md
+      - Risk model: standards/risk-model.md
+      - Application classification: standards/application-classification-standard.md
+      - Evidence management: standards/evidence-management-standard.md
+      - SAMM and ASVS: standards/samm-asvs-mapping.md
+      - SAMM assessment: standards/samm-assessment-methodology.md
+      - Pipeline security: standards/pipeline-security-standard.md
+      - GitHub baseline: standards/github-security-baseline.md
+      - Open-source dependencies: standards/open-source-policy.md
+      - KPIs and KRIs: standards/kpi-kri-catalogue.md
+      - Secure SDLC: standards/secure-sdlc-standard.md
+      - Security requirements: standards/security-requirements-standard.md
+      - Secure architecture: standards/secure-architecture-standard.md
+      - Threat modelling: standards/threat-modelling-standard.md
+      - Security testing: standards/security-testing-standard.md
+      - Vulnerability management: standards/vulnerability-management-standard.md
+      - Security exceptions: standards/security-exception-standard.md
+      - SBOM: standards/sbom-standard.md
+      - Software supply chain: standards/software-supply-chain-security-standard.md
+  - Guides:
+      - GitLab: guides/gitlab-guide.md
+      - ASVS: guides/asvs-implementation-guide.md
+      - Cloud security: guides/cloud-security-integration-guide.md
+      - Jira: guides/jira-integration-guide.md
+      - SOC: guides/soc-integration-guide.md
+  - Operations:
+      - Integration bootstrap: operations/integration-bootstrap.md
+      - Operations runbook: operations/platform-operations-runbook.md
+      - Disaster recovery: operations/disaster-recovery-plan.md
+      - Backup and restore: operations/backup-and-restore-plan.md
+      - Runbooks:
+          - Incident response: runbooks/incident-response.md
+          - CVE emergency: runbooks/cve-emergency-response.md
+          - Evidence integrity: runbooks/evidence-integrity-mismatch.md
+          - Key rotation: runbooks/key-rotation.md
+          - Application incident template: runbooks/application-incident-runbook-template.md
+  - Develop:
+      - Writing a plugin: develop/plugins.md
+  - Reference:
+      - Settings (aap.yaml): reference/settings.md
+      - API: reference/api.md
+  - Security of the platform:
+      - Security architecture: security/platform-security-architecture.md
+      - Independent review scope: security/review-scope.md
+      - OpenSSF Best Practices: security/openssf-best-practices.md
+      - Access control: security/access-control-model.md
+      - Privacy: security/privacy-assessment.md
+      - DPIA: security/dpia-considerations.md
+  - Testing: testing/test-strategy.md
+  - Roadmap backlog: roadmap/backlog/README.md

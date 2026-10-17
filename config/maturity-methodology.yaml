@@ -1,0 +1,40 @@
+# Maturity derivation parameters (docs/standards/samm-asvs-mapping.md §A.3).
+# Status: DESIGNED; values PROPOSED. Recorded with every maturity snapshot so methodology changes are visible.
+
+version: 1
+
+control_state_weights:          # contribution of a mapped mandatory control to automated_fraction
+  satisfied: 1.0
+  partial: prorata              # evaluator supplies a 0..1 fraction in details.fraction
+  not_satisfied: 0.0
+  stale: 0.0
+  no_evidence: 0.0
+  excepted: 0.0                 # an exception is a risk decision, not maturity
+  error: last_known             # use the last non-error state, flagged in provenance
+  not_applicable: exclude       # removed from the denominator
+observe_mode_controls: exclude  # controls in observe mode do not count (control framework §6)
+
+answer_bands:                   # automated_fraction → official SAMM answer value (Toolbox-style scale)
+  - { min_fraction: 0.8,  answer: 1.0 }
+  - { min_fraction: 0.5,  answer: 0.5 }
+  - { min_fraction: 0.01, answer: 0.25 }
+  - { min_fraction: 0.0,  answer: 0.0 }
+
+manual_cap_tolerance: 0.25      # answer = min(manual, automated + tolerance) when both exist
+
+aggregation:
+  stream: sum_of_level_answers  # 0..3
+  practice: mean_of_streams
+  business_function: mean_of_practices
+  overall: mean_of_business_functions
+
+rollup:                         # org-unit views over application scores
+  statistics: [median, p25, p75, min, max, count]
+  headline: pct_apps_meeting_tier_target   # config/samm-targets.yaml
+  weighting: none               # no tier weighting of means; tiers are reported separately
+
+provenance_categories: [automated, manual_independent, manual_self, unassessed]
+
+snapshot:
+  schedule: "0 2 1 * *"         # 02:00 on the 1st of each month
+  publish_requires: governance_analyst

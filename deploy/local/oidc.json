@@ -1,0 +1,24 @@
+{
+  "interactiveLogin": false,
+  "tokenCallbacks": [
+    {
+      "issuerId": "aap",
+      "tokenExpiry": 3600,
+      "requestMappings": [
+        {
+          "requestParam": "client_id",
+          "match": "aap-web",
+          "claims": {
+            "sub": "local-developer",
+            "oid": "6f1c2d3e-0000-4000-8000-000000000001",
+            "tid": "00000000-0000-4000-8000-00000000000a",
+            "name": "Local Developer",
+            "preferred_username": "developer@localhost",
+            "roles": ["appsec_engineer"],
+            "aud": ["aap-web"]
+          }
+        }
+      ]
+    }
+  ]
+}

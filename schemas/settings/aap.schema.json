@@ -1,0 +1,117 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.org/aap/settings.schema.json",
+  "title": "aap.yaml: deployment settings",
+  "description": "Endpoints and choices for one deployment. NO SECRETS: credentials live in the secret store; the database URL can be read from a mounted file (database.url_file). Environment variables (AAP_*) override every value.",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "version": { "const": 1 },
+    "env": { "enum": ["development", "production"] },
+    "public_url": { "type": "string", "pattern": "^https?://" },
+    "database": {
+      "type": "object", "additionalProperties": false,
+      "properties": { "url_file": { "type": "string", "description": "Path to a file holding the database URL (e.g. a mounted Kubernetes secret)" } }
+    },
+    "auth": {
+      "type": "object", "additionalProperties": false,
+      "properties": {
+        "mode": { "enum": ["oidc", "dev"] },
+        "oidc": {
+          "type": "object", "additionalProperties": false,
+          "properties": {
+            "issuer": { "type": "string", "pattern": "^https?://" },
+            "client_id": { "type": "string" },
+            "tenant_id": { "type": "string" },
+            "api_audience": { "type": "string" },
+            "client_auth": { "enum": ["managed_identity", "secret"] },
+            "internal_url": { "type": "string", "pattern": "^https?://[^/]+/?$", "description": "back-channel origin for discovery, keys and token calls" }
+          }
+        }
+      }
+    },
+    "secrets": {
+      "type": "object", "additionalProperties": false,
+      "properties": {
+        "backend": { "enum": ["file", "mounted", "keyvault"] },
+        "dir": { "type": "string" },
+        "keyvault_url": { "type": "string", "pattern": "^https://" }
+      }
+    },
+    "evidence_store": {
+      "type": "object", "additionalProperties": false,
+      "properties": {
+        "kind": { "enum": ["local", "azure", "s3"] },
+        "root": { "type": "string" },
+        "container": { "type": "string" },
+        "account_url": { "type": "string", "pattern": "^https://" },
+        "bucket": { "type": "string" },
+        "prefix": { "type": "string" },
+        "endpoint_url": { "type": "string", "pattern": "^https?://" },
+        "region": { "type": "string" }
+      }
+    },
+    "azure": {
+      "type": "object", "additionalProperties": false,
+      "properties": { "client_id": { "type": "string", "description": "User-assigned managed identity client id" } }
+    },
+    "plugins": {
+      "type": "object", "additionalProperties": false,
+      "properties": {
+        "github": {
+          "type": "object", "additionalProperties": false,
+          "properties": {
+            "org": { "type": "string" },
+            "app_client_id": { "type": "string" },
+            "app_key_id": { "type": "string", "description": "Key Vault key id of the App's signing key" },
+            "api_url": { "type": "string", "pattern": "^https://" }
+          }
+        },
+        "jira": {
+          "type": "object", "additionalProperties": false,
+          "properties": { "url": { "type": "string", "pattern": "^https?://" }, "email": { "type": "string" } }
+        },
+        "dependency_track": {
+          "type": "object", "additionalProperties": false,
+          "properties": { "url": { "type": "string", "pattern": "^https?://" } }
+        },
+        "defectdojo": {
+          "type": "object", "additionalProperties": false,
+          "properties": { "url": { "type": "string", "pattern": "^https?://" } }
+        },
+        "azure_defender": {
+          "type": "object", "additionalProperties": false,
+          "properties": { "subscriptions": { "type": "array", "items": { "type": "string" } } }
+        },
+        "aws_securityhub": {
+          "type": "object", "additionalProperties": false,
+          "properties": {
+            "role_arn": { "type": "string", "pattern": "^arn:aws" },
+            "accounts": { "type": "array", "items": { "type": "string", "pattern": "^[0-9]{12}$" } },
+            "web_identity_audience": { "type": "string" }
+          }
+        },
+        "sentinel": {
+          "type": "object", "additionalProperties": false,
+          "properties": { "dce": { "type": "string", "pattern": "^https://" }, "dcr_id": { "type": "string" } }
+        },
+        "siem_http": {
+          "type": "object", "additionalProperties": false,
+          "properties": { "url": { "type": "string", "pattern": "^https://" }, "format": { "enum": ["json", "splunk_hec"] } }
+        },
+        "syslog": {
+          "type": "object", "additionalProperties": false,
+          "properties": { "address": { "type": "string", "pattern": "^[^:/ ]+:[0-9]{1,5}$" }, "ca_file": { "type": "string" } }
+        },
+        "gitlab": {
+          "type": "object", "additionalProperties": false,
+          "properties": { "url": { "type": "string", "pattern": "^https?://" }, "group": { "type": "string" } }
+        },
+        "github_issues": {
+          "type": "object", "additionalProperties": false,
+          "properties": { "enabled": { "enum": ["on"] } }
+        }
+      }
+    }
+  }
+}

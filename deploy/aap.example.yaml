@@ -1,0 +1,36 @@
+# Deployment settings for one installation (schemas/settings/aap.schema.json). Point AAP_CONFIG_FILE at a copy.
+# NO SECRETS in this file: credentials live in the secret store (secrets.backend), and the database URL is read from
+# a mounted file. Environment variables (AAP_*) override any value here. Check a file: `aap settings check <file>`.
+version: 1
+env: production
+public_url: https://appsec.example.org
+
+database:
+  url_file: /var/run/secrets/aap/database-url        # postgresql+psycopg://aap_api_login:...@db:5432/aap?sslmode=require
+
+auth:
+  mode: oidc                                          # any OpenID Connect provider (Entra ID, Okta, Keycloak, ...)
+  oidc:
+    issuer: https://login.example.org/realms/acme
+    client_id: aap-web
+    client_auth: secret                               # secret "oidc-client-secret" from the store; Azure: managed_identity
+
+secrets:
+  backend: mounted                                    # mounted (Kubernetes/Docker secrets) | keyvault | file (dev only)
+  dir: /var/run/secrets/aap
+
+evidence_store:
+  kind: s3                                            # s3 (Object Lock bucket = WORM) | azure | local (dev only)
+  bucket: acme-aap-evidence
+  region: eu-west-1
+  # endpoint_url: https://minio.internal:9000         # MinIO or another S3-compatible store
+
+plugins:                                              # only what you use; each one also needs its secret(s)
+  github:
+    org: acme
+    app_client_id: Iv23liExampleClientId
+  jira:
+    url: https://acme.atlassian.net
+    email: appsec-bot@example.org
+  # dependency_track: { url: https://dtrack.internal }
+  # aws_securityhub: { role_arn: "arn:aws:iam::123456789012:role/aap-securityhub-reader", accounts: ["123456789012"] }

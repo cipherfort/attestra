@@ -1,0 +1,85 @@
+{{/* SPDX-License-Identifier: Apache-2.0 */}}
+{{- if .Values.podDisruptionBudget.enabled }}
+{{- range list "api" "hook" }}
+{{- if or (eq . "api") $.Values.hook.enabled }}
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: {{ include "aap.fullname" $ }}-{{ . }}
+  labels: {{- include "aap.labels" $ | nindent 4 }}
+spec:
+  minAvailable: {{ $.Values.podDisruptionBudget.minAvailable }}
+  selector:
+    matchLabels: {{- include "aap.selector" $ | nindent 6 }}
+      app.kubernetes.io/component: {{ . }}
+{{- end }}
+{{- end }}
+{{- end }}
+{{- if .Values.api.autoscaling.enabled }}
+---
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: {{ include "aap.fullname" . }}-api
+  labels: {{- include "aap.labels" . | nindent 4 }}
+spec:
+  scaleTargetRef: { apiVersion: apps/v1, kind: Deployment, name: {{ include "aap.fullname" . }}-api }
+  minReplicas: {{ .Values.api.autoscaling.minReplicas }}
+  maxReplicas: {{ .Values.api.autoscaling.maxReplicas }}
+  metrics:
+    - type: Resource
+      resource: { name: cpu, target: { type: Utilization, averageUtilization: {{ .Values.api.autoscaling.targetCPUUtilizationPercentage }} } }
+{{- end }}
+{{- if .Values.networkPolicy.enabled }}
+---
+# Default deny for every platform pod; then exactly what each process needs.
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: {{ include "aap.fullname" . }}-default-deny
+  labels: {{- include "aap.labels" . | nindent 4 }}
+spec:
+  podSelector:
+    matchLabels: {{- include "aap.selector" . | nindent 6 }}
+  policyTypes: [Ingress, Egress]
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: {{ include "aap.fullname" . }}-egress
+  labels: {{- include "aap.labels" . | nindent 4 }}
+spec:
+  podSelector:
+    matchLabels: {{- include "aap.selector" . | nindent 6 }}
+  policyTypes: [Egress]
+  egress:
+    - ports: [{ protocol: UDP, port: 53 }, { protocol: TCP, port: 53 }]
+    - to: [{ ipBlock: { cidr: {{ .Values.networkPolicy.postgres.cidr }} } }]
+      ports: [{ protocol: TCP, port: {{ .Values.networkPolicy.postgres.port }} }]
+    - to:
+        {{- range .Values.networkPolicy.egressHttpsCIDRs }}
+        - ipBlock:
+            cidr: {{ . }}
+            {{- with $.Values.networkPolicy.egressHttpsExcept }}
+            except: {{- toYaml . | nindent 14 }}
+            {{- end }}
+        {{- end }}
+      ports: [{ protocol: TCP, port: 443 }]
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: {{ include "aap.fullname" . }}-ingress
+  labels: {{- include "aap.labels" . | nindent 4 }}
+spec:
+  podSelector:
+    matchExpressions:
+      - { key: app.kubernetes.io/instance, operator: In, values: [{{ .Release.Name }}] }
+      - { key: app.kubernetes.io/component, operator: In, values: [api, hook] }
+  policyTypes: [Ingress]
+  ingress:
+    - from:
+        - namespaceSelector:
+            matchLabels: {{- toYaml .Values.networkPolicy.ingressFromNamespaceLabels | nindent 14 }}
+{{- end }}

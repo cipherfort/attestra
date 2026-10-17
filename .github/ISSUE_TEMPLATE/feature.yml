@@ -1,0 +1,11 @@
+name: Feature request
+description: A change to what the platform does
+labels: [enhancement, triage]
+body:
+  - type: textarea
+    id: problem
+    attributes: { label: The problem, description: "What are you trying to do, and what stops you today?" }
+    validations: { required: true }
+  - type: textarea
+    id: proposal
+    attributes: { label: Proposal, description: "What should change? If it touches an invariant in CONTRIBUTING.md, say how it stays safe." }

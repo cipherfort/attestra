@@ -1,0 +1,53 @@
+# .security/application.yaml: proposed by Attestra onboarding PR.
+# Everything here is DECLARED and verified by the platform where possible (see docs/architecture/06-repository-structure.md §B.3).
+# Classification values must be labels from the active classification model (config/profiles/<profile>/classification.yaml).
+schema_version: "1"
+application:
+  name: Claims API
+  description: Public API customers use to submit and track claims.
+  owners:
+    business_owner: jane.smith@example.org
+    technical_owner: "@example-org/claims-leads"
+    team: "@example-org/claims"
+    org_unit: benefits        # the owning unit (org_units.slug); levels come from config/organization.yaml
+    security_champion: "@ajones"
+  security_contact:
+    email: claims-security@example.org
+  lifecycle: production
+  classification:
+    data_classification: confidential
+    personal_data: customer_personal
+    exposure: internet_authenticated
+    user_population: public_large
+    business_criticality: major
+    privileged_integration: limited
+    regulatory: [ "GDPR" ]
+  profile:
+    languages: [ java, typescript ]
+    frameworks: [ spring-boot, react ]
+    runtime: container
+    kubernetes: false
+    authentication: entra_id
+    has_api: true
+    has_web_frontend: true
+    distribution: saas
+    openapi_paths: [ api/openapi.yaml ]
+    container_images: [ "examplecr.azurecr.io/claims-api" ]
+  environments:
+    - name: test
+      type: test
+      url: https://claims-test.example.org
+      github_environment: test
+      cloud:
+        - { provider: azure, scope_type: resource_group, ref: /subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rg-claims-test }
+    - name: prod
+      type: production
+      url: https://claims.example.org
+      github_environment: production
+      cloud:
+        - { provider: azure, scope_type: resource_group, ref: /subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rg-claims-prod }
+  data_stores:
+    - { name: claims-db, type: postgresql, classification: confidential }
+  third_party_services:
+    - { name: Transactional email service, supplier: ExampleMail Ltd, data_shared: "email address, claim reference" }
+  repositories: [ example-org/claims-infra ]

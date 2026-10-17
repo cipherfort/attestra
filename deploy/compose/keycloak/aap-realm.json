@@ -1,0 +1,64 @@
+{
+  "realm": "aap",
+  "enabled": true,
+  "displayName": "Attestra (evaluation)",
+  "sslRequired": "none",
+  "registrationAllowed": false,
+  "clients": [
+    {
+      "clientId": "aap-web",
+      "name": "Attestra",
+      "protocol": "openid-connect",
+      "publicClient": false,
+      "secret": "${AAP_OIDC_CLIENT_SECRET}",
+      "standardFlowEnabled": true,
+      "directAccessGrantsEnabled": false,
+      "implicitFlowEnabled": false,
+      "serviceAccountsEnabled": false,
+      "redirectUris": ["http://localhost:8000/auth/callback"],
+      "webOrigins": ["http://localhost:8000"],
+      "attributes": {
+        "pkce.code.challenge.method": "S256",
+        "post.logout.redirect.uris": "http://localhost:8000/*"
+      },
+      "protocolMappers": [
+        {
+          "name": "platform roles",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-usermodel-client-role-mapper",
+          "config": {
+            "usermodel.clientRoleMapping.clientId": "aap-web",
+            "claim.name": "roles",
+            "jsonType.label": "String",
+            "multivalued": "true",
+            "id.token.claim": "true",
+            "access.token.claim": "true",
+            "userinfo.token.claim": "true"
+          }
+        }
+      ]
+    }
+  ],
+  "roles": {
+    "client": {
+      "aap-web": [
+        { "name": "appsec_engineer" }, { "name": "security_leadership" }, { "name": "governance_analyst" },
+        { "name": "executive" }, { "name": "auditor" }, { "name": "engineer" }, { "name": "platform_admin" }
+      ]
+    }
+  },
+  "users": [
+    { "username": "appsec", "firstName": "Alex", "lastName": "AppSec", "email": "appsec@example.org", "emailVerified": true,
+      "enabled": true, "credentials": [{ "type": "password", "value": "${AAP_DEMO_PASSWORD}", "temporary": false }],
+      "clientRoles": { "aap-web": ["appsec_engineer"] } },
+    { "username": "lead", "firstName": "Lee", "lastName": "Leadership", "email": "lead@example.org", "emailVerified": true,
+      "enabled": true, "credentials": [{ "type": "password", "value": "${AAP_DEMO_PASSWORD}", "temporary": false }],
+      "clientRoles": { "aap-web": ["security_leadership"] } },
+    { "username": "admin", "firstName": "Pat", "lastName": "Admin", "email": "admin@example.org", "emailVerified": true,
+      "enabled": true, "credentials": [{ "type": "password", "value": "${AAP_DEMO_PASSWORD}", "temporary": false }],
+      "clientRoles": { "aap-web": ["platform_admin"] } },
+    { "username": "dev", "firstName": "Dana", "lastName": "Developer", "email": "dev@example.org", "emailVerified": true,
+      "enabled": true, "credentials": [{ "type": "password", "value": "${AAP_DEMO_PASSWORD}", "temporary": false }],
+      "clientRoles": { "aap-web": ["engineer"] } }
+  ]
+}

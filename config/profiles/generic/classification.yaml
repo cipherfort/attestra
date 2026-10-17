@@ -1,0 +1,114 @@
+# Application classification model: GENERIC profile (the default; neutral labels any organization can use).
+# Copy this profile to make your own, then select it in config/organization.yaml.
+# Status: DESIGNED — tier boundaries, labels and ASVS targets REQUIRE HUMAN APPROVAL.
+# All labels are configuration; nothing in code depends on the label text, only on tier rank.
+#
+# Method (transparent, two-step):
+#   1. Floor rules: any matching rule sets a MINIMUM tier (lower number = more critical).
+#   2. Points: sum of dimension scores mapped to a tier via thresholds.
+#   Final tier = the more critical of (floor, points). Every computation stores the inputs,
+#   matched rules and model version, and is shown to the owner ("why is my app Tier 1?").
+# Downgrades below the computed tier require an approved override (AppSec), recorded with reason.
+
+model_id: classification
+version: 1
+
+tiers:
+  - rank: 1
+    label: Critical
+    asvs_target: L3
+    description: High-impact public services, sensitive data at scale, or critical business functions
+  - rank: 2
+    label: High
+    asvs_target: L2
+    description: Significant operational or information-security impact
+  - rank: 3
+    label: Standard
+    asvs_target: L1+   # L1 in full + L2 requirements that are verified automatically
+    description: Normal business applications
+  - rank: 4
+    label: Low
+    asvs_target: L1
+    description: Low-risk, internal, prototypes or limited-impact services
+
+dimensions:
+  data_classification:
+    # Map your organization's scheme here (e.g. Public / Internal / Confidential / Restricted). Highest stored data counts.
+    question: Highest classification of data the application stores or processes
+    options:
+      public: 0
+      internal: 1
+      confidential: 3
+      highly_confidential: 5
+  personal_data:
+    question: Personal data processed
+    options:
+      none: 0
+      limited: 1             # names/emails of staff
+      customer_personal: 3   # personal data of customers or members of the public
+      special_category: 5    # health, criminal offence, biometric, etc.
+  exposure:
+    question: Network exposure of the most exposed interface
+    options:
+      isolated: 0
+      internal: 1
+      partner: 2             # B2B / restricted external
+      internet_authenticated: 3
+      internet_public: 4     # unauthenticated internet-facing functionality
+  user_population:
+    question: Who depends on the service
+    options:
+      team: 0
+      organisation: 1
+      public_small: 2        # a limited external audience
+      public_large: 4        # the public or customers at large scale
+  business_criticality:
+    question: Impact of 24h unavailability or integrity loss
+    options:
+      minimal: 0
+      moderate: 2
+      major: 4
+      severe: 6
+  privileged_integration:
+    question: Does the app hold credentials/permissions that can change other systems (cloud admin, CI, IdP, payment)?
+    options:
+      none: 0
+      limited: 2
+      high: 4
+  regulatory:
+    question: Specific regulatory obligations attach to the service (list in application.yaml)
+    options:
+      none: 0
+      some: 2
+
+floor_rules:
+  - id: FR-1
+    description: Internet-facing and processes special-category personal data
+    when: { exposure: [internet_public, internet_authenticated], personal_data: [special_category] }
+    min_tier: 1
+  - id: FR-2
+    description: Holds high-privilege integration (e.g. cloud admin / identity) — compromise is estate-wide
+    when: { privileged_integration: [high] }
+    min_tier: 1
+  - id: FR-3
+    description: Large-scale public or customer-facing service
+    when: { user_population: [public_large] }
+    min_tier: 1
+  - id: FR-4
+    description: Internet-facing with customer personal data
+    when: { exposure: [internet_public, internet_authenticated], personal_data: [customer_personal] }
+    min_tier: 2
+  - id: FR-5
+    description: Highly confidential data regardless of exposure
+    when: { data_classification: [highly_confidential] }
+    min_tier: 2
+
+points_thresholds:     # inclusive lower bounds
+  - { min_points: 16, tier: 1 }
+  - { min_points: 10, tier: 2 }
+  - { min_points: 4,  tier: 3 }
+  - { min_points: 0,  tier: 4 }
+
+lifecycle:
+  prototype_max_tier_rank: 4   # prototypes may not process real personal data; enforced by FR checks + attestation
+  review_interval_days: 365

@@ -1,0 +1,48 @@
+# ASVS 5.0 applicability: chapter → capability conditions (methodology Part B.3, E12-F02-S01).
+# Status: DESIGNED at CHAPTER level. Section/requirement-level refinements are added after the official
+# ASVS 5.0 import (E12-F01-S01). Requirement text and IDs are never hand-transcribed here.
+# Conditions reference flags in .security/asvs.yaml (schemas/repo-contract/asvs.schema.json).
+# VERIFY chapter numbering/titles against the imported release.
+
+asvs_version: "5.0.0"
+
+chapters:
+  - { id: V1,  title: "Encoding and Sanitization",          applies_when: always }
+  - { id: V2,  title: "Validation and Business Logic",       applies_when: always }
+  - { id: V3,  title: "Web Frontend Security",               applies_when: "capabilities.web_frontend" }
+  - { id: V4,  title: "API and Web Service",                 applies_when: "capabilities.api" }
+  - { id: V5,  title: "File Handling",                       applies_when: "capabilities.file_handling" }
+  - { id: V6,  title: "Authentication",                      applies_when: "capabilities.authentication != 'none'",
+      notes: "When authentication == 'federated', local credential-storage/recovery sections are N/A after section-level mapping" }
+  - { id: V7,  title: "Session Management",                  applies_when: "capabilities.sessions" }
+  - { id: V8,  title: "Authorization",                       applies_when: "capabilities.authentication != 'none'" }
+  - { id: V9,  title: "Self-contained Tokens",               applies_when: "capabilities.self_contained_tokens" }
+  - { id: V10, title: "OAuth and OIDC",                      applies_when: "size(capabilities.oauth_oidc) > 0",
+      notes: "Sections scoped by role: client, resource_server, authorization_server" }
+  - { id: V11, title: "Cryptography",                        applies_when: always }
+  - { id: V12, title: "Secure Communication",                applies_when: always }
+  - { id: V13, title: "Configuration",                       applies_when: always }
+  - { id: V14, title: "Data Protection",                     applies_when: always }
+  - { id: V15, title: "Secure Coding and Architecture",      applies_when: always }
+  - { id: V16, title: "Security Logging and Error Handling", applies_when: always }
+  - { id: V17, title: "WebRTC",                              applies_when: "capabilities.webrtc" }
+
+# Default verification method per chapter (methodology Part B.4). Refined per requirement after import.
+default_methods:
+  V1: [automated_test, scanner_supporting, manual_review]
+  V2: [automated_test, manual_review]
+  V3: [config_check, automated_test]
+  V4: [automated_test, config_check]
+  V5: [automated_test, manual_review]
+  V6: [automated_test, manual_review, pentest]
+  V7: [automated_test, config_check]
+  V8: [automated_test, pentest]
+  V9: [automated_test]
+  V10: [automated_test, manual_review]
+  V11: [scanner_supporting, manual_review]
+  V12: [config_check]
+  V13: [config_check, scanner_supporting]
+  V14: [manual_review, config_check]
+  V15: [scanner_supporting, manual_review, design_review]
+  V16: [automated_test, manual_review]
+  V17: [manual_review]

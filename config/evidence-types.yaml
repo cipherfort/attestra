@@ -1,0 +1,227 @@
+# Evidence type registry: the ONLY evidence types controls may reference.
+# Status: DESIGNED. Loaded by the evaluator by content digest; changes go via PR (ADR-016, T-12).
+#
+# confidence_max: the highest confidence evidence of this type can carry
+#   C0 declared   — claimed by the team (e.g. a field in .security/*.yaml). Never satisfies a control alone.
+#   C1 configured — platform observed a setting through an authoritative API.
+#   C2 executed   — platform verified an approved workflow ran on a specific commit/artifact and produced a result.
+#   C3 attested   — C2 plus a verified signed attestation and hash-matched raw output, OR pulled directly
+#                   by the platform from the authoritative system (e.g. GHAS alert API).
+#   M1 manual-self — manual evidence recorded by the owning team.
+#   M2 manual-independent — manual evidence recorded/approved by an independent reviewer (SoD enforced).
+#
+# freshness.policy:
+#   continuous     — state read from a live API; valid for `ttl` (re-polled before expiry)
+#   commit_bound   — valid for the commit it was produced on; superseded when the default branch moves AND the
+#                    change touches `paths`; hard ceiling `ceiling_days` (catches new rules/advisories)
+#   artifact_bound — valid for an artifact digest while that digest is the current/deployed one; ceiling applies
+#   time_bound     — valid for `valid_days`
+#   event_bound    — valid until an invalidating event in `invalidated_by`, with ceiling `ceiling_days`
+# warn_days: evidence enters EXPIRING this many days before expiry.
+
+version: 1
+
+types:
+  registry.application:
+    description: .security/application.yaml present, schema-valid, owners resolvable
+    producer: platform:github-connector
+    confidence_max: C1
+    freshness: { policy: continuous, ttl: 24h }
+
+  registry.classification:
+    description: Tier computed from classification inputs and approved (Tier 1/2 approval by AppSec)
+    producer: platform:workflow-engine
+    confidence_max: M2
+    freshness: { policy: event_bound, invalidated_by: [classification_input_changed], ceiling_days: 365, warn_days: 30 }
+
+  repo.ruleset:
+    description: Effective default-branch protection (rulesets + legacy branch protection, merged)
+    producer: platform:github-connector
+    confidence_max: C1
+    freshness: { policy: continuous, ttl: 24h }
+
+  repo.security_settings:
+    description: GHAS feature enablement (code scanning default/advanced, secret scanning, push protection, Dependabot)
+    producer: platform:github-connector
+    confidence_max: C1
+    freshness: { policy: continuous, ttl: 24h }
+
+  repo.codeowners:
+    description: CODEOWNERS parsed; GitHub's CODEOWNERS errors API clean; required paths covered
+    producer: platform:github-connector
+    confidence_max: C1
+    freshness: { policy: continuous, ttl: 24h }
+
+  repo.access:
+    description: Collaborators, teams and permission levels; visibility
+    producer: platform:github-connector
+    confidence_max: C1
+    freshness: { policy: continuous, ttl: 24h }
+
+  repo.actions_policy:
+    description: Repo/org Actions settings (allowed actions, default GITHUB_TOKEN permissions, fork PR approval)
+    producer: platform:github-connector
+    confidence_max: C1
+    freshness: { policy: continuous, ttl: 24h }
+
+  repo.environments:
+    description: Deployment environments, protection rules, environment secrets (names only)
+    producer: platform:github-connector
+    confidence_max: C1
+    freshness: { policy: continuous, ttl: 24h }
+
+  scan.workflow_hardening:
+    description: "Static analysis of .github/workflows (e.g. zizmor/actionlint): unpinned actions, dangerous triggers, excessive permissions"
+    producer: workflow:security-workflows/workflow-lint
+    confidence_max: C3
+    freshness: { policy: commit_bound, paths: [".github/workflows/**", ".github/actions/**"], ceiling_days: 30, warn_days: 5 }
+
+  scan.sast:
+    description: SAST execution and result (CodeQL via GHAS, or approved alternative) on the default branch
+    producer: workflow:security-workflows/sast | github:code-scanning
+    confidence_max: C3
+    freshness: { policy: commit_bound, paths: ["**"], ceiling_days: 30, warn_days: 5 }
+
+  scan.sca:
+    description: Dependency vulnerability analysis of resolved dependency set
+    producer: workflow:security-workflows/sca | github:dependabot
+    confidence_max: C3
+    freshness: { policy: commit_bound, paths: ["**/*lock*", "**/go.sum", "**/pom.xml", "**/*.gradle*", "**/requirements*.txt", "**/pyproject.toml", "**/.terraform.lock.hcl", "**/*.csproj", "**/packages.lock.json"], ceiling_days: 30, warn_days: 5 }
+
+  scan.secrets:
+    description: Secret detection results (GHAS secret scanning alerts API; pipeline scanner for history on onboarding)
+    producer: github:secret-scanning | workflow:security-workflows/secrets
+    confidence_max: C3
+    freshness: { policy: continuous, ttl: 24h }
+
+  scan.iac:
+    description: IaC misconfiguration scan (Checkov/Trivy config/PSRule)
+    producer: workflow:security-workflows/iac
+    confidence_max: C3
+    freshness: { policy: commit_bound, paths: ["**/*.tf", "**/*.bicep", "**/*.json", "**/*.yaml", "**/*.yml", "**/Dockerfile*"], ceiling_days: 30, warn_days: 5 }
+
+  scan.container:
+    description: Container image vulnerability + misconfiguration scan bound to image digest
+    producer: workflow:security-workflows/container
+    confidence_max: C3
+    freshness: { policy: artifact_bound, ceiling_days: 30, warn_days: 5 }
+
+  sbom:
+    description: CycloneDX (or converted SPDX) SBOM bound to commit (source SBOM) or artifact digest (build SBOM)
+    producer: workflow:security-workflows/sbom
+    confidence_max: C3
+    freshness: { policy: artifact_bound, ceiling_days: 90, warn_days: 10 }
+
+  sbom.eol:
+    description: "Derived: current SBOM components checked against endoflife.date (summary: snapshot, components, checked, eol[], eol_soon[])"
+    producer: connector:endoflife
+    confidence_max: C3          # never above the SBOM it was derived from (services/eol.py)
+    freshness: { policy: continuous, ttl: 72h }
+
+  provenance.attestation:
+    description: SLSA build provenance attestation for a release artifact, verified
+    producer: workflow:security-workflows/provenance
+    confidence_max: C3
+    freshness: { policy: artifact_bound }
+
+  scan.licence:
+    description: Licence policy evaluation of SBOM components
+    producer: platform:licence-evaluator
+    confidence_max: C3
+    freshness: { policy: artifact_bound, ceiling_days: 90 }
+
+  scan.malicious_package:
+    description: Check of dependency set against malicious-package advisories (OSV MAL-*)
+    producer: workflow:security-workflows/sca
+    confidence_max: C3
+    freshness: { policy: commit_bound, paths: ["**/*lock*", "**/go.sum", "**/requirements*.txt", "**/pyproject.toml"], ceiling_days: 7, warn_days: 2 }
+
+  test.security:
+    description: "Security-tagged automated tests: JUnit properties asvs / threat (summary: tests, failures, skipped, asvs{id: pass|fail}, threats{id: pass|fail})"
+    producer: workflow:security-workflows/test-evidence
+    confidence_max: C3
+    freshness: { policy: commit_bound, paths: ["**"], ceiling_days: 30 }
+
+  scan.dast:
+    description: DAST against a deployed non-production environment (target, auth mode, policy, result)
+    producer: workflow:security-workflows/dast
+    confidence_max: C3
+    freshness: { policy: event_bound, invalidated_by: [new_release_deployed], ceiling_days: 90, warn_days: 14 }
+
+  scan.api:
+    description: API security test against the published OpenAPI definition
+    producer: workflow:security-workflows/api
+    confidence_max: C3
+    freshness: { policy: event_bound, invalidated_by: [api_definition_changed, new_release_deployed], ceiling_days: 90, warn_days: 14 }
+
+  deploy.record:
+    description: "Deployment of artifact digest to environment (subject: artifact_digest, environment; summary: verified, image_created_at)"
+    producer: github:deployments | workflow:security-workflows/deploy-evidence
+    confidence_max: C3
+    freshness: { policy: continuous, ttl: 30d }
+
+  repo.threat_model:
+    description: Threat model files under .security/threat-model parsed and schema-valid; mitigation references resolve
+    producer: platform:github-connector
+    confidence_max: C1
+    freshness: { policy: commit_bound, paths: [".security/threat-model/**"], ceiling_days: 365 }
+
+  assessment.threat_model:
+    description: Review of the threat model (bound to the commit SHA of the files reviewed), by team (M1) or independent reviewer (M2)
+    producer: platform:workflow-engine
+    confidence_max: M2
+    freshness: { policy: event_bound, invalidated_by: [architecture_change, tier_increased, exposure_changed], ceiling_days: 365, warn_days: 30 }
+
+  assessment.architecture_review:
+    description: Architecture security review outcome with reviewer, scope, findings
+    producer: platform:workflow-engine
+    confidence_max: M2
+    freshness: { policy: event_bound, invalidated_by: [architecture_change, tier_increased], ceiling_days: 730, warn_days: 60 }
+
+  assessment.pentest:
+    description: "Penetration test: scope, tester, dates, report hash, findings imported"
+    producer: platform:workflow-engine
+    confidence_max: M2
+    freshness: { policy: time_bound, valid_days: 365, warn_days: 45 }
+
+  assessment.manual_control:
+    description: "Generic manual attestation for a specific control (scope, method, outcome, artefacts; summary may list asvs_verified[])"
+    producer: platform:workflow-engine
+    confidence_max: M2
+    freshness: { policy: time_bound, valid_days: 365, warn_days: 30 }
+
+  assessment.samm_interview:
+    description: Manual SAMM assessment answers for non-automatable activities
+    producer: platform:workflow-engine
+    confidence_max: M2
+    freshness: { policy: time_bound, valid_days: 365, warn_days: 30 }
+
+  training.completion:
+    description: "Secure development training, aggregated to team, never per person (summary: course, engineers, completed, window_days)"
+    producer: connector:lms
+    confidence_max: C3
+    freshness: { policy: time_bound, valid_days: 365, warn_days: 30 }
+
+  cloud.posture:
+    description: Defender for Cloud / Security Hub findings for cloud scopes mapped to the application
+    producer: connector:defender | connector:securityhub
+    confidence_max: C3
+    freshness: { policy: continuous, ttl: 24h }
+
+  siem.log_source_health:
+    description: Query result proving the application's security log source delivered events within window
+    producer: connector:sentinel
+    confidence_max: C3
+    freshness: { policy: continuous, ttl: 24h }
+
+  vuln.posture:
+    description: Derived snapshot of the application's findings vs SLA (computed by the platform)
+    producer: platform:risk-engine
+    confidence_max: C3
+    freshness: { policy: continuous, ttl: 24h }
+
+  process.review_record:
+    description: Record that a periodic process occurred (e.g. quarterly defect RCA) with attendees and outputs
+    producer: platform:workflow-engine
+    confidence_max: M2
+    freshness: { policy: time_bound, valid_days: 120, warn_days: 14 }

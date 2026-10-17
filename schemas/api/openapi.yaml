@@ -1,0 +1,2271 @@
+openapi: 3.1.0
+info:
+  title: Attestra API
+  version: 1.0.0-draft
+  summary: Application registry, controls, evidence, findings, risk, exceptions, SBOM and maturity.
+  description: |
+    Status: DESIGNED (contract-first, ADR-023). Not yet implemented.
+
+    Conventions
+    - Versioning: URL major version (`/api/v1`). Additive changes only within a major. Deprecations carry `Deprecation` and `Sunset` headers.
+    - Authentication: browser users via the BFF session cookie; service clients via Entra ID client-credentials JWT with app roles (ADR-014). No API keys.
+    - Authorisation: every operation declares `x-permission` (ADR-013). Resources outside the caller's scope return **404**, not 403.
+    - Pagination: cursor-based (`cursor`, `limit` ≤ 200). The response `page.next_cursor` is null on the last page.
+    - Filtering: allowlisted `filter[...]` parameters only; `sort` with optional `-` prefix for descending.
+    - Errors: RFC 9457 `application/problem+json`.
+    - Concurrency: `ETag` on mutable workflow resources; updates require `If-Match`.
+    - Idempotency: POSTs that create workflow objects accept `Idempotency-Key`.
+    - Long operations return `202` with a `Job` resource.
+  license:
+    name: Internal
+    identifier: LicenseRef-Internal
+servers:
+  - url: https://aap.internal.example/api/v1
+    description: Production (internal network only)
+  - url: https://aap-dev.internal.example/api/v1
+    description: Development
+security:
+  - session: []
+  - entraClientCredentials: []
+tags:
+  - { name: Administration, description: "Organization structure and access (platform_admin; changes audited)" }
+  - name: Applications
+  - name: Controls
+  - name: Evidence
+  - name: Findings
+  - name: Vulnerabilities
+  - name: SBOM
+  - name: Exceptions
+  - name: Assessments
+  - name: Maturity
+  - name: ASVS
+  - name: Threat models
+  - name: Tickets
+  - name: Organisation
+  - name: Reports
+  - name: Catalogue
+  - name: Platform
+
+paths:
+  /health/live:
+    get:
+      tags: [Platform]
+      operationId: getLiveness
+      summary: Liveness probe
+      security: []
+      x-permission: public
+      responses:
+        "200": { description: Process is alive }
+  /health/ready:
+    get:
+      tags: [Platform]
+      operationId: getReadiness
+      summary: Readiness probe (DB reachable, config loaded)
+      security: []
+      x-permission: public
+      responses:
+        "200": { description: Ready }
+        "503": { description: Not ready }
+  # ------------------------------------------------------------------ Organisation / identity
+  /users/me:
+    get:
+      tags: [Organisation]
+      operationId: getCurrentUser
+      summary: Current caller, roles and visible scope
+      x-permission: authenticated
+      responses:
+        "200":
+          description: Caller profile
+          content: { application/json: { schema: { $ref: "#/components/schemas/Me" } } }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+        "422": { $ref: "#/components/responses/Unprocessable" }
+        "400": { $ref: "#/components/responses/BadRequest" }
+  /integrations:
+    get:
+      tags: [Platform]
+      operationId: listIntegrations
+      summary: Every external integration, whether it is configured, what is missing, and its last run
+      description: >-
+        Nothing is assumed to exist. An unconfigured integration lists the missing settings and secrets by name (never
+        values) and the command that sets it up (ADR-031). Evidence it would produce stays NO_EVIDENCE.
+      x-permission: integration.read
+      responses:
+        "200":
+          description: Integration status
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [items]
+                properties:
+                  items: { type: array, items: { $ref: "#/components/schemas/Integration" } }
+                  load_errors:
+                    type: object
+                    description: Installed plugins that failed to load (entry point name → error)
+                    additionalProperties: { type: string }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+        "422": { $ref: "#/components/responses/Unprocessable" }
+        "400": { $ref: "#/components/responses/BadRequest" }
+  /org-units:
+    get:
+      tags: [Organisation]
+      operationId: listOrgUnits
+      summary: Directorates and teams visible to the caller
+      x-permission: org_unit.read
+      parameters:
+        - $ref: "#/components/parameters/Cursor"
+        - $ref: "#/components/parameters/Limit"
+        - { name: "filter[type]", in: query, schema: { $ref: "#/components/schemas/OrgUnitType" } }
+      responses:
+        "200":
+          description: Page of org units
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [items, page]
+                properties:
+                  items: { type: array, items: { $ref: "#/components/schemas/OrgUnit" } }
+                  page: { $ref: "#/components/schemas/Page" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+        "422": { $ref: "#/components/responses/Unprocessable" }
+        "400": { $ref: "#/components/responses/BadRequest" }
+  /org-units/{orgUnitId}:
+    get:
+      tags: [Organisation]
+      operationId: getOrgUnit
+      x-status: designed   # in the contract, not implemented yet (the API returns 404)
+      x-permission: org_unit.read
+      parameters: [ { $ref: "#/components/parameters/OrgUnitId" } ]
+      responses:
+        "200":
+          description: Org unit
+          content: { application/json: { schema: { $ref: "#/components/schemas/OrgUnit" } } }
+        "404": { $ref: "#/components/responses/NotFound" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+        "422": { $ref: "#/components/responses/Unprocessable" }
+        "400": { $ref: "#/components/responses/BadRequest" }
+  # ------------------------------------------------------------------ Applications
+  /applications:
+    get:
+      tags: [Applications]
+      operationId: listApplications
+      summary: List applications in the caller's scope
+      x-permission: application.read
+      parameters:
+        - $ref: "#/components/parameters/Cursor"
+        - $ref: "#/components/parameters/Limit"
+        - { name: q, in: query, description: Trigram search on name or app key, schema: { type: string, maxLength: 100 } }
+        - { name: "filter[tier]", in: query, schema: { type: array, items: { $ref: "#/components/schemas/TierRank" } }, style: form, explode: false }
+        - { name: "filter[org_unit]", in: query, schema: { type: string, format: uuid } }
+        - { name: "filter[lifecycle]", in: query, schema: { type: array, items: { $ref: "#/components/schemas/Lifecycle" } }, style: form, explode: false }
+        - { name: sort, in: query, schema: { type: string, enum: [name, -name, tier, -tier, updated_at, -updated_at] } }
+      responses:
+        "200":
+          description: Page of applications
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [items, page]
+                properties:
+                  items: { type: array, items: { $ref: "#/components/schemas/ApplicationSummary" } }
+                  page: { $ref: "#/components/schemas/Page" }
+        "400": { $ref: "#/components/responses/BadRequest" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+        "422": { $ref: "#/components/responses/Unprocessable" }
+    post:
+      tags: [Applications]
+      operationId: registerApplication
+      summary: Register an application from its repository contract (.security/application.yaml)
+      x-permission: application.register
+      description: |
+        With only `repository`, the platform reads `.security/application.yaml` and `.security/asvs.yaml` from the
+        default branch through the GitHub plugin. Without a configured SCM plugin (or before the contract is merged),
+        send the files' text with `application_yaml`, `asvs_yaml` and the provider's `repository_id`.
+        The caller may register only into units they belong to (403 otherwise). Tier 1/2 classifications wait for
+        AppSec approval; Tier 3/4 are auto-approved. 409 when the repository is already registered.
+      requestBody:
+        required: true
+        content: { application/json: { schema: { $ref: "#/components/schemas/RegisterApplication" } } }
+      responses:
+        "201":
+          description: Registered
+          content: { application/json: { schema: { $ref: "#/components/schemas/Registered" } } }
+        "403": { $ref: "#/components/responses/Forbidden" }
+        "404": { $ref: "#/components/responses/NotFound" }
+        "409": { $ref: "#/components/responses/Conflict" }
+        "422": { $ref: "#/components/responses/Unprocessable" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "400": { $ref: "#/components/responses/BadRequest" }
+  /applications/{appId}:
+    parameters: [ { $ref: "#/components/parameters/AppId" } ]
+    get:
+      tags: [Applications]
+      operationId: getApplication
+      x-permission: application.read
+      responses:
+        "200":
+          description: Application
+          headers: { ETag: { $ref: "#/components/headers/ETag" } }
+          content: { application/json: { schema: { $ref: "#/components/schemas/Application" } } }
+        "404": { $ref: "#/components/responses/NotFound" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+        "422": { $ref: "#/components/responses/Unprocessable" }
+        "400": { $ref: "#/components/responses/BadRequest" }
+    patch:
+      tags: [Applications]
+      operationId: updateApplicationSettings
+      x-status: designed   # in the contract, not implemented yet (the API returns 404)
+      summary: Update platform-owned settings (fields owned by application.yaml are read-only here)
+      x-permission: application.settings.write
+      parameters: [ { $ref: "#/components/parameters/IfMatch" } ]
+      requestBody:
+        required: true
+        content:
+          application/merge-patch+json:
+            schema: { $ref: "#/components/schemas/ApplicationSettingsPatch" }
+      responses:
+        "200":
+          description: Updated
+          content: { application/json: { schema: { $ref: "#/components/schemas/Application" } } }
+        "404": { $ref: "#/components/responses/NotFound" }
+        "412": { $ref: "#/components/responses/PreconditionFailed" }
+        "422": { $ref: "#/components/responses/Unprocessable" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+        "400": { $ref: "#/components/responses/BadRequest" }
+  /applications/{appId}/classification:
+    get:
+      tags: [Applications]
+      operationId: getClassification
+      summary: Current classification with inputs, matched rules and explanation
+      x-permission: application.read
+      parameters: [ { $ref: "#/components/parameters/AppId" } ]
+      responses:
+        "200":
+          description: Classification
+          content: { application/json: { schema: { $ref: "#/components/schemas/Classification" } } }
+        "404": { $ref: "#/components/responses/NotFound" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+        "422": { $ref: "#/components/responses/Unprocessable" }
+        "400": { $ref: "#/components/responses/BadRequest" }
+  /applications/{appId}/classification/override-requests:
+    post:
+      tags: [Applications]
+      operationId: requestTierOverride
+      x-status: designed   # in the contract, not implemented yet (the API returns 404)
+      summary: Request a tier different from the computed tier (downgrades need AppSec approval)
+      x-permission: classification.request
+      parameters: [ { $ref: "#/components/parameters/AppId" }, { $ref: "#/components/parameters/IdempotencyKey" } ]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [requested_tier, reason]
+              properties:
+                requested_tier: { $ref: "#/components/schemas/TierRank" }
+                reason: { type: string, minLength: 20, maxLength: 2000 }
+      responses:
+        "201":
+          description: Request created (pending)
+          content: { application/json: { schema: { $ref: "#/components/schemas/Classification" } } }
+        "404": { $ref: "#/components/responses/NotFound" }
+        "422": { $ref: "#/components/responses/Unprocessable" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+        "400": { $ref: "#/components/responses/BadRequest" }
+  /applications/{appId}/classification/decisions:
+    post:
+      tags: [Applications]
+      operationId: decideClassification
+      summary: Approve or reject the pending classification (Tier 1/2)
+      x-permission: classification.decide
+      description: |
+        Appends a decision that supersedes the pending classification (the ledger is append-only). Segregation of
+        duties: the decider must not be the requester or a member of the owning unit, a unit below it, or a unit above it (other than the
+        organization root); a refusal
+        is audited. 409 when nothing is pending.
+      parameters: [ { $ref: "#/components/parameters/AppId" } ]
+      requestBody:
+        required: true
+        content: { application/json: { schema: { $ref: "#/components/schemas/ClassificationDecision" } } }
+      responses:
+        "201":
+          description: Decided
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [classification_id, decision, tier]
+                properties:
+                  classification_id: { type: string, format: uuid }
+                  decision: { type: string, enum: [approved, rejected] }
+                  tier: { $ref: "#/components/schemas/TierRank" }
+        "403": { $ref: "#/components/responses/SodViolation" }
+        "404": { $ref: "#/components/responses/NotFound" }
+        "409": { $ref: "#/components/responses/Conflict" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "422": { $ref: "#/components/responses/Unprocessable" }
+        "400": { $ref: "#/components/responses/BadRequest" }
+  /applications/{appId}/repositories:
+    get:
+      tags: [Applications]
+      operationId: listApplicationRepositories
+      x-permission: application.read
+      parameters: [ { $ref: "#/components/parameters/AppId" } ]
+      responses:
+        "200":
+          description: Linked repositories
+          content:
+            application/json:
+              schema: { type: object, required: [items], properties: { items: { type: array, items: { $ref: "#/components/schemas/Repository" } } } }
+        "404": { $ref: "#/components/responses/NotFound" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+        "422": { $ref: "#/components/responses/Unprocessable" }
+        "400": { $ref: "#/components/responses/BadRequest" }
+  /applications/{appId}/environments:
+    get:
+      tags: [Applications]
+      operationId: listApplicationEnvironments
+      x-status: designed   # in the contract, not implemented yet (the API returns 404)
+      x-permission: application.read
+      parameters: [ { $ref: "#/components/parameters/AppId" } ]
+      responses:
+        "200":
+          description: Environments with cloud scopes and current deployments
+          content:
+            application/json:
+              schema: { type: object, required: [items], properties: { items: { type: array, items: { $ref: "#/components/schemas/Environment" } } } }
+        "404": { $ref: "#/components/responses/NotFound" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+        "422": { $ref: "#/components/responses/Unprocessable" }
+        "400": { $ref: "#/components/responses/BadRequest" }
+  # ------------------------------------------------------------------ Controls
+  /applications/{appId}/controls:
+    get:
+      tags: [Controls]
+      operationId: listControlStates
+      summary: Current control states (app × control × scope) with requirement level
+      x-permission: application.read
+      parameters:
+        - $ref: "#/components/parameters/AppId"
+        - { name: "filter[state]", in: query, schema: { type: array, items: { $ref: "#/components/schemas/ControlStateValue" } }, style: form, explode: false }
+        - { name: "filter[domain]", in: query, schema: { type: string, enum: [GOV, REQ, TM, ARC, SRC, BLD, DEP, TST, VUL, OPS] } }
+        - { name: "filter[requirement]", in: query, schema: { $ref: "#/components/schemas/RequirementLevel" } }
+      responses:
+        "200":
+          description: Control states
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [items, data_as_of]
+                properties:
+                  items: { type: array, items: { $ref: "#/components/schemas/ControlState" } }
+                  data_as_of: { $ref: "#/components/schemas/DataFreshness" }
+        "404": { $ref: "#/components/responses/NotFound" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+        "422": { $ref: "#/components/responses/Unprocessable" }
+        "400": { $ref: "#/components/responses/BadRequest" }
+  /applications/{appId}/controls/{controlKey}/evaluations:
+    get:
+      tags: [Controls]
+      operationId: listControlEvaluations
+      summary: Evaluation history for one control (append-only ledger)
+      x-permission: application.read
+      parameters:
+        - $ref: "#/components/parameters/AppId"
+        - $ref: "#/components/parameters/ControlKey"
+        - $ref: "#/components/parameters/Cursor"
+        - $ref: "#/components/parameters/Limit"
+      responses:
+        "200":
+          description: Evaluations, newest first
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [items, page]
+                properties:
+                  items: { type: array, items: { $ref: "#/components/schemas/ControlEvaluation" } }
+                  page: { $ref: "#/components/schemas/Page" }
+        "404": { $ref: "#/components/responses/NotFound" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+        "422": { $ref: "#/components/responses/Unprocessable" }
+        "400": { $ref: "#/components/responses/BadRequest" }
+  # ------------------------------------------------------------------ Evidence
+  /applications/{appId}/evidence:
+    get:
+      tags: [Evidence]
+      operationId: listEvidence
+      x-permission: evidence.read
+      parameters:
+        - $ref: "#/components/parameters/AppId"
+        - $ref: "#/components/parameters/Cursor"
+        - $ref: "#/components/parameters/Limit"
+        - { name: "filter[type]", in: query, schema: { type: string } }
+        - { name: "filter[state]", in: query, schema: { $ref: "#/components/schemas/EvidenceState" } }
+        - { name: "filter[commit_sha]", in: query, schema: { type: string, pattern: "^[0-9a-f]{40}$" } }
+      responses:
+        "200":
+          description: Evidence records
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [items, page]
+                properties:
+                  items: { type: array, items: { $ref: "#/components/schemas/Evidence" } }
+                  page: { $ref: "#/components/schemas/Page" }
+        "404": { $ref: "#/components/responses/NotFound" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+        "422": { $ref: "#/components/responses/Unprocessable" }
+        "400": { $ref: "#/components/responses/BadRequest" }
+  /evidence/{evidenceId}:
+    get:
+      tags: [Evidence]
+      operationId: getEvidence
+      summary: Evidence record with freshness history and verification details
+      x-permission: evidence.read
+      parameters: [ { $ref: "#/components/parameters/EvidenceId" } ]
+      responses:
+        "200":
+          description: Evidence
+          content: { application/json: { schema: { $ref: "#/components/schemas/EvidenceDetail" } } }
+        "404": { $ref: "#/components/responses/NotFound" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+        "422": { $ref: "#/components/responses/Unprocessable" }
+        "400": { $ref: "#/components/responses/BadRequest" }
+  /evidence/{evidenceId}/download-links:
+    post:
+      tags: [Evidence]
+      operationId: createEvidenceDownloadLink
+      x-status: designed   # in the contract, not implemented yet (the API returns 404)
+      summary: Short-lived download link for a raw artefact (audited)
+      x-permission: evidence.raw.read
+      parameters: [ { $ref: "#/components/parameters/EvidenceId" } ]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [sha256]
+              properties:
+                sha256: { type: string, pattern: "^[0-9a-f]{64}$" }
+      responses:
+        "201":
+          description: Link valid for 5 minutes, single blob
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [url, expires_at, sha256]
+                properties:
+                  url: { type: string, format: uri }
+                  expires_at: { type: string, format: date-time }
+                  sha256: { type: string }
+        "404": { $ref: "#/components/responses/NotFound" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+        "422": { $ref: "#/components/responses/Unprocessable" }
+        "400": { $ref: "#/components/responses/BadRequest" }
+  # ------------------------------------------------------------------ Findings
+  /findings:
+    get:
+      tags: [Findings]
+      operationId: listFindings
+      x-permission: finding.read
+      parameters:
+        - $ref: "#/components/parameters/Cursor"
+        - $ref: "#/components/parameters/Limit"
+        - { name: "filter[application]", in: query, schema: { type: string, format: uuid } }
+        - { name: "filter[priority]", in: query, schema: { type: array, items: { $ref: "#/components/schemas/Priority" } }, style: form, explode: false }
+        - { name: "filter[status]", in: query, schema: { type: array, items: { $ref: "#/components/schemas/FindingStatus" } }, style: form, explode: false }
+        - { name: "filter[type]", in: query, schema: { type: array, items: { $ref: "#/components/schemas/FindingType" } }, style: form, explode: false }
+        - { name: "filter[sla_breached]", in: query, schema: { type: boolean } }
+        - { name: "filter[vulnerability]", in: query, schema: { type: string, description: "CVE/GHSA/OSV id (aliases resolved)" } }
+        - { name: sort, in: query, schema: { type: string, enum: [sla_due_at, -sla_due_at, risk_score, -risk_score, first_seen_at, -first_seen_at] } }
+      responses:
+        "200":
+          description: Page of findings
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [items, page]
+                properties:
+                  items: { type: array, items: { $ref: "#/components/schemas/Finding" } }
+                  page: { $ref: "#/components/schemas/Page" }
+        "400": { $ref: "#/components/responses/BadRequest" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+        "422": { $ref: "#/components/responses/Unprocessable" }
+  /findings/{findingId}:
+    get:
+      tags: [Findings]
+      operationId: getFinding
+      x-permission: finding.read
+      parameters: [ { $ref: "#/components/parameters/FindingId" } ]
+      responses:
+        "200":
+          description: Finding with current risk assessment and links
+          headers: { ETag: { $ref: "#/components/headers/ETag" } }
+          content: { application/json: { schema: { $ref: "#/components/schemas/FindingDetail" } } }
+        "404": { $ref: "#/components/responses/NotFound" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+        "422": { $ref: "#/components/responses/Unprocessable" }
+        "400": { $ref: "#/components/responses/BadRequest" }
+  /findings/{findingId}/transitions:
+    post:
+      tags: [Findings]
+      operationId: transitionFinding
+      summary: Apply a workflow action. Closing is NOT an action; findings close only on verification evidence.
+      x-permission: finding.transition
+      description: |
+        Permission is further checked per action (e.g. `confirm_false_positive` needs `finding.fp.confirm` and SoD:
+        confirmer ≠ marker). Invalid transitions return 409.
+      parameters: [ { $ref: "#/components/parameters/FindingId" }, { $ref: "#/components/parameters/IfMatch" } ]
+      requestBody:
+        required: true
+        content: { application/json: { schema: { $ref: "#/components/schemas/FindingTransition" } } }
+      responses:
+        "200":
+          description: Transition applied
+          content: { application/json: { schema: { $ref: "#/components/schemas/FindingDetail" } } }
+        "403": { $ref: "#/components/responses/SodViolation" }
+        "404": { $ref: "#/components/responses/NotFound" }
+        "409": { $ref: "#/components/responses/Conflict" }
+        "412": { $ref: "#/components/responses/PreconditionFailed" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "422": { $ref: "#/components/responses/Unprocessable" }
+        "400": { $ref: "#/components/responses/BadRequest" }
+  /findings/{findingId}/events:
+    get:
+      tags: [Findings]
+      operationId: listFindingEvents
+      x-permission: finding.read
+      parameters: [ { $ref: "#/components/parameters/FindingId" }, { $ref: "#/components/parameters/Cursor" }, { $ref: "#/components/parameters/Limit" } ]
+      responses:
+        "200":
+          description: Finding history
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [items, page]
+                properties:
+                  items: { type: array, items: { $ref: "#/components/schemas/FindingEvent" } }
+                  page: { $ref: "#/components/schemas/Page" }
+        "404": { $ref: "#/components/responses/NotFound" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+        "422": { $ref: "#/components/responses/Unprocessable" }
+        "400": { $ref: "#/components/responses/BadRequest" }
+  /findings/{findingId}/risk-assessments:
+    get:
+      tags: [Findings]
+      operationId: listRiskAssessments
+      summary: Risk scoring history ("why is this P1?")
+      x-permission: finding.read
+      parameters: [ { $ref: "#/components/parameters/FindingId" } ]
+      responses:
+        "200":
+          description: Risk assessments, newest first
+          content:
+            application/json:
+              schema: { type: object, required: [items], properties: { items: { type: array, items: { $ref: "#/components/schemas/RiskAssessment" } } } }
+        "404": { $ref: "#/components/responses/NotFound" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+        "422": { $ref: "#/components/responses/Unprocessable" }
+        "400": { $ref: "#/components/responses/BadRequest" }
+  /findings/{findingId}/priority-overrides:
+    post:
+      tags: [Findings]
+      operationId: requestPriorityOverride
+      x-status: designed   # in the contract, not implemented yet (the API returns 404)
+      x-permission: finding.priority.override
+      description: Requires approval by a second person (appsec_engineer); audited.
+      parameters: [ { $ref: "#/components/parameters/FindingId" }, { $ref: "#/components/parameters/IdempotencyKey" } ]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [priority, reason]
+              properties:
+                priority: { $ref: "#/components/schemas/Priority" }
+                reason: { type: string, minLength: 20, maxLength: 2000 }
+      responses:
+        "202": { description: Override pending approval }
+        "404": { $ref: "#/components/responses/NotFound" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+        "422": { $ref: "#/components/responses/Unprocessable" }
+        "400": { $ref: "#/components/responses/BadRequest" }
+  # ------------------------------------------------------------------ Vulnerabilities & SBOM
+  /vulnerabilities/{vulnId}:
+    get:
+      tags: [Vulnerabilities]
+      operationId: getVulnerability
+      x-status: designed   # in the contract, not implemented yet (the API returns 404)
+      x-permission: vulnerability.read
+      parameters: [ { $ref: "#/components/parameters/VulnId" } ]
+      responses:
+        "200":
+          description: Vulnerability intelligence (CVSS, EPSS, KEV, aliases, CWE)
+          content: { application/json: { schema: { $ref: "#/components/schemas/Vulnerability" } } }
+        "404": { $ref: "#/components/responses/NotFound" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+        "422": { $ref: "#/components/responses/Unprocessable" }
+        "400": { $ref: "#/components/responses/BadRequest" }
+  /vulnerabilities/{vulnId}/affected-applications:
+    get:
+      tags: [Vulnerabilities]
+      operationId: getAffectedApplications
+      summary: Which applications are affected by this vulnerability?
+      description: |
+        Returns three sets. **affected**: a current SBOM contains a vulnerable version. **possibly_affected**: no SBOM,
+        or a stale one per freshness policy, so the result is unknown and never reported as unaffected. **not_affected_count**:
+        apps with current SBOMs and no match. Results are limited to the caller's scope; org-wide for security roles.
+      x-permission: vulnerability.impact.read
+      parameters: [ { $ref: "#/components/parameters/VulnId" } ]
+      responses:
+        "200":
+          description: Impact
+          content: { application/json: { schema: { $ref: "#/components/schemas/AffectedApplications" } } }
+        "404": { $ref: "#/components/responses/NotFound" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+        "422": { $ref: "#/components/responses/Unprocessable" }
+        "400": { $ref: "#/components/responses/BadRequest" }
+  /vulnerabilities/{vulnId}/affected-applications/exports:
+    post:
+      tags: [Vulnerabilities]
+      operationId: exportAffectedApplications
+      x-status: designed   # in the contract, not implemented yet (the API returns 404)
+      x-permission: vulnerability.impact.export
+      description: Audited (`data.bulk_export` SIEM event when org-wide).
+      parameters: [ { $ref: "#/components/parameters/VulnId" }, { $ref: "#/components/parameters/IdempotencyKey" } ]
+      responses:
+        "202":
+          description: Export job accepted
+          content: { application/json: { schema: { $ref: "#/components/schemas/Job" } } }
+        "404": { $ref: "#/components/responses/NotFound" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+        "422": { $ref: "#/components/responses/Unprocessable" }
+        "400": { $ref: "#/components/responses/BadRequest" }
+  /components:
+    get:
+      tags: [SBOM]
+      operationId: searchComponents
+      summary: Search the component inventory (e.g. before a CVE is published)
+      x-permission: component.read
+      parameters:
+        - $ref: "#/components/parameters/Cursor"
+        - $ref: "#/components/parameters/Limit"
+        - { name: purl, in: query, description: "Package URL without version, e.g. pkg:maven/org.apache.logging.log4j/log4j-core", schema: { type: string, maxLength: 500 } }
+        - { name: name, in: query, schema: { type: string, maxLength: 200 } }
+        - { name: ecosystem, in: query, schema: { type: string, maxLength: 40 } }
+        - { name: version_range, in: query, description: "vers-style range, e.g. vers:maven/>=2.0.0|<2.17.1", schema: { type: string, maxLength: 200 } }
+      responses:
+        "200":
+          description: Components with the count of applications using each
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [items, page]
+                properties:
+                  items: { type: array, items: { $ref: "#/components/schemas/ComponentUsage" } }
+                  page: { $ref: "#/components/schemas/Page" }
+        "400": { $ref: "#/components/responses/BadRequest" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+        "422": { $ref: "#/components/responses/Unprocessable" }
+  /applications/{appId}/sboms:
+    get:
+      tags: [SBOM]
+      operationId: listApplicationSboms
+      x-permission: application.read
+      parameters:
+        - $ref: "#/components/parameters/AppId"
+        - { name: "filter[current]", in: query, schema: { type: boolean, default: true } }
+      responses:
+        "200":
+          description: SBOMs
+          content:
+            application/json:
+              schema: { type: object, required: [items], properties: { items: { type: array, items: { $ref: "#/components/schemas/Sbom" } } } }
+        "404": { $ref: "#/components/responses/NotFound" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+        "422": { $ref: "#/components/responses/Unprocessable" }
+        "400": { $ref: "#/components/responses/BadRequest" }
+  /sboms/{sbomId}/components:
+    get:
+      tags: [SBOM]
+      operationId: listSbomComponents
+      x-status: designed   # in the contract, not implemented yet (the API returns 404)
+      x-permission: application.read
+      parameters:
+        - { name: sbomId, in: path, required: true, schema: { type: string, format: uuid } }
+        - $ref: "#/components/parameters/Cursor"
+        - $ref: "#/components/parameters/Limit"
+      responses:
+        "200":
+          description: Components in the SBOM
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [items, page]
+                properties:
+                  items: { type: array, items: { $ref: "#/components/schemas/SbomComponent" } }
+                  page: { $ref: "#/components/schemas/Page" }
+        "404": { $ref: "#/components/responses/NotFound" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+        "422": { $ref: "#/components/responses/Unprocessable" }
+        "400": { $ref: "#/components/responses/BadRequest" }
+  # ------------------------------------------------------------------ Exceptions
+  /exceptions:
+    get:
+      tags: [Exceptions]
+      operationId: listExceptions
+      x-permission: exception.read
+      parameters:
+        - $ref: "#/components/parameters/Cursor"
+        - $ref: "#/components/parameters/Limit"
+        - { name: "filter[application]", in: query, schema: { type: string, format: uuid } }
+        - { name: "filter[status]", in: query, schema: { type: array, items: { $ref: "#/components/schemas/ExceptionStatus" } }, style: form, explode: false }
+        - { name: "filter[expires_before]", in: query, schema: { type: string, format: date } }
+        - { name: "filter[awaiting_my_decision]", in: query, schema: { type: boolean } }
+      responses:
+        "200":
+          description: Exceptions
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [items]
+                properties:
+                  items: { type: array, maxItems: 200, items: { $ref: "#/components/schemas/ExceptionSummary" } }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+        "422": { $ref: "#/components/responses/Unprocessable" }
+        "400": { $ref: "#/components/responses/BadRequest" }
+    post:
+      tags: [Exceptions]
+      operationId: createException
+      summary: Create a draft exception
+      x-permission: exception.request
+      parameters: [ { $ref: "#/components/parameters/IdempotencyKey" } ]
+      requestBody:
+        required: true
+        content: { application/json: { schema: { $ref: "#/components/schemas/ExceptionCreate" } } }
+      responses:
+        "201":
+          description: Draft created
+          headers: { ETag: { $ref: "#/components/headers/ETag" } }
+          content: { application/json: { schema: { $ref: "#/components/schemas/SecurityException" } } }
+        "404": { $ref: "#/components/responses/NotFound" }
+        "422": { $ref: "#/components/responses/Unprocessable" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+        "400": { $ref: "#/components/responses/BadRequest" }
+  /exceptions/{exceptionId}:
+    parameters: [ { $ref: "#/components/parameters/ExceptionId" } ]
+    get:
+      tags: [Exceptions]
+      operationId: getException
+      x-permission: exception.read
+      responses:
+        "200":
+          description: Exception with event history and required approver role
+          headers: { ETag: { $ref: "#/components/headers/ETag" } }
+          content: { application/json: { schema: { $ref: "#/components/schemas/SecurityException" } } }
+        "404": { $ref: "#/components/responses/NotFound" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+        "422": { $ref: "#/components/responses/Unprocessable" }
+        "400": { $ref: "#/components/responses/BadRequest" }
+    patch:
+      tags: [Exceptions]
+      operationId: updateDraftException
+      x-status: designed   # in the contract, not implemented yet (the API returns 404)
+      x-permission: exception.request
+      parameters: [ { $ref: "#/components/parameters/IfMatch" } ]
+      requestBody:
+        required: true
+        content: { application/merge-patch+json: { schema: { $ref: "#/components/schemas/ExceptionCreate" } } }
+      responses:
+        "200":
+          description: Updated (drafts only)
+          content: { application/json: { schema: { $ref: "#/components/schemas/SecurityException" } } }
+        "409": { $ref: "#/components/responses/Conflict" }
+        "412": { $ref: "#/components/responses/PreconditionFailed" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+        "422": { $ref: "#/components/responses/Unprocessable" }
+        "400": { $ref: "#/components/responses/BadRequest" }
+        "404": { $ref: "#/components/responses/NotFound" }
+  /exceptions/{exceptionId}/submit:
+    post:
+      tags: [Exceptions]
+      operationId: submitException
+      x-permission: exception.request
+      parameters: [ { $ref: "#/components/parameters/ExceptionId" }, { $ref: "#/components/parameters/IfMatch" } ]
+      responses:
+        "200":
+          description: Submitted; routed to the approver role from config/exception-policy.yaml
+          content: { application/json: { schema: { $ref: "#/components/schemas/SecurityException" } } }
+        "409": { $ref: "#/components/responses/Conflict" }
+        "422": { $ref: "#/components/responses/Unprocessable" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+        "400": { $ref: "#/components/responses/BadRequest" }
+        "404": { $ref: "#/components/responses/NotFound" }
+  /exceptions/{exceptionId}/decision:
+    post:
+      tags: [Exceptions]
+      operationId: decideException
+      x-permission: exception.decide
+      description: Approver must hold the required role for priority × tier and must not be the requester, technical owner or owning-team member. Tier 1/2 also require business-owner co-sign (role `app_owner`).
+      parameters: [ { $ref: "#/components/parameters/ExceptionId" }, { $ref: "#/components/parameters/IfMatch" } ]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              allOf:
+                - $ref: "#/components/schemas/Decision"
+                - type: object
+                  properties:
+                    expires_at: { type: string, format: date, description: "Required on approve; ≤ max duration" }
+      responses:
+        "200":
+          description: Decision recorded
+          content: { application/json: { schema: { $ref: "#/components/schemas/SecurityException" } } }
+        "403": { $ref: "#/components/responses/SodViolation" }
+        "409": { $ref: "#/components/responses/Conflict" }
+        "422": { $ref: "#/components/responses/Unprocessable" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "400": { $ref: "#/components/responses/BadRequest" }
+        "404": { $ref: "#/components/responses/NotFound" }
+  /exceptions/{exceptionId}/renewals:
+    post:
+      tags: [Exceptions]
+      operationId: renewException
+      x-permission: exception.request
+      parameters: [ { $ref: "#/components/parameters/ExceptionId" }, { $ref: "#/components/parameters/IdempotencyKey" } ]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [justification, remediation_plan]
+              properties:
+                justification: { type: string, minLength: 20 }
+                remediation_plan: { type: string, minLength: 20 }
+      responses:
+        "201":
+          description: Renewal draft created (fresh approval required)
+          content: { application/json: { schema: { $ref: "#/components/schemas/SecurityException" } } }
+        "409": { $ref: "#/components/responses/Conflict" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+        "422": { $ref: "#/components/responses/Unprocessable" }
+        "400": { $ref: "#/components/responses/BadRequest" }
+        "404": { $ref: "#/components/responses/NotFound" }
+  /exceptions/{exceptionId}/revoke:
+    post:
+      tags: [Exceptions]
+      operationId: revokeException
+      x-permission: exception.decide
+      parameters: [ { $ref: "#/components/parameters/ExceptionId" }, { $ref: "#/components/parameters/IfMatch" } ]
+      requestBody:
+        required: true
+        content: { application/json: { schema: { type: object, required: [reason], properties: { reason: { type: string, minLength: 10 } } } } }
+      responses:
+        "200":
+          description: Revoked; covered findings/control gaps reopen
+          content: { application/json: { schema: { $ref: "#/components/schemas/SecurityException" } } }
+        "409": { $ref: "#/components/responses/Conflict" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+        "422": { $ref: "#/components/responses/Unprocessable" }
+        "400": { $ref: "#/components/responses/BadRequest" }
+        "404": { $ref: "#/components/responses/NotFound" }
+  # ------------------------------------------------------------------ Assessments
+  /assessments:
+    get:
+      tags: [Assessments]
+      operationId: listAssessments
+      x-permission: assessment.read
+      parameters:
+        - $ref: "#/components/parameters/Cursor"
+        - $ref: "#/components/parameters/Limit"
+        - { name: "filter[type]", in: query, schema: { $ref: "#/components/schemas/AssessmentType" } }
+        - { name: "filter[application]", in: query, schema: { type: string, format: uuid } }
+        - { name: "filter[status]", in: query, schema: { $ref: "#/components/schemas/AssessmentStatus" } }
+      responses:
+        "200":
+          description: Assessments
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [items]
+                properties:
+                  items: { type: array, maxItems: 200, items: { $ref: "#/components/schemas/AssessmentSummary" } }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+        "422": { $ref: "#/components/responses/Unprocessable" }
+        "400": { $ref: "#/components/responses/BadRequest" }
+    post:
+      tags: [Assessments]
+      operationId: createAssessment
+      x-permission: assessment.create
+      parameters: [ { $ref: "#/components/parameters/IdempotencyKey" } ]
+      requestBody:
+        required: true
+        content: { application/json: { schema: { $ref: "#/components/schemas/AssessmentCreate" } } }
+      responses:
+        "201":
+          description: Planned
+          content: { application/json: { schema: { $ref: "#/components/schemas/Assessment" } } }
+        "422": { $ref: "#/components/responses/Unprocessable" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+        "400": { $ref: "#/components/responses/BadRequest" }
+  /assessments/{assessmentId}:
+    get:
+      tags: [Assessments]
+      operationId: getAssessment
+      x-permission: assessment.read
+      parameters: [ { $ref: "#/components/parameters/AssessmentId" } ]
+      responses:
+        "200":
+          description: Assessment with answers (SAMM types include official question text and pre-filled automated answers)
+          headers: { ETag: { $ref: "#/components/headers/ETag" } }
+          content: { application/json: { schema: { $ref: "#/components/schemas/Assessment" } } }
+        "404": { $ref: "#/components/responses/NotFound" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+        "422": { $ref: "#/components/responses/Unprocessable" }
+        "400": { $ref: "#/components/responses/BadRequest" }
+  /assessments/{assessmentId}/answers:
+    put:
+      tags: [Assessments]
+      operationId: putAssessmentAnswers
+      x-permission: assessment.answer
+      parameters: [ { $ref: "#/components/parameters/AssessmentId" }, { $ref: "#/components/parameters/IfMatch" } ]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { type: object, required: [answers], properties: { answers: { type: array, items: { $ref: "#/components/schemas/AssessmentAnswer" } } } }
+      responses:
+        "200":
+          description: Answers saved
+          content: { application/json: { schema: { $ref: "#/components/schemas/Assessment" } } }
+        "409": { $ref: "#/components/responses/Conflict" }
+        "412": { $ref: "#/components/responses/PreconditionFailed" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+        "422": { $ref: "#/components/responses/Unprocessable" }
+        "400": { $ref: "#/components/responses/BadRequest" }
+        "404": { $ref: "#/components/responses/NotFound" }
+  /assessments/{assessmentId}/decision:
+    post:
+      tags: [Assessments]
+      operationId: decideAssessment
+      x-permission: assessment.approve
+      description: Approver ≠ lead assessor; for M2 evidence the approver must be outside the owning team. Approval creates evidence.
+      parameters: [ { $ref: "#/components/parameters/AssessmentId" }, { $ref: "#/components/parameters/IfMatch" } ]
+      requestBody:
+        required: true
+        content: { application/json: { schema: { $ref: "#/components/schemas/Decision" } } }
+      responses:
+        "200":
+          description: Decided
+          content: { application/json: { schema: { $ref: "#/components/schemas/Assessment" } } }
+        "403": { $ref: "#/components/responses/SodViolation" }
+        "409": { $ref: "#/components/responses/Conflict" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "422": { $ref: "#/components/responses/Unprocessable" }
+        "400": { $ref: "#/components/responses/BadRequest" }
+        "404": { $ref: "#/components/responses/NotFound" }
+  # ------------------------------------------------------------------ Maturity, ASVS, threat models
+  /applications/{appId}/maturity:
+    get:
+      tags: [Maturity]
+      operationId: getApplicationMaturity
+      x-permission: application.read
+      parameters:
+        - $ref: "#/components/parameters/AppId"
+        - { name: snapshot, in: query, description: "Snapshot period (YYYY-MM); default = live calculation", schema: { type: string, pattern: "^[0-9]{4}-[0-9]{2}$" } }
+      responses:
+        "200":
+          description: SAMM scores with provenance and target comparison
+          content: { application/json: { schema: { $ref: "#/components/schemas/MaturityReport" } } }
+        "404": { $ref: "#/components/responses/NotFound" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+        "422": { $ref: "#/components/responses/Unprocessable" }
+        "400": { $ref: "#/components/responses/BadRequest" }
+  /org-units/{orgUnitId}/maturity:
+    get:
+      tags: [Maturity]
+      operationId: getOrgUnitMaturity
+      x-status: designed   # in the contract, not implemented yet (the API returns 404)
+      summary: Distribution of application maturity (not a league table) plus org-level Governance practices
+      x-permission: maturity.rollup.read
+      parameters:
+        - $ref: "#/components/parameters/OrgUnitId"
+        - { name: snapshot, in: query, schema: { type: string, pattern: "^[0-9]{4}-[0-9]{2}$" } }
+      responses:
+        "200":
+          description: Roll-up
+          content: { application/json: { schema: { $ref: "#/components/schemas/MaturityRollup" } } }
+        "404": { $ref: "#/components/responses/NotFound" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+        "422": { $ref: "#/components/responses/Unprocessable" }
+        "400": { $ref: "#/components/responses/BadRequest" }
+  /maturity/snapshots:
+    get:
+      tags: [Maturity]
+      operationId: listMaturitySnapshots
+      x-status: designed   # in the contract, not implemented yet (the API returns 404)
+      x-permission: maturity.rollup.read
+      responses:
+        "200":
+          description: Published snapshots with catalogue/methodology versions
+          content:
+            application/json:
+              schema: { type: object, required: [items], properties: { items: { type: array, items: { $ref: "#/components/schemas/MaturitySnapshot" } } } }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+        "422": { $ref: "#/components/responses/Unprocessable" }
+        "400": { $ref: "#/components/responses/BadRequest" }
+  /applications/{appId}/asvs:
+    get:
+      tags: [ASVS]
+      operationId: listAsvsRequirementStatus
+      x-status: designed   # in the contract, not implemented yet (the API returns 404)
+      x-permission: application.read
+      parameters:
+        - $ref: "#/components/parameters/AppId"
+        - { name: "filter[chapter]", in: query, schema: { type: string, pattern: "^V[0-9]{1,2}$" } }
+        - { name: "filter[status]", in: query, schema: { $ref: "#/components/schemas/RequirementStatus" } }
+      responses:
+        "200":
+          description: Applicable requirements with derived status and backing method
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [target_level, items, summary]
+                properties:
+                  target_level: { type: integer, minimum: 1, maximum: 3 }
+                  asvs_version: { type: string }
+                  summary: { type: object, additionalProperties: { type: integer } }
+                  items: { type: array, items: { $ref: "#/components/schemas/RequirementState" } }
+        "404": { $ref: "#/components/responses/NotFound" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+        "422": { $ref: "#/components/responses/Unprocessable" }
+        "400": { $ref: "#/components/responses/BadRequest" }
+  /applications/{appId}/threat-models:
+    get:
+      tags: [Threat models]
+      operationId: listThreatModels
+      x-status: designed   # in the contract, not implemented yet (the API returns 404)
+      x-permission: application.read
+      parameters: [ { $ref: "#/components/parameters/AppId" } ]
+      responses:
+        "200":
+          description: Parsed threat-model versions (per commit) with review status
+          content:
+            application/json:
+              schema: { type: object, required: [items], properties: { items: { type: array, items: { $ref: "#/components/schemas/ThreatModel" } } } }
+        "404": { $ref: "#/components/responses/NotFound" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+        "422": { $ref: "#/components/responses/Unprocessable" }
+        "400": { $ref: "#/components/responses/BadRequest" }
+  # ------------------------------------------------------------------ Tickets, reports, jobs, catalogue
+  /tickets:
+    get:
+      tags: [Tickets]
+      operationId: listTickets
+      x-status: designed   # in the contract, not implemented yet (the API returns 404)
+      x-permission: finding.read
+      parameters:
+        - $ref: "#/components/parameters/Cursor"
+        - $ref: "#/components/parameters/Limit"
+        - { name: "filter[application]", in: query, schema: { type: string, format: uuid } }
+      responses:
+        "200":
+          description: Tickets with linked findings
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [items, page]
+                properties:
+                  items: { type: array, items: { $ref: "#/components/schemas/Ticket" } }
+                  page: { $ref: "#/components/schemas/Page" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+        "422": { $ref: "#/components/responses/Unprocessable" }
+        "400": { $ref: "#/components/responses/BadRequest" }
+  /reports/org-scorecard:
+    get:
+      tags: [Reports]
+      operationId: getOrgScorecard
+      summary: Aggregates for leadership and executive views (no finding-level detail)
+      x-permission: report.org.read
+      parameters:
+        - { name: org_unit, in: query, schema: { type: string, format: uuid } }
+      responses:
+        "200":
+          description: Scorecard
+          content: { application/json: { schema: { $ref: "#/components/schemas/OrgScorecard" } } }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+        "422": { $ref: "#/components/responses/Unprocessable" }
+        "400": { $ref: "#/components/responses/BadRequest" }
+  /reports/exports:
+    post:
+      tags: [Reports]
+      operationId: createReportExport
+      x-status: designed   # in the contract, not implemented yet (the API returns 404)
+      x-permission: report.export
+      parameters: [ { $ref: "#/components/parameters/IdempotencyKey" } ]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [report, format]
+              properties:
+                report: { type: string, enum: [unit_pack, leadership_pack, findings_csv, control_gaps_csv] }
+                format: { type: string, enum: [pdf, csv] }
+                org_unit: { type: string, format: uuid }
+                period: { type: string, pattern: "^[0-9]{4}-[0-9]{2}$" }
+      responses:
+        "202":
+          description: Export job accepted (audited)
+          content: { application/json: { schema: { $ref: "#/components/schemas/Job" } } }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+        "422": { $ref: "#/components/responses/Unprocessable" }
+        "400": { $ref: "#/components/responses/BadRequest" }
+  /jobs/{jobId}:
+    get:
+      tags: [Platform]
+      operationId: getJob
+      x-status: designed   # in the contract, not implemented yet (the API returns 404)
+      x-permission: job.read.own
+      parameters: [ { name: jobId, in: path, required: true, schema: { type: string } } ]
+      responses:
+        "200":
+          description: Job status; result link when complete
+          content: { application/json: { schema: { $ref: "#/components/schemas/Job" } } }
+        "404": { $ref: "#/components/responses/NotFound" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+        "422": { $ref: "#/components/responses/Unprocessable" }
+        "400": { $ref: "#/components/responses/BadRequest" }
+  /catalogue/controls:
+    get:
+      tags: [Catalogue]
+      operationId: listCatalogueControls
+      summary: Active control catalogue (read-only; changes are made by PR, never via the API)
+      x-permission: catalogue.read
+      responses:
+        "200":
+          description: Controls with mappings and applicability
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [catalogue_version, git_sha, items]
+                properties:
+                  catalogue_version: { type: string }
+                  git_sha: { type: string }
+                  items: { type: array, items: { $ref: "#/components/schemas/CatalogueControl" } }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+        "422": { $ref: "#/components/responses/Unprocessable" }
+        "400": { $ref: "#/components/responses/BadRequest" }
+  /exceptions/{exceptionId}/cosign:
+    post:
+      tags: [Exceptions]
+      operationId: cosignException
+      summary: Business-owner co-signature (Tier 1/2), before approval
+      x-permission: exception.read
+      description: The permission only requires that the caller can see the exception; the service accepts the co-signature only from the application's recorded business owner (an identity fact, stronger than a role).
+      parameters: [ { $ref: "#/components/parameters/ExceptionId" } ]
+      responses:
+        "200": { description: Co-signed, content: { application/json: { schema: { $ref: "#/components/schemas/SecurityException" } } } }
+        "403": { $ref: "#/components/responses/SodViolation" }
+        "409": { $ref: "#/components/responses/Conflict" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "422": { $ref: "#/components/responses/Unprocessable" }
+        "400": { $ref: "#/components/responses/BadRequest" }
+        "404": { $ref: "#/components/responses/NotFound" }
+  /assessments/{assessmentId}/submit:
+    post:
+      tags: [Assessments]
+      operationId: submitAssessment
+      summary: Lead assessor submits the recorded assessment for review
+      x-permission: assessment.answer
+      parameters: [ { $ref: "#/components/parameters/AssessmentId" } ]
+      responses:
+        "200": { description: Submitted, content: { application/json: { schema: { $ref: "#/components/schemas/Assessment" } } } }
+        "403": { $ref: "#/components/responses/Forbidden" }
+        "409": { $ref: "#/components/responses/Conflict" }
+        "422": { $ref: "#/components/responses/Unprocessable" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "400": { $ref: "#/components/responses/BadRequest" }
+        "404": { $ref: "#/components/responses/NotFound" }
+  /reports/{report}.csv:
+    get:
+      tags: [Reports]
+      operationId: exportReport
+      summary: CSV export of open findings or control states, scoped to the caller and audited
+      x-permission: report.export
+      description: Cells that could be read as spreadsheet formulas are prefixed with an apostrophe (CSV injection).
+      parameters:
+        - { name: report, in: path, required: true, schema: { type: string, enum: [findings, controls] } }
+      responses:
+        "200": { description: CSV, content: { text/csv: { schema: { type: string } } } }
+        "404": { $ref: "#/components/responses/NotFound" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+        "422": { $ref: "#/components/responses/Unprocessable" }
+        "400": { $ref: "#/components/responses/BadRequest" }
+  /admin/org-units:
+    get:
+      tags: [Administration]
+      operationId: adminListOrgUnits
+      summary: The organization tree with member and application counts
+      x-permission: org.admin
+      responses:
+        "200":
+          description: Units and the configured levels
+          content: { application/json: { schema: { type: object, required: [items, levels], properties: { items: { type: array, items: { $ref: "#/components/schemas/OrgUnitAdmin" } }, levels: { type: array, items: { type: string } } } } } }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+        "422": { $ref: "#/components/responses/Unprocessable" }
+        "400": { $ref: "#/components/responses/BadRequest" }
+    post:
+      tags: [Administration]
+      operationId: adminCreateOrgUnit
+      x-permission: org.admin
+      description: The parent must be exactly one level above (config/organization.yaml). Re-parenting is not offered.
+      requestBody:
+        required: true
+        content: { application/json: { schema: { type: object, required: [slug, name, unit_type, parent], properties: { slug: { type: string, pattern: "^[a-z0-9][a-z0-9-]{1,62}[a-z0-9]$" }, name: { type: string }, unit_type: { type: string }, parent: { type: string } } } } }
+      responses:
+        "201": { description: Created, content: { application/json: { schema: { type: object, properties: { id: { type: string }, slug: { type: string } } } } } }
+        "409": { $ref: "#/components/responses/Conflict" }
+        "422": { $ref: "#/components/responses/Unprocessable" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+        "400": { $ref: "#/components/responses/BadRequest" }
+  /admin/org-units/{slug}:
+    patch:
+      tags: [Administration]
+      operationId: adminUpdateOrgUnit
+      x-permission: org.admin
+      parameters: [ { name: slug, in: path, required: true, schema: { type: string } } ]
+      requestBody:
+        required: true
+        content: { application/json: { schema: { type: object, properties: { name: { type: string }, scm_group: { type: string }, idp_group_id: { type: string } } } } }
+      responses:
+        "200": { description: Updated, content: { application/json: { schema: { type: object } } } }
+        "404": { $ref: "#/components/responses/NotFound" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+        "422": { $ref: "#/components/responses/Unprocessable" }
+        "400": { $ref: "#/components/responses/BadRequest" }
+  /admin/org-units/{slug}/members:
+    get:
+      tags: [Administration]
+      operationId: adminListMembers
+      x-permission: org.admin
+      parameters: [ { name: slug, in: path, required: true, schema: { type: string } } ]
+      responses:
+        "200": { description: Members, content: { application/json: { schema: { type: object, properties: { items: { type: array, items: { type: object } } } } } } }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+        "422": { $ref: "#/components/responses/Unprocessable" }
+        "400": { $ref: "#/components/responses/BadRequest" }
+        "404": { $ref: "#/components/responses/NotFound" }
+  /admin/org-units/{slug}/members/{userId}:
+    parameters:
+      - { name: slug, in: path, required: true, schema: { type: string } }
+      - { name: userId, in: path, required: true, schema: { type: string, format: uuid } }
+    put:
+      tags: [Administration]
+      operationId: adminAddMember
+      x-permission: org.admin
+      responses: { "200": { description: Member, content: { application/json: { schema: { type: object } } } } }
+    delete:
+      tags: [Administration]
+      operationId: adminRemoveMember
+      x-permission: org.admin
+      responses: { "200": { description: Removed, content: { application/json: { schema: { type: object } } } } }
+  /admin/users:
+    get:
+      tags: [Administration]
+      operationId: adminListUsers
+      x-permission: org.admin
+      parameters: [ { name: q, in: query, schema: { type: string, maxLength: 100 } } ]
+      responses:
+        "200": { description: People, content: { application/json: { schema: { type: object, properties: { items: { type: array, items: { type: object } } } } } } }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+        "422": { $ref: "#/components/responses/Unprocessable" }
+        "400": { $ref: "#/components/responses/BadRequest" }
+  /admin/role-assignments:
+    get:
+      tags: [Administration]
+      operationId: adminListGrants
+      x-permission: org.admin
+      responses:
+        "200": { description: Grants, content: { application/json: { schema: { type: object, properties: { items: { type: array, items: { type: object } } } } } } }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+        "422": { $ref: "#/components/responses/Unprocessable" }
+        "400": { $ref: "#/components/responses/BadRequest" }
+    post:
+      tags: [Administration]
+      operationId: adminGrantRole
+      x-permission: org.admin
+      description: Never to yourself (403, audited); platform_admin comes from the identity provider only; scoped roles need an org unit, organization-wide roles take none.
+      requestBody:
+        required: true
+        content: { application/json: { schema: { type: object, required: [principal_id, role], properties: { principal_type: { type: string, enum: [user, idp_group] }, principal_id: { type: string }, role: { type: string }, org_unit: { type: string }, expires_at: { type: string, format: date } } } } }
+      responses:
+        "201": { description: Granted, content: { application/json: { schema: { type: object, properties: { id: { type: string } } } } } }
+        "403": { $ref: "#/components/responses/SodViolation" }
+        "409": { $ref: "#/components/responses/Conflict" }
+        "422": { $ref: "#/components/responses/Unprocessable" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "400": { $ref: "#/components/responses/BadRequest" }
+  /admin/role-assignments/{grantId}:
+    delete:
+      tags: [Administration]
+      operationId: adminRevokeRole
+      x-permission: org.admin
+      parameters: [ { name: grantId, in: path, required: true, schema: { type: string, format: uuid } } ]
+      responses:
+        "200": { description: Revoked, content: { application/json: { schema: { type: object } } } }
+        "403": { $ref: "#/components/responses/SodViolation" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "422": { $ref: "#/components/responses/Unprocessable" }
+        "400": { $ref: "#/components/responses/BadRequest" }
+        "404": { $ref: "#/components/responses/NotFound" }
+components:
+  securitySchemes:
+    session:
+      type: apiKey
+      in: cookie
+      name: __Host-aap_session
+      description: BFF session established via Entra ID OIDC (auth code + PKCE). State-changing requests also require the X-CSRF-Token header.
+    entraClientCredentials:
+      type: oauth2
+      description: Entra ID client credentials; app roles (e.g. Reports.Read) in the `roles` claim. Tenant-specific token URL.
+      flows:
+        clientCredentials:
+          tokenUrl: https://login.microsoftonline.com/TENANT_ID/oauth2/v2.0/token
+          scopes:
+            api://aap/.default: Application permissions granted as app roles
+
+  headers:
+    ETag:
+      description: Entity tag for optimistic concurrency
+      schema: { type: string }
+
+  parameters:
+    Cursor: { name: cursor, in: query, schema: { type: string, maxLength: 512 } }
+    Limit: { name: limit, in: query, schema: { type: integer, minimum: 1, maximum: 200, default: 50 } }
+    AppId: { name: appId, in: path, required: true, description: "UUID or app key (APP-nnnnn)", schema: { type: string, pattern: "^([0-9a-f-]{36}|APP-[0-9]{5})$" } }
+    OrgUnitId: { name: orgUnitId, in: path, required: true, schema: { type: string, format: uuid } }
+    ControlKey: { name: controlKey, in: path, required: true, schema: { type: string, pattern: "^ASC-[A-Z]{2,3}-[0-9]{2}$" } }
+    EvidenceId: { name: evidenceId, in: path, required: true, schema: { type: string, format: uuid } }
+    FindingId: { name: findingId, in: path, required: true, schema: { type: string, format: uuid } }
+    VulnId: { name: vulnId, in: path, required: true, description: "CVE, GHSA, OSV or MAL id; aliases resolved", schema: { type: string, maxLength: 64 } }
+    ExceptionId: { name: exceptionId, in: path, required: true, description: "UUID or EX-nnnnnn", schema: { type: string } }
+    AssessmentId: { name: assessmentId, in: path, required: true, schema: { type: string, format: uuid } }
+    IfMatch: { name: If-Match, in: header, required: true, schema: { type: string } }
+    IdempotencyKey: { name: Idempotency-Key, in: header, required: false, schema: { type: string, maxLength: 128 } }
+
+  responses:
+    BadRequest:
+      description: Invalid request (e.g. unknown filter field)
+      content: { application/problem+json: { schema: { $ref: "#/components/schemas/Problem" } } }
+    Unauthorized:
+      description: Not authenticated
+      content: { application/problem+json: { schema: { $ref: "#/components/schemas/Problem" } } }
+    Forbidden:
+      description: The caller's roles do not grant this operation's x-permission
+      content: { application/problem+json: { schema: { $ref: "#/components/schemas/Problem" } } }
+    SodViolation:
+      description: Forbidden by segregation of duties or role (type .../problems/sod-violation or .../forbidden)
+      content: { application/problem+json: { schema: { $ref: "#/components/schemas/Problem" } } }
+    NotFound:
+      description: Not found or outside the caller's scope (no enumeration)
+      content: { application/problem+json: { schema: { $ref: "#/components/schemas/Problem" } } }
+    Conflict:
+      description: Invalid state transition
+      content: { application/problem+json: { schema: { $ref: "#/components/schemas/Problem" } } }
+    PreconditionFailed:
+      description: ETag mismatch
+      content: { application/problem+json: { schema: { $ref: "#/components/schemas/Problem" } } }
+    Unprocessable:
+      description: Semantically invalid (e.g. expiry beyond policy maximum)
+      content: { application/problem+json: { schema: { $ref: "#/components/schemas/Problem" } } }
+
+  schemas:
+    Problem:
+      type: object
+      description: RFC 9457 problem details
+      required: [type, title, status]
+      properties:
+        type: { type: string, format: uri, examples: ["https://aap.internal.example/problems/sod-violation"] }
+        title: { type: string }
+        status: { type: integer }
+        detail: { type: string }
+        instance: { type: string }
+        request_id: { type: string }
+        errors:
+          type: array
+          items: { type: object, properties: { field: { type: string }, message: { type: string } } }
+    Page:
+      type: object
+      required: [next_cursor]
+      properties:
+        next_cursor: { type: [string, "null"] }
+    DataFreshness:
+      type: object
+      description: Connector freshness behind this view; stale connectors are flagged rather than hidden
+      properties:
+        computed_at: { type: string, format: date-time }
+        stale_connectors: { type: array, items: { type: string } }
+
+    TierRank: { type: integer, minimum: 1, maximum: 4 }
+    Lifecycle: { type: string, enum: [proposed, development, pilot, production, deprecated, retired] }
+    Exposure: { type: string, enum: [isolated, internal, partner, internet_authenticated, internet_public] }
+    OrgUnitType: { type: string, pattern: '^[a-z][a-z0-9_]{1,31}$', description: 'A level from config/organization.yaml, e.g. organisation, business_unit, team' }
+    Priority: { type: string, enum: [P1, P2, P3, P4] }
+    Confidence: { type: string, enum: [C0, C1, C2, C3, M1, M2] }
+    ControlStateValue: { type: string, enum: [satisfied, partial, not_satisfied, stale, no_evidence, excepted, not_applicable, error] }
+    RequirementLevel: { type: string, enum: [mandatory, recommended, "n/a"] }
+    EvidenceState: { type: string, enum: [active, expiring, expired, superseded, revoked] }
+    FindingStatus: { type: string, enum: [new, triaged, ticketed, fix_pending, verified, closed, false_positive, excepted, reopened] }
+    FindingType:
+      type: string
+      enum: [code, dependency, secret, iac, container, dast, api, cloud, malicious_package, licence, control_gap, pentest, architecture, threat_model, exception_expired]
+    ExceptionStatus: { type: string, enum: [draft, pending_approval, approved, rejected, expired, revoked, closed] }
+    AssessmentType: { type: string, enum: [samm_organisation, samm_application, architecture_review, threat_model_review, pentest, manual_control, classification_review] }
+    AssessmentStatus: { type: string, enum: [planned, in_progress, submitted, approved, rejected, cancelled] }
+    RequirementStatus: { type: string, enum: [verified, scanned_no_issues, failed, unverified, excepted, not_applicable] }
+
+    PersonRef:
+      type: object
+      required: [id, display_name]
+      properties:
+        id: { type: string, format: uuid }
+        display_name: { type: string }
+        github_login: { type: [string, "null"] }
+    Integration:
+      type: object
+      required: [key, name, configured, missing, bootstrap]
+      properties:
+        key:
+          type: string
+          examples: [jira]
+        name: {type: string}
+        kind:
+          enum: [cloud_posture, evidence_store, identity, notification, scm, secrets, siem, ticketing, vuln_intel, workbench]
+        source: {type: string, description: 'builtin, or the Python distribution that provided the plugin'}
+        purpose: {type: string}
+        configured: {type: boolean}
+        missing:
+          type: array
+          items: {type: string}
+          description: Setting or secret NAMES; never values
+        bootstrap: {type: string, description: Command or Terraform module that sets it up}
+        evidence:
+          type: array
+          items: {type: string}
+        interval:
+          type: [string, 'null']
+        last_run:
+          type: [object, 'null']
+        check:
+          type: [object, 'null']
+          description: plugin health check result, when it has one
+    Me:
+      type: object
+      required: [user, roles]
+      properties:
+        csrf_token: { type: [string, "null"], description: "Session sign-in only: send as X-AAP-CSRF on unsafe requests" }
+        auth_mode: { enum: [dev, oidc] }
+        user: { $ref: "#/components/schemas/PersonRef" }
+        roles:
+          type: array
+          items:
+            type: object
+            required: [role]
+            properties:
+              role: { type: string }
+              scope_org_unit: { type: [string, "null"], format: uuid }
+              scope_application: { type: [string, "null"], format: uuid }
+              expires_at: { type: [string, "null"], format: date-time }
+        org_wide: { type: boolean }
+    OrgUnit:
+      type: object
+      required: [id, type, name, slug]
+      properties:
+        id: { type: string, format: uuid }
+        parent_id: { type: [string, "null"], format: uuid }
+        type: { $ref: "#/components/schemas/OrgUnitType" }
+        name: { type: string }
+        slug: { type: string }
+
+    ApplicationSummary:
+      type: object
+      required: [id, app_key, name, tier, lifecycle, org_unit]
+      properties:
+        id: {type: string, format: uuid}
+        app_key: {type: string}
+        name: {type: string}
+        tier:
+          anyOf:
+          - {$ref: '#/components/schemas/TierRank'}
+          - {type: 'null'}
+        lifecycle: {type: string}
+        exposure:
+          type: [string, 'null']
+        org_unit: {type: string, description: owning unit name}
+        org_slug: {type: string}
+        mandatory_controls:
+          type: [object, 'null']
+          additionalProperties: {type: integer}
+          description: "mandatory control states \u2192 count"
+        open_findings:
+          type: [object, 'null']
+          additionalProperties: {type: integer}
+          description: "priority (or unscored) \u2192 open count"
+        sla_breaches: {type: integer}
+    Application:
+      allOf:
+      - {$ref: '#/components/schemas/ApplicationSummary'}
+      - type: object
+        properties:
+          description: {type: string}
+          data_classification:
+            type: [string, 'null']
+          personal_data:
+            type: [string, 'null']
+          profile: {type: object}
+          updated_at: {type: string, format: date-time}
+          business_owner:
+            type: [string, 'null']
+            description: display name; null when application.yaml names nobody resolvable
+          technical_owner:
+            type: [string, 'null']
+          champion:
+            type: [string, 'null']
+    ApplicationSettingsPatch:
+      type: object
+      additionalProperties: false
+      properties:
+        jira_project: { type: [string, "null"], pattern: "^[A-Z][A-Z0-9]+$" }
+        jira_component: { type: [string, "null"] }
+        notification_channel: { type: [string, "null"], format: uri }
+        p4_ticket_batching: { type: boolean }
+    Classification:
+      type: object
+      required: [id, model_version, computed_tier, decision, explanation]
+      properties:
+        id: { type: string, format: uuid }
+        model_version: { type: string }
+        inputs: { type: object, description: the classification answers from application.yaml }
+        matched_floor_rules: { type: array, items: { type: string } }
+        points: { type: integer }
+        computed_tier: { $ref: "#/components/schemas/TierRank" }
+        requested_tier: { anyOf: [ { $ref: "#/components/schemas/TierRank" }, { type: "null" } ] }
+        approved_tier: { anyOf: [ { $ref: "#/components/schemas/TierRank" }, { type: "null" } ] }
+        decision: { type: string, enum: [auto_approved, pending, approved, rejected] }
+        explanation: { type: string }
+        decided_by: { type: [string, "null"], description: display name }
+        decided_at: { type: [string, "null"], format: date-time }
+        requested_by: { type: [string, "null"], description: display name of the person who registered or asked }
+        can_decide: { type: boolean, description: "the caller may decide it now (pending, permitted, not SoD-barred)" }
+    OrgUnitAdmin:
+      type: object
+      required: [id, slug, name, unit_type]
+      properties:
+        id: { type: string, format: uuid }
+        slug: { type: string }
+        name: { type: string }
+        unit_type: { type: string }
+        parent: { type: [string, "null"] }
+        scm_group: { type: [string, "null"] }
+        idp_group_id: { type: [string, "null"] }
+        members: { type: integer }
+        applications: { type: integer }
+    ClassificationDecision:
+      type: object
+      required: [decision]
+      properties:
+        decision: { type: string, enum: [approved, rejected] }
+        reason: { type: string, maxLength: 2000 }
+    RegisterApplication:
+      type: object
+      required: [repository]
+      properties:
+        repository: { type: string, pattern: "^[A-Za-z0-9_.-]+(/[A-Za-z0-9_.-]+)+$", maxLength: 255, description: owner/name }
+        provider: { type: string, enum: [github, gitlab], default: github }
+        repository_id: { type: string, maxLength: 64, description: "the provider's repository id (with application_yaml)" }
+        application_yaml: { type: string, maxLength: 262144 }
+        asvs_yaml: { type: string, maxLength: 262144 }
+    Registered:
+      type: object
+      required: [id, app_key, tier, decision, explanation]
+      properties:
+        id: { type: string, format: uuid }
+        app_key: { type: string }
+        tier: { $ref: "#/components/schemas/TierRank" }
+        decision: { type: string, enum: [pending, auto_approved] }
+        explanation: { type: string }
+        matched_floor_rules: { type: array, items: { type: string } }
+    Decision:
+      type: object
+      required: [outcome, comment]
+      properties:
+        outcome: { type: string, enum: [approve, reject] }
+        comment: { type: string, minLength: 5, maxLength: 4000 }
+    Repository:
+      type: object
+      required: [id, full_name, visibility, role]
+      properties:
+        id: { type: string, format: uuid }
+        github_id: { type: integer }
+        full_name: { type: string }
+        visibility: { type: string, enum: [public, private, internal] }
+        default_branch: { type: string }
+        role: { type: string, enum: [primary, component, iac, library, documentation] }
+        onboarding: { type: string, enum: [discovered, onboarding_pr_open, onboarded, excluded] }
+        workflow_pin: { type: [string, "null"], description: "security-workflows SHA in use and whether it is still trusted" }
+    Environment:
+      type: object
+      required: [id, name, type]
+      properties:
+        id: { type: string, format: uuid }
+        name: { type: string }
+        type: { type: string, enum: [development, test, staging, production, other] }
+        url: { type: [string, "null"], format: uri }
+        cloud_scopes:
+          type: array
+          items:
+            type: object
+            properties:
+              provider: { type: string, enum: [azure, aws, gcp, other] }
+              scope_type: { type: string }
+              scope_ref: { type: string }
+        current_deployments:
+          type: array
+          items:
+            type: object
+            properties:
+              artifact: { type: string }
+              digest: { type: string }
+              deployed_at: { type: string, format: date-time }
+              provenance_verified: { type: boolean }
+
+    ControlState:
+      type: object
+      required: [control_key, title, requirement, state, scope, since]
+      properties:
+        control_key: { type: string }
+        title: { type: string }
+        domain: { type: string }
+        requirement: { $ref: "#/components/schemas/RequirementLevel" }
+        state: { $ref: "#/components/schemas/ControlStateValue" }
+        observe_mode: { type: boolean }
+        scope: { type: object, properties: { type: { type: string }, ref: { type: string }, label: { type: string } } }
+        since: { type: string, format: date-time }
+        explanation: { type: string }
+        evidence_ids: { type: array, items: { type: string, format: uuid } }
+        exception: { type: [string, "null"], description: "Exception key if excepted" }
+        next_expiry: { type: [string, "null"], format: date-time, description: "When the supporting evidence expires" }
+    ControlEvaluation:
+      type: object
+      required: [id, evaluated_at, scope_type, scope_ref, state, evaluator, explanation]
+      properties:
+        id: {type: string, format: uuid}
+        evaluated_at: {type: string, format: date-time}
+        scope_type: {type: string}
+        scope_ref: {type: string}
+        state: {$ref: '#/components/schemas/ControlStateValue'}
+        previous_state:
+          type: [string, 'null']
+        evaluator: {type: string}
+        evaluator_build: {type: string}
+        catalogue_version_id: {type: string, format: uuid}
+        evidence_ids:
+          type: array
+          items: {type: string}
+        explanation: {type: string}
+        details: {type: object}
+    Evidence:
+      type: object
+      required: [id, type, confidence, result, observed_at, state, producer_type, producer_ref]
+      properties:
+        id: {type: string, format: uuid}
+        type: {type: string}
+        confidence: {$ref: '#/components/schemas/Confidence'}
+        confidence_reasons:
+          type: array
+          items: {type: string}
+        result: {type: string}
+        observed_at: {type: string, format: date-time}
+        ingested_at: {type: string, format: date-time}
+        state: {type: string}
+        valid_until:
+          type: [string, 'null']
+          format: date-time
+        producer_type:
+          type: string
+          enum: [approved_workflow, platform_connector, manual, external_system]
+        producer_ref: {type: string}
+        tool:
+          type: [string, 'null']
+        tool_version:
+          type: [string, 'null']
+        subject: {type: object}
+        summary: {type: object}
+        scope_ref: {type: string}
+    EvidenceDetail:
+      allOf:
+      - {$ref: '#/components/schemas/Evidence'}
+      - type: object
+        properties:
+          application_id:
+            type: [string, 'null']
+          run_ref:
+            type: [object, 'null']
+          raw_location:
+            type: [string, 'null']
+          attestation_ref:
+            type: [string, 'null']
+          record_hash: {type: string, description: hex SHA-256 of the hash-chained record}
+          prev_hash:
+            type: [string, 'null']
+          raw_sha256:
+            type: [array, 'null']
+            items: {type: string}
+          validity_events:
+            type: array
+            items:
+              type: object
+              properties:
+                state: {type: string}
+                reason: {type: string}
+                at: {type: string}
+          used_by_evaluations:
+            type: array
+            items: {type: string}
+    Finding:
+      type: object
+      required: [id, application_id, app_key, type, title, status, first_seen_at]
+      properties:
+        id: {type: string, format: uuid}
+        application_id: {type: string, format: uuid}
+        app_key: {type: string}
+        application_name: {type: string}
+        type: {type: string}
+        source_system: {type: string}
+        title: {type: string}
+        cwe_id:
+          type: [integer, 'null']
+        vulnerability:
+          type: [string, 'null']
+        tool_severity:
+          type: [string, 'null']
+        priority:
+          anyOf:
+          - {$ref: '#/components/schemas/Priority'}
+          - {type: 'null'}
+        risk_score:
+          type: [integer, 'null']
+        status: {$ref: '#/components/schemas/FindingStatus'}
+        first_seen_at: {type: string, format: date-time}
+        last_seen_at: {type: string, format: date-time}
+        triage_due_at:
+          type: [string, 'null']
+          format: date-time
+        sla_due_at:
+          type: [string, 'null']
+          format: date-time
+        sla_breached: {type: boolean}
+        control_key:
+          type: [string, 'null']
+        location: {type: object}
+        scope_ref: {type: string}
+        updated_at: {type: string, format: date-time}
+    FindingDetail:
+      allOf:
+      - {$ref: '#/components/schemas/Finding'}
+      - type: object
+        properties:
+          description: {type: string}
+          closure_evidence_id:
+            type: [string, 'null']
+          last_seen_evidence_id:
+            type: [string, 'null']
+          likelihood:
+            type: [integer, 'null']
+          impact:
+            type: [integer, 'null']
+          risk_explanation:
+            type: [string, 'null']
+          applied_rules:
+            type: [array, 'null']
+            items: {type: string}
+          risk_computed_at:
+            type: [string, 'null']
+            format: date-time
+    FindingTransition:
+      type: object
+      required: [action]
+      properties:
+        action:
+          type: string
+          enum: [triage, assign, mark_false_positive, confirm_false_positive, reject_false_positive, request_verification, reopen]
+        assignee: { type: string, format: uuid }
+        comment: { type: string, maxLength: 4000 }
+      allOf:
+        - if: { properties: { action: { enum: [mark_false_positive, reject_false_positive, reopen] } } }
+          then: { required: [comment] }
+        - if: { properties: { action: { const: assign } } }
+          then: { required: [assignee] }
+    FindingEvent:
+      type: object
+      required: [at, event_type]
+      properties:
+        at: { type: string, format: date-time }
+        event_type: { type: string }
+        from_status: { anyOf: [ { $ref: "#/components/schemas/FindingStatus" }, { type: "null" } ] }
+        to_status: { anyOf: [ { $ref: "#/components/schemas/FindingStatus" }, { type: "null" } ] }
+        actor: { type: string }
+        evidence_id: { type: [string, "null"], format: uuid }
+        details: { type: object, additionalProperties: true }
+    RiskAssessment:
+      type: object
+      required: [id, likelihood, impact, score, priority, computed_at]
+      properties:
+        id: {type: string, format: uuid}
+        model_version_id: {type: string, format: uuid}
+        inputs: {type: object}
+        likelihood: {type: integer}
+        impact: {type: integer}
+        score: {type: integer}
+        priority: {$ref: '#/components/schemas/Priority'}
+        applied_rules:
+          type: array
+          items: {type: string}
+        explanation: {type: string}
+        manual_override: {type: boolean}
+        computed_at: {type: string, format: date-time}
+    Vulnerability:
+      type: object
+      required: [id, aliases]
+      properties:
+        id: { type: string }
+        aliases: { type: array, items: { type: string } }
+        title: { type: [string, "null"] }
+        cwe_ids: { type: array, items: { type: integer } }
+        cvss_v4: { type: [object, "null"], properties: { vector: { type: string }, score: { type: number } } }
+        cvss_v3: { type: [object, "null"], properties: { vector: { type: string }, score: { type: number } } }
+        epss: { type: [object, "null"], properties: { score: { type: number }, percentile: { type: number }, date: { type: string, format: date } } }
+        in_kev: { type: boolean }
+        kev_added_at: { type: [string, "null"], format: date }
+        exploit_public: { type: boolean }
+        is_malicious: { type: boolean }
+        published_at: { type: [string, "null"], format: date-time }
+    AffectedApplications:
+      type: object
+      required: [vulnerability, affected, possibly_affected, not_affected_count, computed_at]
+      properties:
+        vulnerability: { $ref: "#/components/schemas/Vulnerability" }
+        affected:
+          type: array
+          items:
+            type: object
+            properties:
+              application: { $ref: "#/components/schemas/ApplicationSummary" }
+              components: { type: array, items: { type: object, properties: { purl: { type: string }, fixed_versions: { type: array, items: { type: string } }, direct: { type: [boolean, "null"] } } } }
+              deployed_in: { type: array, items: { type: string } }
+              finding_id: { type: [string, "null"], format: uuid }
+        possibly_affected:
+          type: array
+          items:
+            type: object
+            properties:
+              application: { $ref: "#/components/schemas/ApplicationSummary" }
+              reason: { type: string, enum: [no_sbom, stale_sbom, sbom_inconclusive] }
+        not_affected_count: { type: integer }
+        computed_at: { type: string, format: date-time }
+    ComponentUsage:
+      type: object
+      required: [purl, ecosystem, name, version, application_count]
+      properties:
+        purl: { type: string }
+        ecosystem: { type: string }
+        name: { type: string }
+        version: { type: string }
+        licence: { type: [string, "null"] }
+        application_count: { type: integer }
+        known_vulnerabilities: { type: integer }
+    Sbom:
+      type: object
+      required: [id, scope_key, format, component_count, is_current]
+      properties:
+        id: {type: string, format: uuid}
+        scope_key: {type: string}
+        commit_sha:
+          type: [string, 'null']
+        format: {type: string}
+        spec_version: {type: string}
+        component_count: {type: integer}
+        purl_coverage_pct:
+          type: [number, 'null']
+        is_current: {type: boolean}
+        evidence_id: {type: string, format: uuid}
+        generated_at: {type: string, format: date-time}
+    SbomComponent:
+      type: object
+      required: [purl]
+      properties:
+        purl: { type: string }
+        direct: { type: [boolean, "null"] }
+        scope: { type: string, enum: [required, optional, development, unknown] }
+        licence: { type: [string, "null"] }
+        vulnerabilities: { type: array, items: { type: string } }
+
+    ExceptionCreate:
+      type: object
+      required: [application, target_type, target_ref, justification, risk_description, residual_priority, remediation_plan]
+      properties:
+        application: { type: string, description: "application UUID or APP-key" }
+        target_type: { type: string, enum: [control, finding, requirement, sla] }
+        target_ref: { type: string, maxLength: 200 }
+        justification: { type: string, minLength: 20, maxLength: 4000 }
+        risk_description: { type: string, minLength: 20, maxLength: 4000 }
+        residual_priority: { $ref: "#/components/schemas/Priority" }
+        compensating_controls: { type: [string, "null"], maxLength: 4000 }
+        remediation_plan: { type: string, minLength: 20, maxLength: 4000 }
+        owner: { type: string, format: uuid, description: "defaults to the requester" }
+        requested_expiry: { type: string, format: date }
+    ExceptionSummary:
+      type: object
+      required: [id, exception_key, target_type, target_ref, residual_priority, status, app_key]
+      properties:
+        id: { type: string, format: uuid }
+        exception_key: { type: string }
+        target_type: { type: string }
+        target_ref: { type: string }
+        residual_priority: { $ref: "#/components/schemas/Priority" }
+        status: { $ref: "#/components/schemas/ExceptionStatus" }
+        expires_at: { type: [string, "null"], format: date-time }
+        created_at: { type: string, format: date-time }
+        app_key: { type: string }
+        application_name: { type: string }
+        requested_by: { type: string }
+    AssessmentSummary:
+      type: object
+      required: [id, type, status, app_key]
+      properties:
+        id: { type: string, format: uuid }
+        type: { $ref: "#/components/schemas/AssessmentType" }
+        status: { $ref: "#/components/schemas/AssessmentStatus" }
+        due_at: { type: [string, "null"], format: date-time }
+        approved_at: { type: [string, "null"], format: date-time }
+        app_key: { type: string }
+        application_name: { type: string }
+        lead_assessor: { type: [string, "null"] }
+        confidence: { type: [string, "null"] }
+    SecurityException:
+      type: object
+      required: [id, exception_key, application_id, app_key, target_type, target_ref, justification, risk_description,
+                 residual_priority, remediation_plan, status, required_approver_role, business_owner_cosign_required,
+                 cosigned, can_decide, can_cosign, max_days, created_at, renewal_count, events]
+      properties:
+        id: { type: string, format: uuid }
+        exception_key: { type: string, pattern: "^EX-[0-9]{6}$" }
+        application_id: { type: string, format: uuid }
+        app_key: { type: string }
+        target_type: { type: string, enum: [control, finding, requirement, sla] }
+        target_ref: { type: string }
+        justification: { type: string }
+        risk_description: { type: string }
+        residual_priority: { $ref: "#/components/schemas/Priority" }
+        compensating_controls: { type: [string, "null"] }
+        remediation_plan: { type: string }
+        status: { $ref: "#/components/schemas/ExceptionStatus" }
+        owner: { type: [string, "null"], description: display name }
+        requested_by: { type: [string, "null"], description: display name }
+        approver: { type: [string, "null"], description: display name }
+        required_approver_role: { type: string, description: "from config/exception-policy.yaml for priority x tier (escalated after max renewals)" }
+        business_owner_cosign_required: { type: boolean }
+        cosigned: { type: boolean }
+        can_decide: { type: boolean, description: the caller may decide it now (role rank and segregation of duties) }
+        can_cosign: { type: boolean }
+        max_days: { type: integer, description: the shorter of the policy and the control's own limit }
+        created_at: { type: string, format: date-time }
+        approved_at: { type: [string, "null"], format: date-time }
+        expires_at: { type: [string, "null"], format: date-time }
+        renewal_count: { type: integer }
+        events:
+          type: array
+          items:
+            type: object
+            required: [type, actor, at]
+            properties: { type: { type: string }, actor: { type: string }, at: { type: string, format: date-time }, details: { type: object } }
+
+    AssessmentCreate:
+      type: object
+      required: [type]
+      properties:
+        type: { $ref: "#/components/schemas/AssessmentType" }
+        application: { type: [string, "null"], format: uuid }
+        org_unit: { type: [string, "null"], format: uuid }
+        scope: { type: object, additionalProperties: true }
+        lead_assessor: { type: string, format: uuid }
+        due_at: { type: string, format: date }
+    AssessmentAnswer:
+      type: object
+      required: [item, value]
+      properties:
+        item: { type: string, description: "Framework item key, e.g. I-SB-A level question id" }
+        value: { type: number, minimum: 0, maximum: 1 }
+        rationale: { type: string, maxLength: 4000 }
+        evidence_refs: { type: array, items: { type: string } }
+        automated_value: { type: [number, "null"], readOnly: true }
+        capped: { type: boolean, readOnly: true }
+    Assessment:
+      type: object
+      required: [id, type, status, application_id, app_key, scope, can_record, can_decide]
+      properties:
+        id: { type: string, format: uuid }
+        type: { $ref: "#/components/schemas/AssessmentType" }
+        application_id: { type: string }
+        app_key: { type: [string, "null"] }
+        status: { $ref: "#/components/schemas/AssessmentStatus" }
+        scope: { type: object, description: "type-specific content: outcome, control_key, method, model_commit, tester, report_sha256, answers {STREAM:LEVEL: 0|0.25|0.5|1}" }
+        lead_assessor: { type: [string, "null"] }
+        approved_by: { type: [string, "null"] }
+        due_at: { type: [string, "null"], format: date-time }
+        submitted_at: { type: [string, "null"], format: date-time }
+        approved_at: { type: [string, "null"], format: date-time }
+        evidence_id: { type: [string, "null"], format: uuid, description: written by the worker after approval }
+        can_record: { type: boolean }
+        can_decide: { type: boolean }
+
+    MaturityScore:
+      type: object
+      required: [item, name, score, provenance]
+      properties:
+        item: { type: string, examples: ["I-SB"] }
+        name: { type: string }
+        level: { type: string, enum: [business_function, practice, stream] }
+        score: { type: number, minimum: 0, maximum: 3 }
+        target: { type: [number, "null"] }
+        provenance:
+          type: object
+          properties:
+            automated_pct: { type: number }
+            manual_independent_pct: { type: number }
+            manual_self_pct: { type: number }
+            unassessed_pct: { type: number }
+    MaturityReport:
+      type: object
+      required: [methodology_version, catalogue_version, overall, practices, functions]
+      properties:
+        methodology_version: {type: string}
+        catalogue_version: {type: string}
+        meets_tier_target:
+          type: [boolean, 'null']
+        overall: {type: number, minimum: 0, maximum: 3}
+        practices:
+          type: array
+          items:
+            allOf:
+            - type: object
+              required: [item, name, score]
+              properties:
+                item: {type: string}
+                name: {type: string}
+                score: {type: number, minimum: 0, maximum: 3}
+            - type: object
+              properties:
+                target:
+                  type: [number, 'null']
+                provenance: {type: object, description: 'answer provenance counts: automated, manual_independent, manual_self,
+                    unassessed'}
+        functions:
+          type: array
+          items:
+            type: object
+            required: [item, name, score]
+            properties:
+              item: {type: string}
+              name: {type: string}
+              score: {type: number, minimum: 0, maximum: 3}
+        streams:
+          type: array
+          items:
+            type: object
+            required: [item, name, score]
+            properties:
+              item: {type: string}
+              name: {type: string}
+              score: {type: number, minimum: 0, maximum: 3}
+    MaturityRollup:
+      type: object
+      required: [org_unit, distribution]
+      properties:
+        org_unit: { $ref: "#/components/schemas/OrgUnit" }
+        snapshot: { type: [string, "null"] }
+        pct_apps_meeting_target_by_tier: { type: object, additionalProperties: { type: number } }
+        distribution:
+          type: array
+          items:
+            type: object
+            properties:
+              practice: { type: string }
+              median: { type: number }
+              p25: { type: number }
+              p75: { type: number }
+              min: { type: number }
+              max: { type: number }
+              count: { type: integer }
+        organisation_practices: { type: array, items: { $ref: "#/components/schemas/MaturityScore" } }
+    MaturitySnapshot:
+      type: object
+      required: [period, published, catalogue_version, methodology_version]
+      properties:
+        period: { type: string }
+        published: { type: boolean }
+        catalogue_version: { type: string }
+        methodology_version: { type: string }
+        methodology_changed: { type: boolean }
+
+    RequirementState:
+      type: object
+      required: [requirement_key, status]
+      properties:
+        requirement_key: { type: string }
+        chapter: { type: string }
+        level: { type: integer }
+        title: { type: string, description: "Official ASVS text (imported verbatim)" }
+        status: { $ref: "#/components/schemas/RequirementStatus" }
+        method: { type: [string, "null"] }
+        evidence_ids: { type: array, items: { type: string, format: uuid } }
+    ThreatModel:
+      type: object
+      required: [id, commit_sha, schema_valid]
+      properties:
+        id: { type: string, format: uuid }
+        repository: { type: string }
+        commit_sha: { type: string }
+        schema_valid: { type: boolean }
+        validation_errors: { type: array, items: { type: string } }
+        threats_by_rating: { type: object, additionalProperties: { type: integer } }
+        unresolved_mitigations: { type: integer }
+        review: { type: [object, "null"], properties: { confidence: { $ref: "#/components/schemas/Confidence" }, reviewer: { type: string }, at: { type: string, format: date-time }, state: { $ref: "#/components/schemas/EvidenceState" } } }
+    Ticket:
+      type: object
+      required: [id, system, ticket_key, url]
+      properties:
+        id: { type: string, format: uuid }
+        system: { type: string }
+        ticket_key: { type: string }
+        url: { type: string, format: uri }
+        external_status: { type: [string, "null"] }
+        finding_ids: { type: array, items: { type: string, format: uuid } }
+        last_synced_at: { type: [string, "null"], format: date-time }
+    OrgScorecard:
+      type: object
+      properties:
+        computed_at: { type: string, format: date-time }
+        coverage:
+          type: object
+          properties:
+            registered_production_apps_pct: { type: number }
+            tier12_current_evidence_pct: { type: number }
+            sbom_coverage_pct: { type: number }
+            threat_model_coverage_pct: { type: number }
+        sla_compliance_by_priority: { type: object, additionalProperties: { type: number } }
+        kev_internet_exposed_open: { type: integer }
+        p1_overdue: { type: integer }
+        expired_exceptions: { type: integer }
+        dark_apps_pct: { type: number }
+        tier1_meeting_maturity_target_pct: { type: number }
+        trend: { type: array, items: { type: object, properties: { period: { type: string }, metric: { type: string }, value: { type: number } } } }
+    Job:
+      type: object
+      required: [id, status]
+      properties:
+        id: { type: string }
+        status: { type: string, enum: [queued, running, succeeded, failed] }
+        created_at: { type: string, format: date-time }
+        result_url: { type: [string, "null"], format: uri }
+        error: { $ref: "#/components/schemas/Problem" }
+    CatalogueControl:
+      type: object
+      required: [control_key, title, domain, objective_type, assessment_mode, applicability]
+      properties:
+        control_key: { type: string }
+        title: { type: string }
+        domain: { type: string }
+        objective_type: { type: string }
+        assessment_mode: { type: string }
+        description: { type: string }
+        proof: { type: string }
+        applicability: { type: object, additionalProperties: { $ref: "#/components/schemas/RequirementLevel" } }
+        mappings: { type: object, additionalProperties: true }

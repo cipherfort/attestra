@@ -1,0 +1,3 @@
+# Dependencies whose licence the checker cannot read automatically, reviewed by a maintainer.
+# name: reason (licence, where verified, date)
+tzdata: Apache-2.0 per PyPI metadata; Windows-only dependency of psycopg, not installed elsewhere (verified 2026-10-15)

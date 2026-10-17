@@ -1,0 +1,67 @@
+# SAMM target maturity profile per application tier (methodology §A.3, roadmap 18-month table).
+# Status: PROPOSED. REQUIRES HUMAN APPROVAL (Governance Board).
+# Values are practice scores on SAMM's 0–3 scale. Application-scope practices only; Governance practices
+# (G-SM, G-PC, G-EG) are assessed at organisation scope and have organisation targets below.
+# "% of Tier 1 apps meeting target" = all listed practices ≥ target.
+
+version: 1
+horizon: 18 months from programme start
+
+application_targets:
+  1:
+    D-TA: 2.0
+    D-SR: 1.75
+    D-SA: 1.5
+    I-SB: 2.5
+    I-SD: 2.0
+    I-DM: 2.0
+    V-AA: 1.5
+    V-RT: 1.5
+    V-ST: 2.0
+    O-IM: 1.5
+    O-EM: 2.0
+    O-OM: 1.0
+  2:
+    D-TA: 1.5
+    D-SR: 1.25
+    D-SA: 1.0
+    I-SB: 2.0
+    I-SD: 1.5
+    I-DM: 1.5
+    V-AA: 1.0
+    V-RT: 1.0
+    V-ST: 1.5
+    O-IM: 1.0
+    O-EM: 1.5
+    O-OM: 0.75
+  3:
+    D-TA: 1.0
+    D-SR: 0.75
+    D-SA: 0.5
+    I-SB: 1.5
+    I-SD: 1.0
+    I-DM: 1.25
+    V-AA: 0.25
+    V-RT: 0.5
+    V-ST: 1.0
+    O-IM: 0.5
+    O-EM: 1.0
+    O-OM: 0.5
+  4:
+    D-TA: 0.5
+    D-SR: 0.25
+    D-SA: 0.25
+    I-SB: 1.0
+    I-SD: 0.75
+    I-DM: 1.0
+    V-AA: 0.0
+    V-RT: 0.25
+    V-ST: 0.75
+    O-IM: 0.25
+    O-EM: 0.75
+    O-OM: 0.25
+
+organisation_targets:
+  G-SM: 2.0
+  G-PC: 2.0
+  G-EG: 2.0

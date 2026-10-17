@@ -1,0 +1,9 @@
+# Every change needs a maintainer review (MAINTAINERS.md). Security-critical paths are listed so that, as maintainers
+# join, at least two people can be required for them.
+*                                   @ciphermichael
+/backend/src/aap/domain/evidence.py @ciphermichael
+/backend/src/aap/connectors/attestation.py @ciphermichael
+/backend/src/aap/api/                @ciphermichael
+/schemas/database/                   @ciphermichael
+/config/trusted-producers.yaml       @ciphermichael
+/.github/workflows/                  @ciphermichael

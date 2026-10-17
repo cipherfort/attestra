@@ -1,0 +1,36 @@
+# Python
+__pycache__/
+*.pyc
+backend/.venv/
+.aap-blobs/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+# Node
+frontend/node_modules/
+frontend/dist/
+# Local
+.env
+*.local
+# Terraform (lock files ARE committed)
+**/.terraform/
+*.tfstate
+*.tfstate.*
+*.tfvars
+!*.tfvars.example
+# Local integration stack
+deploy/local/.env
+deploy/local/aap.env
+deploy/local/logs/
+# Docs site build
+site/
+# Personal editor settings
+.vscode/
+.idea/
+.DS_Store
+deploy/local/.gitlab-admin-token
+deploy/compose/secrets/
+
+# test-tool caches
+.schemathesis/
+.hypothesis/

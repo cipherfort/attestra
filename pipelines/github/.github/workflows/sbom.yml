@@ -1,0 +1,62 @@
+# SPDX-License-Identifier: Apache-2.0
+# Attestra shipped pipeline: Software bill of materials (Syft).
+# Source: pipelines/github/ in the platform repository. Do not edit the copy in your security-workflows repository by
+# hand: change the source, re-run `aap pipelines export`, review, release, and approve the new commit SHA
+# (`aap pipelines approve`). Evidence from any other commit is rejected (UNAPPROVED_WORKFLOW_REF).
+name: aap-sbom
+
+on:
+  workflow_call:
+    inputs:
+      runner:
+        description: Runner label. GitHub-hosted runners allow C3 evidence; plain self-hosted runners are capped at C2.
+        type: string
+        default: ubuntu-latest
+
+permissions: {}
+
+jobs:
+  sbom:
+    name: Software bill of materials (Syft)
+    runs-on: ${{ inputs.runner }}
+    timeout-minutes: 30
+    permissions:
+      contents: read
+      id-token: write       # keyless signature over the evidence manifest
+      attestations: write   # store it (public repos, or GitHub Enterprise Cloud for private ones)
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Generate the SBOM
+        uses: anchore/sbom-action@66cbf4bc1f1c0d2edc94016e65bc221b6bb0ad6c # v0.24.3
+        with:
+          path: .
+          format: cyclonedx-json
+          output-file: sbom.cdx.json
+          upload-artifact: false
+          upload-release-assets: false
+      # @@aap-evidence-tool@@
+      - name: Write the evidence manifest
+        id: manifest
+        if: ${{ !cancelled() }}
+        shell: bash
+        run: |
+          python3 "$RUNNER_TEMP/aap_evidence.py" manifest --type sbom --tool-name anchore/sbom-action --tool-version 0.24.3 --result pass --out "$RUNNER_TEMP/aap-evidence" sbom.cdx.json
+          python3 "$RUNNER_TEMP/aap_evidence.py" verify "$RUNNER_TEMP/aap-evidence"
+      - name: Sign the manifest
+        if: ${{ !cancelled() && steps.manifest.outcome == 'success' }}
+        continue-on-error: true   # private repos without Enterprise Cloud: no attestation, evidence capped at C2
+        uses: actions/attest@1e69f48acb82d1966a394da916b4c1698aa569d6 # v4.2.2
+        with:
+          subject-path: ${{ runner.temp }}/aap-evidence/evidence-manifest.json
+          predicate-type: https://cipherfort.github.io/attestra/attestation/evidence/v1
+          predicate-path: ${{ runner.temp }}/aap-evidence/evidence-manifest.json
+      - name: Upload the evidence bundle
+        if: ${{ !cancelled() && steps.manifest.outcome == 'success' }}
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: aap-evidence-sbom
+          path: ${{ runner.temp }}/aap-evidence/
+          if-no-files-found: error
+          retention-days: 30

@@ -1,0 +1,268 @@
+# CI: every check a contributor runs locally (CONTRIBUTING.md), plus infrastructure, image and licence gates.
+name: ci
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions: {}
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  validate:
+    name: Catalogue, config, schemas, OpenAPI, links
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: "3.12"
+      - name: Install pinned tooling
+        run: python -m pip install --disable-pip-version-check -r tools/requirements.txt
+      - name: Control catalogue (validate + rendered doc up to date)
+        run: python tools/catalogue/validate.py --check
+      - name: Metrics catalogue (rendered doc up to date)
+        run: python tools/metrics/render.py --check
+      - name: Config, schemas, templates, OpenAPI
+        run: python tools/config/validate.py
+      - name: Generated reference pages (settings, API) up to date
+        run: python tools/docs/render_reference.py --check
+      - name: Markdown links and anchors
+        run: python tools/docs/check_links.py
+      - name: Shell scripts (shellcheck)
+        run: shellcheck deploy/local/*.sh deploy/compose/setup.sh charts/attestra/ci/smoke.sh tools/api/contract_test.sh tests/database/run.sh
+
+  database:
+    name: Schema security-property tests (PostgreSQL 16)
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Apply DDL and run tests in a throwaway container
+        run: tests/database/run.sh
+
+  backend:
+    name: Backend (ruff, mypy strict, unit + integration tests on PostgreSQL 16)
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    timeout-minutes: 15
+    defaults:
+      run:
+        working-directory: backend
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: astral-sh/setup-uv@c18668ad3cf93ea998bef934396af7bb5c839dc7 # v10.2.0
+      - name: Install locked dependencies
+        run: uv sync --locked --python 3.12
+      - name: Lint and format
+        run: uv run ruff check src tests migrations && uv run ruff format --check src tests migrations
+      - name: Type check (strict on domain + evaluators)
+        run: uv run mypy
+      - name: Tests (integration tests start a throwaway postgres:16 container)
+        run: uv run pytest -q
+      - name: The example plugin (installed through its entry point) still works
+        run: |
+          uv run ruff check ../examples/plugins
+          uv run --with-editable ../examples/plugins/aap-plugin-jsonl pytest ../examples/plugins/aap-plugin-jsonl/tests -q
+      - name: Licence gate (runtime dependencies must be Apache-2.0 compatible)
+        run: uv run python ../tools/licenses/check.py
+      - name: Known vulnerabilities in runtime dependencies (pip-audit, PyPI/OSV advisories)
+        run: |
+          uv export --no-hashes --no-dev --format requirements-txt --no-emit-project > "$RUNNER_TEMP/req.txt"
+          uvx pip-audit==2.9.0 -r "$RUNNER_TEMP/req.txt" --progress-spinner off
+
+  frontend:
+    name: Frontend (typecheck + build)
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    timeout-minutes: 10
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: "22"
+      - run: npm ci --no-audit --no-fund
+      - run: npm audit --omit=dev --audit-level=high
+      - run: npm run types:check   # src/api-types.ts is generated from schemas/api/openapi.yaml
+      - run: npm run build
+
+  infra:
+    name: Terraform (fmt, validate every root, Checkov)
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: hashicorp/setup-terraform@dfe3c3f87815947d99a8997f908cb6525fc44e9e # v4.0.1
+        with:
+          terraform_version: "1.15.5"
+      - run: terraform fmt -check -recursive examples/terraform
+      - name: Validate (no backend, no credentials)
+        run: |
+          for root in examples/terraform/azure/state-bootstrap examples/terraform/azure/envs/azure examples/terraform/azure/envs/aws examples/terraform/azure/envs/github examples/terraform/aws; do
+            terraform -chdir="$root" init -backend=false -input=false -lockfile=readonly
+            terraform -chdir="$root" validate
+          done
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: "3.12"
+      - name: Checkov (every skip carries a written reason in the code)
+        run: |
+          pip install --quiet "checkov==3.3.29"
+          checkov -d examples/terraform --framework terraform --quiet --compact --skip-path '\.terraform'
+
+  image:
+    name: Container image (build, non-root, read-only smoke test)
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - run: docker build -t aap:ci .
+      - run: |
+          test "$(docker image inspect aap:ci --format '{{.Config.User}}')" = "10001"
+          docker run --rm --read-only aap:ci sh -c 'gh --version && aap --help >/dev/null'
+          # dev sign-in must be refused in production
+          ! docker run --rm --read-only -e AAP_AUTH_MODE=dev -e AAP_ENV=production aap:ci aap api
+
+  secrets:
+    name: Secrets scan (gitleaks, full history)
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - run: |
+          docker run --rm -v "$PWD":/repo:ro \
+            zricethezav/gitleaks:v8.30.1@sha256:c00b6bd0aeb3071cbcb79009cb16a60dd9e0a7c60e2be9ab65d25e6bc8abbb7f \
+            git /repo --config /repo/.gitleaks.toml --redact --no-banner
+
+  pipelines:
+    name: Shipped pipelines render and pass actionlint + zizmor
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: astral-sh/setup-uv@c18668ad3cf93ea998bef934396af7bb5c839dc7 # v10.2.0
+      - name: Render (aap pipelines export)
+        working-directory: backend
+        run: uv sync --locked --python 3.12 && uv run aap pipelines export --to "$RUNNER_TEMP/security-workflows"
+      - name: actionlint (with shellcheck on every run block)
+        run: |
+          cd "$RUNNER_TEMP/security-workflows" && git init -q
+          docker run --rm -v "$PWD:/repo" -w /repo \
+            rhysd/actionlint:1.7.7@sha256:887a259a5a534f3c4f36cb02dca341673c6089431057242cdc931e9f133147e9 -no-color
+      - name: zizmor
+        run: uvx zizmor@1.31.0 --offline --no-progress "$RUNNER_TEMP/security-workflows"
+
+  contract:
+    name: API contract (Schemathesis against the demo world)
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    timeout-minutes: 15
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env: { POSTGRES_PASSWORD: ci, POSTGRES_DB: aap }
+        ports: ["5432:5432"]
+        options: --health-cmd pg_isready --health-interval 5s --health-retries 10
+    env:
+      AAP_DATABASE_URL: postgresql+psycopg://postgres:ci@127.0.0.1:5432/aap
+      AAP_AUTH_MODE: dev
+      AAP_ENV: development
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: astral-sh/setup-uv@c18668ad3cf93ea998bef934396af7bb5c839dc7 # v10.2.0
+      - name: Demo world and API
+        working-directory: backend
+        run: |
+          uv sync --locked --python 3.12
+          uv run aap migrate && uv run aap demo seed
+          AAP_SECRETS_DIR="$RUNNER_TEMP/secrets" AAP_BLOB_ROOT="$RUNNER_TEMP/blobs" nohup uv run aap api --port 8765 > "$RUNNER_TEMP/api.log" 2>&1 &
+          for _ in $(seq 30); do curl -sf http://127.0.0.1:8765/api/v1/health/ready && break; sleep 1; done
+      - name: Every implemented GET operation matches the contract
+        run: tools/api/contract_test.sh http://127.0.0.1:8765/api/v1
+      - name: API log on failure
+        if: failure()
+        run: tail -200 "$RUNNER_TEMP/api.log"
+
+  helm:
+    name: Helm chart (lint, kubeconform, install + upgrade on kind)
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: azure/setup-helm@9bc31f4ebc9c6b171d7bfbaa5d006ae7abdb4310 # v5.0.1
+      - name: Lint and validate the rendered manifests (Kubernetes 1.27 and 1.31)
+        run: |
+          helm lint charts/attestra
+          curl -sSLo /tmp/kc.tgz https://github.com/yannh/kubeconform/releases/download/v0.8.0/kubeconform-linux-amd64.tar.gz
+          echo "$(curl -sSL https://github.com/yannh/kubeconform/releases/download/v0.8.0/CHECKSUMS | grep 'kubeconform-linux-amd64.tar.gz' | cut -d' ' -f1)  /tmp/kc.tgz" | sha256sum -c -
+          tar -xzf /tmp/kc.tgz -C /tmp kubeconform
+          for v in 1.27.0 1.31.0; do
+            helm template t charts/attestra | /tmp/kubeconform -strict -summary -kubernetes-version "$v"
+            helm template t charts/attestra --set api.autoscaling.enabled=true --set ingress.enabled=true \
+              --set ingress.hookHost=hooks.example.org | /tmp/kubeconform -strict -summary -kubernetes-version "$v"
+          done
+      - uses: helm/kind-action@1544676c07bb3570fcb70166beaa07c4528fd4aa # v1.15.1
+        with:
+          cluster_name: aap-smoke
+      - name: Install, check, upgrade (charts/attestra/ci/smoke.sh)
+        run: charts/attestra/ci/smoke.sh
+
+  docs-site:
+    name: Documentation site builds
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: astral-sh/setup-uv@c18668ad3cf93ea998bef934396af7bb5c839dc7 # v10.2.0
+      - run: uvx --with "mkdocs-material==9.*" mkdocs build

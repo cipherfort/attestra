@@ -1,0 +1,23 @@
+# schemas/repo-contract/threat-model.schema.json#/$defs/mitigationsFile. References are resolved by the platform (ASC-TM-03).
+schema_version: "1"
+mitigations:
+  - threat: TM-01
+    description: Ownership check on every claim read/write; tested with negative cross-user cases.
+    refs:
+      - { type: requirement, ref: "V8" }
+      - { type: test, ref: "ClaimAuthorizationTest#otherCustomerClaimReturns404" }
+      - { type: control, ref: ASC-TST-04 }
+    status: verified
+  - threat: TM-02
+    description: Uploads quarantined until malware scan passes; type/size allowlist.
+    refs:
+      - { type: requirement, ref: "CUSTOM-01" }
+      - { type: requirement, ref: "V5" }
+      - { type: ticket, ref: "CLAIMS-412" }
+    status: implemented
+  - threat: TM-03
+    description: Key stored in Key Vault, referenced via managed identity; secret scanning push protection.
+    refs:
+      - { type: control, ref: ASC-DEP-04 }
+      - { type: control, ref: ASC-SRC-03 }
+    status: verified

@@ -1,0 +1,17 @@
+Attestra (working name)
+Copyright 2026 Attestra Authors
+
+This product is licensed under the Apache License, Version 2.0 (see LICENSE).
+
+It builds on, and refers to, the following open standards and data sources, which are not
+part of this product and remain under their owners' terms:
+  - OWASP SAMM and OWASP ASVS (https://owasp.org), CC BY-SA 4.0. The file
+    catalogue/frameworks/asvs-5.0.0-requirements.yaml (requirement ids and levels only) is derived
+    from the official ASVS 5.0.0 release and is itself licensed CC BY-SA 4.0.
+  - endoflife.date release-cycle data (https://endoflife.date), fetched at run time
+  - CISA Known Exploited Vulnerabilities catalogue (https://www.cisa.gov/known-exploited-vulnerabilities-catalog)
+  - FIRST EPSS (https://www.first.org/epss)
+  - OSV (https://osv.dev)
+  - Sigstore public-good trust root (tests/fixtures and config/sigstore), Apache-2.0
+
+Third-party software dependencies and their licences are listed by `tools/licenses/check.py`.

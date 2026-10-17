@@ -1,0 +1,91 @@
+# Trusted evidence producers (evidence model §4, ADR-005/006/016).
+# Status: DESIGNED. Evidence from any producer/version not listed here is REJECTED (UNTRUSTED_PRODUCER /
+# UNAPPROVED_WORKFLOW_REF). Changes by PR only (CODEOWNERS: appsec-platform, 2 approvals).
+#
+# Shipped workflows (pipelines/github/, rendered by `aap pipelines export`): sast, sca, secrets, iac, sbom, container,
+# workflow-lint. The other entries are for workflows an organization writes itself (provenance, DAST, API, deploy).
+# `aap pipelines approve --sha <commit> --release <tag>` appends to every shipped entry.
+#
+# Release process (pipeline architecture §6): a security-workflows release appends its commit SHA under
+# approved_shas with `approved_at`. A superseded SHA gets `retire_after` = successor release + 90 days.
+# Emergency revocation: set `revoked_at` → evidence produced by that SHA after `revoked_from` is revoked.
+
+version: 1
+
+workflow_repository: example-org/security-workflows   # created by examples/terraform/azure/envs/github (set to its output)
+
+workflows:
+  - path: .github/workflows/sast.yml
+    evidence_types: [scan.sast]
+    approved_shas: []          # populated by the first release (E07-F03-S01)
+  - path: .github/workflows/sca.yml
+    evidence_types: [scan.sca, scan.malicious_package]   # OSV-Scanner reports MAL- advisories too
+    approved_shas: []
+  - path: .github/workflows/secrets.yml
+    evidence_types: [scan.secrets]
+    approved_shas: []
+  - path: .github/workflows/iac.yml
+    evidence_types: [scan.iac]
+    approved_shas: []
+  - path: .github/workflows/container.yml
+    evidence_types: [scan.container]
+    approved_shas: []
+  - path: .github/workflows/sbom.yml
+    evidence_types: [sbom]
+    approved_shas: []
+  - path: .github/workflows/provenance.yml
+    evidence_types: [provenance.attestation]
+    approved_shas: []
+  - path: .github/workflows/workflow-lint.yml
+    evidence_types: [scan.workflow_hardening]
+    approved_shas: []
+  - path: .github/workflows/test-evidence.yml
+    evidence_types: [test.security]
+    approved_shas: []
+  - path: .github/workflows/dast.yml
+    evidence_types: [scan.dast]
+    approved_shas: []
+  - path: .github/workflows/api.yml
+    evidence_types: [scan.api]
+    approved_shas: []
+  - path: .github/workflows/deploy-evidence.yml
+    evidence_types: [deploy.record]
+    approved_shas: []
+
+# Example of a populated entry (illustrative only, not a real SHA):
+#   approved_shas:
+#     - sha: 0123456789abcdef0123456789abcdef01234567
+#       release: v1.0.0
+#       approved_at: 2027-02-15
+#       retire_after: null
+#       revoked_at: null
+
+runner_policy:
+  # Confidence cap by runner environment (threat T-03, risk R-18)
+  github-hosted: C3
+  self-hosted-ephemeral: C3
+  self-hosted: C2
+
+connectors:
+  # Platform connectors are trusted by identity (they run inside the platform) and versioned by image digest.
+  - id: github
+    evidence_types: [registry.application, repo.ruleset, repo.security_settings, repo.codeowners, repo.access,
+                     repo.actions_policy, repo.environments, repo.threat_model, scan.sast, scan.sca, scan.secrets,
+                     deploy.record]
+  - id: workflow-engine
+    evidence_types: [registry.classification, assessment.threat_model, assessment.architecture_review,
+                     assessment.pentest, assessment.manual_control, assessment.samm_interview, process.review_record]
+  - id: endoflife
+    evidence_types: [sbom.eol]
+  - id: licence-evaluator
+    evidence_types: [scan.licence]
+  - id: risk-engine
+    evidence_types: [vuln.posture]
+  - id: defender
+    evidence_types: [cloud.posture]
+  - id: securityhub
+    evidence_types: [cloud.posture]
+  - id: sentinel
+    evidence_types: [siem.log_source_health]
+  - id: lms
+    evidence_types: [training.completion]

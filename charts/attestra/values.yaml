@@ -1,0 +1,100 @@
+# SPDX-License-Identifier: Apache-2.0
+# Attestra Helm values. Schema: values.schema.json. Guide: docs/install/helm.md.
+
+image:
+  repository: ghcr.io/cipherfort/attestra
+  # Pin by digest in production (the release workflow fills it for published charts); tag is used when empty.
+  digest: ""
+  tag: ""
+  pullPolicy: IfNotPresent
+imagePullSecrets: []
+
+# Everything in aap.yaml (schemas/settings/aap.schema.json): non-secret settings only. Rendered into a ConfigMap and
+# read through AAP_CONFIG_FILE. The defaults are production-safe; set your URLs and plugins.
+settings:
+  version: 1
+  env: production
+  public_url: https://aap.example.org
+  auth:
+    mode: oidc
+    oidc:
+      issuer: https://login.example.org/realms/aap
+      client_id: aap-web
+  secrets:
+    backend: mounted
+  evidence_store:
+    kind: s3
+    bucket: aap-evidence
+    region: eu-west-1
+
+# Credentials: one existing Secret (create it yourself, or with External Secrets Operator). Each process mounts only
+# the keys listed for it, as files with mode 0440 (the platform refuses world-readable secrets).
+#   database-url            admin URL, migration job only
+#   database-url-api / -worker / -hook   per-process logins (aap db provision-logins --from-store sets their passwords)
+#   oidc-client-secret, github-app-private-key, gitlab-token, jira-api-token, ... as your plugins need
+secrets:
+  existingSecret: aap-secrets
+  keys:
+    api: [database-url-api, oidc-client-secret]
+    hook: [database-url-hook, github-webhook-secret, gitlab-webhook-secret]
+    worker: [database-url-worker, github-app-private-key, gitlab-token, gitlab-issues-token, jira-api-token,
+             dependency-track-api-key, defectdojo-api-token, notify-webhook-url, siem-http-token]
+    migrate: [database-url, database-url-api, database-url-worker, database-url-hook, database-url-reporting]
+  # Keys absent from the Secret are skipped (optional), so list every key a plugin might use.
+
+serviceAccount:
+  create: true
+  annotations: {}      # e.g. IRSA (eks.amazonaws.com/role-arn) or Azure workload identity for S3/Blob access
+
+api:
+  replicas: 2
+  resources: { requests: { cpu: 100m, memory: 256Mi }, limits: { memory: 768Mi } }
+  autoscaling: { enabled: false, minReplicas: 2, maxReplicas: 6, targetCPUUtilizationPercentage: 70 }
+hook:
+  enabled: true        # the only internet-facing process: expose it (not the api) to GitHub/GitLab webhooks
+  replicas: 2
+  resources: { requests: { cpu: 50m, memory: 128Mi }, limits: { memory: 256Mi } }
+worker:
+  replicas: 1
+  resources: { requests: { cpu: 100m, memory: 256Mi }, limits: { memory: 1Gi } }
+
+migrate:
+  enabled: true        # pre-install/pre-upgrade hook: aap migrate, aap config load, per-process login passwords
+  activeDeadlineSeconds: 900
+
+ingress:
+  enabled: false
+  className: ""
+  annotations: {}
+  host: aap.example.org
+  tls: []              # [{ secretName: aap-tls, hosts: [aap.example.org] }]
+  hookHost: ""         # a separate host for the webhook receiver, e.g. aap-hooks.example.org
+
+podDisruptionBudget:
+  enabled: true
+  minAvailable: 1
+
+networkPolicy:
+  enabled: true
+  # Who may reach the api and hook Services (the ingress controller's namespace).
+  ingressFromNamespaceLabels: { kubernetes.io/metadata.name: ingress-nginx }
+  # PostgreSQL and outbound HTTPS. Kubernetes NetworkPolicy has no FQDN rules: restrict 443 to your egress proxy or
+  # the providers' ranges, or use your CNI's FQDN policies (e.g. Cilium) for an allowlist by name.
+  postgres: { cidr: 10.0.0.0/8, port: 5432 }
+  egressHttpsCIDRs: [0.0.0.0/0]
+  egressHttpsExcept: [169.254.169.254/32]   # never the cloud metadata endpoint from application pods
+
+podSecurityContext:
+  runAsNonRoot: true
+  runAsUser: 10001
+  runAsGroup: 10001
+  fsGroup: 10001
+  seccompProfile: { type: RuntimeDefault }
+securityContext:
+  allowPrivilegeEscalation: false
+  readOnlyRootFilesystem: true
+  capabilities: { drop: [ALL] }
+
+nodeSelector: {}
+tolerations: []
+affinity: {}

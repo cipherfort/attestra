@@ -1,0 +1,25 @@
+# Dependency updates. Every update arrives as a pull request and passes the same CI (tests, licence gate, scans).
+# A 3-day cooldown avoids adopting a release before the ecosystem has had a chance to flag it (ADR-029).
+version: 2
+updates:
+  - package-ecosystem: uv
+    directory: /backend
+    schedule: { interval: weekly }
+    cooldown: { default-days: 3 }
+    groups: { python: { patterns: ["*"], update-types: [minor, patch] } }
+  - package-ecosystem: npm
+    directory: /frontend
+    schedule: { interval: weekly }
+    cooldown: { default-days: 3 }
+    groups: { frontend: { patterns: ["*"], update-types: [minor, patch] } }
+  - package-ecosystem: github-actions
+    directory: /
+    schedule: { interval: weekly }
+    cooldown: { default-days: 3 }
+  - package-ecosystem: docker
+    directory: /
+    schedule: { interval: weekly }
+  - package-ecosystem: terraform
+    directories: [/examples/terraform/aws, /examples/terraform/azure/envs/azure, /examples/terraform/azure/envs/aws,
+                  /examples/terraform/azure/envs/github, /examples/terraform/azure/state-bootstrap]
+    schedule: { interval: monthly }

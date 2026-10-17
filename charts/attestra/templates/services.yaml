@@ -1,0 +1,22 @@
+{{/* SPDX-License-Identifier: Apache-2.0 */}}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "aap.fullname" . }}-api
+  labels: {{- include "aap.labels" . | nindent 4 }}
+spec:
+  selector: {{- include "aap.selector" . | nindent 4 }}
+    app.kubernetes.io/component: api
+  ports: [{ name: http, port: 80, targetPort: http }]
+{{- if .Values.hook.enabled }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "aap.fullname" . }}-hook
+  labels: {{- include "aap.labels" . | nindent 4 }}
+spec:
+  selector: {{- include "aap.selector" . | nindent 4 }}
+    app.kubernetes.io/component: hook
+  ports: [{ name: http, port: 80, targetPort: http }]
+{{- end }}

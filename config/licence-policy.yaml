@@ -1,0 +1,47 @@
+# Open-source licence policy (ADR-029). Referenced by ASC-BLD-08.
+# Status: PROPOSED — REQUIRES HUMAN APPROVAL from Legal / OSS governance. This is a starting point,
+# not legal advice. Identifiers are SPDX licence IDs; expressions are evaluated per SPDX expression rules
+# (an OR expression passes if any branch is allowed).
+
+policy_id: licence
+version: 1
+
+allow:          # usable without review in any distribution model
+  - MIT
+  - Apache-2.0
+  - BSD-2-Clause
+  - BSD-3-Clause
+  - ISC
+  - 0BSD
+  - Unlicense
+  - CC0-1.0
+  - Zlib
+  - PSF-2.0
+  - Python-2.0
+  - BlueOak-1.0.0
+
+review:         # allowed for internal/SaaS use; review required if the software is DISTRIBUTED
+  - MPL-2.0
+  - EPL-2.0
+  - LGPL-2.1-only
+  - LGPL-2.1-or-later
+  - LGPL-3.0-only
+  - LGPL-3.0-or-later
+  - CDDL-1.0
+
+deny:           # requires an approved exception (legal) to use
+  - GPL-2.0-only
+  - GPL-2.0-or-later
+  - GPL-3.0-only
+  - GPL-3.0-or-later
+  - AGPL-3.0-only
+  - AGPL-3.0-or-later
+  - SSPL-1.0
+  - BUSL-1.1
+  - Commons-Clause
+
+unknown_handling:
+  max_unknown_pct: 5          # NOASSERTION / missing licence
+  treat_unknown_as: review
+
+# Distribution context comes from application.yaml (distribution: internal | saas | distributed | open_source)

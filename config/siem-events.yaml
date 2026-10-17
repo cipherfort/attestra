@@ -1,0 +1,76 @@
+# Curated application-security events exported to the SIEM (ADR-020).
+# Status: DESIGNED. REQUIRES HUMAN APPROVAL from the SOC lead (E18-F01-S01).
+# Only these event types leave the platform. Routine findings, control states and evaluations do NOT.
+# Destination: Sentinel custom table AppSecPlatform_CL via the Logs Ingestion API (DCR). Exabeam: PROPOSED.
+
+version: 1
+
+common_fields: [event_id, event_type, severity, occurred_at, app_key, app_tier, repo, resource_ids, vuln_ids,
+                actor, platform_url, correlation_id]
+
+events:
+  - type: secret.exposed_active
+    severity: high
+    trigger: "Secret-scanning alert with validity 'active' (or unknown) on any registered repository"
+    soc_action: Hunt for use of the credential in sign-in and cloud activity logs. Confirm rotation.
+    dedup_window: 24h
+
+  - type: package.malicious_detected
+    severity: high
+    trigger: "Malicious-package advisory (OSV MAL-*, GHSA malware) matches a resolved dependency or build SBOM"
+    soc_action: Treat CI runners and CI-accessible secrets as compromised until shown otherwise.
+    dedup_window: 24h
+
+  - type: vuln.kev_internet_exposed
+    severity: high
+    trigger: "Open finding for a CISA KEV-listed vulnerability on an application with exposure internet_*"
+    soc_action: Correlate with WAF/application logs for exploitation attempts.
+    dedup_window: 7d
+
+  - type: finding.p1_sla_breached
+    severity: medium
+    trigger: "P1 finding passes its remediation SLA"
+    soc_action: Monitoring uplift on the affected application.
+    dedup_window: 7d
+
+  - type: evidence.integrity_failure
+    severity: high
+    trigger: "Hash-chain verification or blob re-hash mismatch (ADR-016)"
+    soc_action: Investigate possible platform compromise. Platform P1 incident.
+    dedup_window: 1h
+
+  - type: evidence.untrusted_producer
+    severity: medium
+    trigger: "≥ 3 evidence rejections with UNTRUSTED_PRODUCER/UNAPPROVED_WORKFLOW_REF/DIGEST_MISMATCH from one repo or actor in 24h"
+    soc_action: Investigate possible attempt to falsify assurance records.
+    dedup_window: 24h
+
+  - type: authz.sod_violation_attempt
+    severity: medium
+    trigger: "Request rejected with SOD_VIOLATION (self-approval, self-review, self-confirmation)"
+    soc_action: Review the actor's intent.
+    dedup_window: 1h
+
+  - type: data.bulk_export
+    severity: low
+    trigger: "Export of > 1,000 findings or any org-wide CVE impact export"
+    soc_action: Baseline per role; alert on anomalies.
+    dedup_window: none
+
+  - type: platform.privileged_activation
+    severity: low
+    trigger: "PIM activation of platform_admin or Key Vault administrator"
+    soc_action: Correlate with configuration changes.
+    dedup_window: none
+
+  - type: finding.mass_closure_anomaly
+    severity: medium
+    trigger: "> 100 findings closed or suppressed from one source system within 1h"
+    soc_action: Investigate the upstream tool (threat T-13).
+    dedup_window: 1h
+
+  - type: checkpoint.daily
+    severity: informational
+    trigger: "Daily evidence/audit hash-chain checkpoint"
+    soc_action: Retain (external tamper-evidence anchor). Retention ≥ evidence retention (ADR-017).
+    dedup_window: none

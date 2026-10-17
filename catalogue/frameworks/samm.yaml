@@ -1,0 +1,72 @@
+# OWASP SAMM structure (identifiers + official names ONLY).
+# Status: DESIGNED. Activity text, assessment questions and answer options are NOT transcribed here:
+# they are imported verbatim from the official model (github.com/owaspsamm/core, model/ directory)
+# at the pinned version below, so that platform content never diverges from or misquotes SAMM.
+# The short IDs (e.g. I-SB-A) are this platform's stable keys; the importer maps them to the
+# official model's identifiers. Backlog: E04-F01-S01.
+
+framework: owasp-samm
+version: "2.0"          # VERIFY at Phase 0 whether a newer published model version should be pinned
+source: https://github.com/owaspsamm/core
+
+business_functions:
+  - id: G
+    name: Governance
+    practices:
+      - id: G-SM
+        name: Strategy & Metrics
+        streams: [ { id: G-SM-A, name: Create and Promote }, { id: G-SM-B, name: Measure and Improve } ]
+      - id: G-PC
+        name: Policy & Compliance
+        streams: [ { id: G-PC-A, name: Policy and Standards }, { id: G-PC-B, name: Compliance Management } ]
+      - id: G-EG
+        name: Education & Guidance
+        streams: [ { id: G-EG-A, name: Training and Awareness }, { id: G-EG-B, name: Organization and Culture } ]
+  - id: D
+    name: Design
+    practices:
+      - id: D-TA
+        name: Threat Assessment
+        streams: [ { id: D-TA-A, name: Application Risk Profile }, { id: D-TA-B, name: Threat Modeling } ]
+      - id: D-SR
+        name: Security Requirements
+        streams: [ { id: D-SR-A, name: Software Requirements }, { id: D-SR-B, name: Supplier Security } ]
+      - id: D-SA
+        name: Secure Architecture
+        streams: [ { id: D-SA-A, name: Architecture Design }, { id: D-SA-B, name: Technology Management } ]
+  - id: I
+    name: Implementation
+    practices:
+      - id: I-SB
+        name: Secure Build
+        streams: [ { id: I-SB-A, name: Build Process }, { id: I-SB-B, name: Software Dependencies } ]
+      - id: I-SD
+        name: Secure Deployment
+        streams: [ { id: I-SD-A, name: Deployment Process }, { id: I-SD-B, name: Secret Management } ]
+      - id: I-DM
+        name: Defect Management
+        streams: [ { id: I-DM-A, name: Defect Tracking }, { id: I-DM-B, name: Metrics and Feedback } ]
+  - id: V
+    name: Verification
+    practices:
+      - id: V-AA
+        name: Architecture Assessment
+        streams: [ { id: V-AA-A, name: Architecture Validation }, { id: V-AA-B, name: Architecture Mitigation } ]
+      - id: V-RT
+        name: Requirements-driven Testing
+        streams: [ { id: V-RT-A, name: Control Verification }, { id: V-RT-B, name: Misuse/Abuse Testing } ]
+      - id: V-ST
+        name: Security Testing
+        streams: [ { id: V-ST-A, name: Scalable Baseline }, { id: V-ST-B, name: Deep Understanding } ]
+  - id: O
+    name: Operations
+    practices:
+      - id: O-IM
+        name: Incident Management
+        streams: [ { id: O-IM-A, name: Incident Detection }, { id: O-IM-B, name: Incident Response } ]
+      - id: O-EM
+        name: Environment Management
+        streams: [ { id: O-EM-A, name: Configuration Hardening }, { id: O-EM-B, name: Patching and Updating } ]
+      - id: O-OM
+        name: Operational Management
+        streams: [ { id: O-OM-A, name: Data Protection }, { id: O-OM-B, name: System Decommissioning / Legacy Management } ]

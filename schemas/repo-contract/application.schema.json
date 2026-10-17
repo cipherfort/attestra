@@ -1,0 +1,157 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cipherfort.github.io/attestra/schemas/repo-contract/application.schema.json",
+  "title": ".security/application.yaml",
+  "description": "Status: DESIGNED. Declared application metadata (confidence C0 until verified by the platform). Classification values are labels from config/profiles/<profile>/classification.yaml; the platform rejects labels the active model does not define.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "application"],
+  "properties": {
+    "schema_version": { "const": "1" },
+    "application": {
+      "oneOf": [
+        { "$ref": "#/$defs/primary" },
+        { "$ref": "#/$defs/secondary" }
+      ]
+    }
+  },
+  "$defs": {
+    "identity": {
+      "type": "string",
+      "description": "GitHub login (@user), GitHub team (@org/team) or email resolvable in Entra ID",
+      "pattern": "^(@[A-Za-z0-9-]+(/[A-Za-z0-9_.-]+)?|[^@\\s]+@[^@\\s]+\\.[^@\\s]+)$"
+    },
+    "secondary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["application_ref", "role"],
+      "properties": {
+        "application_ref": { "type": "string", "pattern": "^APP-[0-9]{5}$" },
+        "role": { "enum": ["component", "iac", "library", "documentation"] }
+      }
+    },
+    "primary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name", "description", "owners", "lifecycle", "classification", "profile"],
+      "properties": {
+        "id": { "type": "string", "pattern": "^APP-[0-9]{5}$", "description": "Assigned by the platform on first registration; written back by the onboarding PR" },
+        "name": { "type": "string", "minLength": 3, "maxLength": 100 },
+        "description": { "type": "string", "minLength": 10, "maxLength": 1000 },
+        "owners": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["business_owner", "technical_owner", "team"],
+          "properties": {
+            "business_owner": { "$ref": "#/$defs/identity" },
+            "technical_owner": { "$ref": "#/$defs/identity" },
+            "team": { "type": "string", "pattern": "^@[A-Za-z0-9-]+/[A-Za-z0-9_.-]+$", "description": "GitHub team that owns the app" },
+            "org_unit": { "type": "string", "pattern": "^[a-z0-9-]{2,64}$", "description": "org_units.slug" },
+            "security_champion": { "$ref": "#/$defs/identity" }
+          }
+        },
+        "security_contact": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "email": { "type": "string", "format": "email" },
+            "teams_channel": { "type": "string", "format": "uri" },
+            "out_of_hours": { "type": "string", "maxLength": 200 }
+          }
+        },
+        "lifecycle": { "enum": ["proposed", "development", "pilot", "production", "deprecated", "retired"] },
+        "classification": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["data_classification", "personal_data", "exposure", "user_population", "business_criticality", "privileged_integration"],
+          "properties": {
+            "data_classification": { "type": "string" },
+            "personal_data": { "type": "string" },
+            "exposure": { "type": "string" },
+            "user_population": { "type": "string" },
+            "business_criticality": { "type": "string" },
+            "privileged_integration": { "type": "string" },
+            "regulatory": { "type": "array", "items": { "type": "string", "maxLength": 100 }, "maxItems": 20 }
+          }
+        },
+        "profile": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "languages": { "type": "array", "items": { "type": "string" } },
+            "frameworks": { "type": "array", "items": { "type": "string" } },
+            "runtime": { "enum": ["container", "serverless", "paas", "vm", "static", "library", "other"] },
+            "kubernetes": { "type": "boolean" },
+            "authentication": { "enum": ["entra_id", "other_oidc", "local", "none", "mixed"] },
+            "has_api": { "type": "boolean" },
+            "has_web_frontend": { "type": "boolean" },
+            "distribution": { "enum": ["internal", "saas", "distributed", "open_source"] },
+            "openapi_paths": { "type": "array", "items": { "type": "string" } },
+            "container_images": { "type": "array", "items": { "type": "string", "maxLength": 512 } }
+          }
+        },
+        "environments": {
+          "type": "array",
+          "maxItems": 20,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["name", "type"],
+            "properties": {
+              "name": { "type": "string", "pattern": "^[a-z0-9-]{1,40}$" },
+              "type": { "enum": ["development", "test", "staging", "production", "other"] },
+              "url": { "type": "string", "format": "uri" },
+              "github_environment": { "type": "string" },
+              "cloud": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": ["provider", "scope_type", "ref"],
+                  "properties": {
+                    "provider": { "enum": ["azure", "aws", "gcp", "other"] },
+                    "scope_type": { "enum": ["subscription", "resource_group", "account", "organizational_unit", "tag", "project"] },
+                    "ref": { "type": "string", "maxLength": 512 }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "data_stores": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["name", "type", "classification"],
+            "properties": {
+              "name": { "type": "string" },
+              "type": { "type": "string", "examples": ["postgresql", "cosmosdb", "blob", "s3", "dynamodb", "redis"] },
+              "classification": { "type": "string" }
+            }
+          }
+        },
+        "depends_on": { "type": "array", "items": { "type": "string", "pattern": "^APP-[0-9]{5}$" } },
+        "third_party_services": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["name"],
+            "properties": {
+              "name": { "type": "string" },
+              "supplier": { "type": "string" },
+              "data_shared": { "type": "string" },
+              "assurance_ref": { "type": "string" }
+            }
+          }
+        },
+        "repositories": {
+          "type": "array",
+          "description": "Other repos implementing this app (each must carry a secondary application.yaml pointing back; links are only accepted when both sides agree)",
+          "items": { "type": "string", "pattern": "^[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+$" }
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,87 @@
+# SPDX-License-Identifier: Apache-2.0
+# Attestra shipped pipeline: Deployment verification.
+# Source: pipelines/github/ in the platform repository. Do not edit the copy in your security-workflows repository by
+# hand: change the source, re-run `aap pipelines export`, review, release, and approve the new commit SHA
+# (`aap pipelines approve`). Evidence from any other commit is rejected (UNAPPROVED_WORKFLOW_REF).
+name: aap-deploy-evidence
+
+on:
+  workflow_call:
+    inputs:
+      runner:
+        description: Runner label. GitHub-hosted runners allow C3 evidence; plain self-hosted runners are capped at C2.
+        type: string
+        default: ubuntu-latest
+      image:
+        description: "Image being deployed, by digest: registry/name@sha256:<hex>"
+        type: string
+        required: true
+      environment:
+        description: Target environment name (e.g. production)
+        type: string
+        required: true
+      owner:
+        description: Organization whose build workflows sign the images
+        type: string
+        required: true
+
+permissions: {}
+
+jobs:
+  deploy-evidence:
+    name: Deployment verification
+    runs-on: ${{ inputs.runner }}
+    timeout-minutes: 15
+    permissions:
+      contents: read
+      id-token: write       # keyless signature over the evidence manifest
+      attestations: write   # store it (public repos, or GitHub Enterprise Cloud for private ones)
+      packages: read
+    steps:
+      - name: Verify the image's build attestation
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+          IMAGE: ${{ inputs.image }}
+          OWNER: ${{ inputs.owner }}
+        run: |
+          [[ "$IMAGE" =~ ^[a-z0-9./:_-]+@(sha256:[0-9a-f]{64})$ ]] || { echo "::error::image must be pinned by digest"; exit 1; }
+          echo "AAP_DIGEST=${BASH_REMATCH[1]}" >> "$GITHUB_ENV"
+          echo "AAP_IMAGE_NAME=${IMAGE%@*}" >> "$GITHUB_ENV"
+          if gh attestation verify "oci://$IMAGE" --owner "$OWNER" --format json > verify.json 2> verify.log; then
+            echo "AAP_VERIFIED=true" >> "$GITHUB_ENV"
+          else
+            echo "AAP_VERIFIED=false" >> "$GITHUB_ENV"
+            echo "::error::attestation verification failed for $IMAGE"; cat verify.log
+          fi
+          printf '%s\n' "$(date -u +%FT%TZ) verify exit status recorded" >> verify.log
+          created=$(docker buildx imagetools inspect "$IMAGE" --format '{{json .Image}}' 2>/dev/null \
+            | python3 -c 'import json,sys; d=json.load(sys.stdin); d=d.get("linux/amd64", d) if "created" not in d else d; print(d.get("created",""))' || true)
+          echo "AAP_CREATED=$created" >> "$GITHUB_ENV"
+          [ -s verify.json ] || echo '[]' > verify.json
+      # @@aap-evidence-tool@@
+      - name: Write the evidence manifest
+        id: manifest
+        if: ${{ !cancelled() }}
+        shell: bash
+        env:
+          ENVIRONMENT: ${{ inputs.environment }}
+        run: |
+          python3 "$RUNNER_TEMP/aap_evidence.py" manifest --type deploy.record --tool-name gh-attestation-verify --tool-version 2 --result "$([ "$AAP_VERIFIED" = true ] && echo pass || echo fail)" --artifact-digest "$AAP_DIGEST" --artifact-name "$AAP_IMAGE_NAME" --environment-name "$ENVIRONMENT" --summary "verified=$AAP_VERIFIED" ${AAP_CREATED:+--summary "image_created_at=$AAP_CREATED"} --out "$RUNNER_TEMP/aap-evidence" verify.json verify.log
+          python3 "$RUNNER_TEMP/aap_evidence.py" verify "$RUNNER_TEMP/aap-evidence"
+      - name: Sign the manifest
+        if: ${{ !cancelled() && steps.manifest.outcome == 'success' }}
+        continue-on-error: true   # private repos without Enterprise Cloud: no attestation, evidence capped at C2
+        uses: actions/attest@1e69f48acb82d1966a394da916b4c1698aa569d6 # v4.2.2
+        with:
+          subject-path: ${{ runner.temp }}/aap-evidence/evidence-manifest.json
+          predicate-type: https://cipherfort.github.io/attestra/attestation/evidence/v1
+          predicate-path: ${{ runner.temp }}/aap-evidence/evidence-manifest.json
+      - name: Upload the evidence bundle
+        if: ${{ !cancelled() && steps.manifest.outcome == 'success' }}
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: aap-evidence-deploy-evidence
+          path: ${{ runner.temp }}/aap-evidence/
+          if-no-files-found: error
+          retention-days: 30

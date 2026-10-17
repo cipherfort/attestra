@@ -1,0 +1,16 @@
+# SPDX-License-Identifier: Apache-2.0
+# Values for charts/attestra/ci/smoke.sh (kind): a locally built image, development sign-in, evidence on the pod's /tmp.
+# Never use these settings outside a throwaway cluster.
+image: { repository: aap, tag: smoke, pullPolicy: Never }
+settings:
+  version: 1
+  env: development
+  public_url: http://localhost:8000
+  auth: { mode: dev }
+  secrets: { backend: mounted }
+  evidence_store: { kind: local, root: /tmp/evidence }
+api: { replicas: 1 }
+hook: { replicas: 1 }
+networkPolicy:
+  ingressFromNamespaceLabels: { kubernetes.io/metadata.name: default }
+  postgres: { cidr: 10.0.0.0/8, port: 5432 }

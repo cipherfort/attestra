@@ -1,0 +1,15 @@
+# Your organization's structure and the classification profile to use (ADR-032).
+# Changes by pull request; the governance board approves.
+version: 1
+
+# Levels of the organization tree, top to bottom. The first level is the root: exactly one unit of that type exists.
+# Applications belong to a unit at any level; access granted at a unit covers everything below it.
+# Examples: [organisation, business_unit, team] · [company, division, department, team] · [org, group]
+levels:
+  - { type: organisation, label: Organisation }
+  - { type: business_unit, label: Business unit }
+  - { type: team, label: Team }
+
+# The classification model (dimensions, labels, floor rules, tiers): config/profiles/<profile>/classification.yaml.
+# Shipped: generic (default), uk-public-sector. Make your own by copying one.
+profile: generic

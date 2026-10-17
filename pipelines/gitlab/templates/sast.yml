@@ -1,0 +1,33 @@
+# SPDX-License-Identifier: Apache-2.0
+# Attestra shipped GitLab CI/CD component: static analysis (Semgrep).
+# Source: pipelines/gitlab/ in the platform repository; rendered by `aap pipelines export --provider gitlab`.
+# The platform accepts this job's evidence only if the merged job equals this file at an approved commit (ADR-033):
+# do not override its keys in your .gitlab-ci.yml. Only `stage` may be changed (input).
+spec:
+  inputs:
+    stage:
+      default: test
+---
+aap-sast:
+  stage: $[[ inputs.stage ]]
+  image: semgrep/semgrep:1.176.1@sha256:34ab619bf1391a24bfda3f05debd0d8a6ce3093c2d5f9d39cfc00f83c1397823
+  inherit:
+    default: false
+    variables: false
+  script:
+    - mkdir -p results
+    - semgrep scan --config p/default --sarif --output results/semgrep.sarif --metrics off . || test -s results/semgrep.sarif
+    # @@aap-evidence-tool@@
+    - >-
+      env -i PATH=/usr/local/bin:/usr/bin:/bin
+      GITLAB_CI="$GITLAB_CI" CI_PROJECT_PATH="$CI_PROJECT_PATH" CI_PROJECT_ID="$CI_PROJECT_ID"
+      CI_COMMIT_SHA="$CI_COMMIT_SHA" CI_COMMIT_REF_NAME="$CI_COMMIT_REF_NAME" CI_JOB_ID="$CI_JOB_ID"
+      CI_PIPELINE_ID="$CI_PIPELINE_ID" CI_PIPELINE_SOURCE="$CI_PIPELINE_SOURCE"
+      CI_PROJECT_VISIBILITY="$CI_PROJECT_VISIBILITY" CI_MERGE_REQUEST_IID="$CI_MERGE_REQUEST_IID"
+      CI_CONFIG_PATH="$CI_CONFIG_PATH"
+      python3 -I /tmp/aap_evidence.py manifest --type scan.sast --tool-name semgrep --policy-ref semgrep-registry:p/default --result auto --out aap-evidence-sast results/semgrep.sarif
+    - python3 -I /tmp/aap_evidence.py verify aap-evidence-sast
+  artifacts:
+    when: always
+    expire_in: 30 days
+    paths: [aap-evidence-sast/]

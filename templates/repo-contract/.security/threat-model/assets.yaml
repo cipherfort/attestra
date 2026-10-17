@@ -1,0 +1,20 @@
+# Model elements: assets, data flows, trust boundaries (schemas/repo-contract/threat-model.schema.json#/$defs/assetsFile)
+schema_version: "1"
+assets:
+  - { id: AS-01, name: Claim records, type: data, classification: confidential, location: claims-db }
+  - { id: AS-02, name: Supporting documents, type: data, classification: confidential, location: document store }
+  - { id: AS-03, name: Customer identity tokens, type: credential, classification: confidential }
+  - { id: AS-04, name: Notify API key, type: credential, classification: confidential, location: Key Vault }
+  - { id: AS-05, name: Claims service availability, type: service, classification: internal }
+trust_boundaries:
+  - { id: TB-01, name: Internet }
+  - { id: TB-02, name: Azure application environment }
+  - { id: TB-03, name: Data tier (private endpoints) }
+  - { id: TB-04, name: Third-party services }
+data_flows:
+  - { id: DF-01, from: Customer, to: Claims API, data: [AS-01, AS-03], protocol: HTTPS, crosses: [TB-01], authenticated: true }
+  - { id: DF-02, from: Customer, to: Claims API, data: [AS-02], protocol: HTTPS, crosses: [TB-01], authenticated: true }
+  - { id: DF-03, from: Claims API, to: claims-db, data: [AS-01], protocol: TLS/PostgreSQL, crosses: [TB-03], authenticated: true }
+  - { id: DF-04, from: Claims API, to: document store, data: [AS-02], protocol: HTTPS, crosses: [TB-03], authenticated: true }
+  - { id: DF-05, from: document store, to: Malware scan function, data: [AS-02], protocol: Event Grid, crosses: [], authenticated: true }
+  - { id: DF-06, from: Claims API, to: Email service, data: [AS-04], protocol: HTTPS, crosses: [TB-04], authenticated: true }

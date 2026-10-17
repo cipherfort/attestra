@@ -1,0 +1,70 @@
+# SPDX-License-Identifier: Apache-2.0
+# Attestra shipped pipeline: Security test results (JUnit).
+# Source: pipelines/github/ in the platform repository. Do not edit the copy in your security-workflows repository by
+# hand: change the source, re-run `aap pipelines export`, review, release, and approve the new commit SHA
+# (`aap pipelines approve`). Evidence from any other commit is rejected (UNAPPROVED_WORKFLOW_REF).
+name: aap-test-evidence
+
+on:
+  workflow_call:
+    inputs:
+      runner:
+        description: Runner label. GitHub-hosted runners allow C3 evidence; plain self-hosted runners are capped at C2.
+        type: string
+        default: ubuntu-latest
+      results_artifact:
+        description: Name of the artifact your test job uploaded, containing JUnit XML files
+        type: string
+        required: true
+
+permissions: {}
+
+jobs:
+  test-evidence:
+    name: Security test results (JUnit)
+    runs-on: ${{ inputs.runner }}
+    timeout-minutes: 15
+    permissions:
+      contents: read
+      id-token: write       # keyless signature over the evidence manifest
+      attestations: write   # store it (public repos, or GitHub Enterprise Cloud for private ones)
+      actions: read         # download the test job's artifact from this run
+    steps:
+      - name: Download the test results
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: ${{ inputs.results_artifact }}
+          path: junit
+      - name: Collect JUnit files
+        shell: bash
+        run: |
+          mkdir -p results
+          i=0
+          while IFS= read -r -d '' f; do
+            i=$((i+1)); cp "$f" "results/junit-$i.xml"
+          done < <(find junit -name '*.xml' -type f -print0 | head -z -n 50)
+          [ "$i" -gt 0 ] || { echo "::error::no JUnit XML in the artifact"; exit 1; }
+      # @@aap-evidence-tool@@
+      - name: Write the evidence manifest
+        id: manifest
+        if: ${{ !cancelled() }}
+        shell: bash
+        run: |
+          python3 "$RUNNER_TEMP/aap_evidence.py" manifest --type test.security --tool-name junit --tool-version 1 --result pass --out "$RUNNER_TEMP/aap-evidence" results/*.xml
+          python3 "$RUNNER_TEMP/aap_evidence.py" verify "$RUNNER_TEMP/aap-evidence"
+      - name: Sign the manifest
+        if: ${{ !cancelled() && steps.manifest.outcome == 'success' }}
+        continue-on-error: true   # private repos without Enterprise Cloud: no attestation, evidence capped at C2
+        uses: actions/attest@1e69f48acb82d1966a394da916b4c1698aa569d6 # v4.2.2
+        with:
+          subject-path: ${{ runner.temp }}/aap-evidence/evidence-manifest.json
+          predicate-type: https://cipherfort.github.io/attestra/attestation/evidence/v1
+          predicate-path: ${{ runner.temp }}/aap-evidence/evidence-manifest.json
+      - name: Upload the evidence bundle
+        if: ${{ !cancelled() && steps.manifest.outcome == 'success' }}
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: aap-evidence-test-evidence
+          path: ${{ runner.temp }}/aap-evidence/
+          if-no-files-found: error
+          retention-days: 30

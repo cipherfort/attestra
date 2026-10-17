@@ -1,0 +1,28 @@
+# End-of-life checks (ASC-ARC-02): which SBOM packages map to which endoflife.date product.
+# Status: IMPLEMENTED for the packages below. A package not listed here is not checked (the evidence records how many
+# components were checked, so coverage is visible). Add entries by PR; product names: https://endoflife.date/api/all.json
+# Keys are package URLs without the version (pkg:<type>/<namespace>/<name>), as they appear in CycloneDX SBOMs.
+version: 1
+warn_days: 180            # "reaches end of life soon" window
+products:
+  pkg:pypi/django: django
+  pkg:pypi/flask: flask
+  pkg:maven/org.springframework.boot/spring-boot: spring-boot
+  pkg:maven/org.springframework/spring-core: spring-framework
+  pkg:maven/org.apache.logging.log4j/log4j-core: log4j
+  pkg:maven/org.apache.tomcat.embed/tomcat-embed-core: tomcat
+  pkg:maven/org.hibernate.orm/hibernate-core: hibernate
+  pkg:npm/%40angular/core: angular
+  pkg:npm/vue: vue
+  pkg:npm/jquery: jquery
+  pkg:npm/bootstrap: bootstrap
+  pkg:npm/next: nextjs
+  pkg:npm/nuxt: nuxt
+  pkg:npm/electron: electron
+  pkg:gem/rails: rails
+  pkg:gem/ruby-on-rails: rails
+  pkg:composer/laravel/framework: laravel
+  pkg:composer/symfony/http-kernel: symfony
+  pkg:composer/drupal/core: drupal
+  pkg:nuget/Microsoft.AspNetCore.App.Ref: dotnet
+  pkg:golang/github.com/gin-gonic/gin: null   # no published lifecycle: listed so nobody adds a guess

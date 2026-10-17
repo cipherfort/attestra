@@ -1,0 +1,76 @@
+# SPDX-License-Identifier: Apache-2.0
+# Attestra shipped pipeline: Container image (Trivy).
+# Source: pipelines/github/ in the platform repository. Do not edit the copy in your security-workflows repository by
+# hand: change the source, re-run `aap pipelines export`, review, release, and approve the new commit SHA
+# (`aap pipelines approve`). Evidence from any other commit is rejected (UNAPPROVED_WORKFLOW_REF).
+name: aap-container
+
+on:
+  workflow_call:
+    inputs:
+      runner:
+        description: Runner label. GitHub-hosted runners allow C3 evidence; plain self-hosted runners are capped at C2.
+        type: string
+        default: ubuntu-latest
+      image:
+        description: "Image to scan, by digest: registry/name@sha256:<hex> (the build job's output)"
+        type: string
+        required: true
+
+permissions: {}
+
+jobs:
+  container:
+    name: Container image (Trivy)
+    runs-on: ${{ inputs.runner }}
+    timeout-minutes: 30
+    permissions:
+      contents: read
+      id-token: write       # keyless signature over the evidence manifest
+      attestations: write   # store it (public repos, or GitHub Enterprise Cloud for private ones)
+      packages: read        # pull from GHCR
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Check the image reference
+        id: ref
+        shell: bash
+        env:
+          IMAGE: ${{ inputs.image }}
+        run: |
+          [[ "$IMAGE" =~ ^[a-z0-9./:_-]+@(sha256:[0-9a-f]{64})$ ]] || { echo "::error::image must be pinned by digest"; exit 1; }
+          echo "AAP_DIGEST=${BASH_REMATCH[1]}" >> "$GITHUB_ENV"
+          echo "AAP_IMAGE_NAME=${IMAGE%@*}" >> "$GITHUB_ENV"
+      - name: Scan the image
+        uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
+        with:
+          image-ref: ${{ inputs.image }}
+          format: sarif
+          output: trivy.sarif
+          severity: UNKNOWN,LOW,MEDIUM,HIGH,CRITICAL
+          exit-code: "0"
+      # @@aap-evidence-tool@@
+      - name: Write the evidence manifest
+        id: manifest
+        if: ${{ !cancelled() }}
+        shell: bash
+        run: |
+          python3 "$RUNNER_TEMP/aap_evidence.py" manifest --type scan.container --tool-name trivy --artifact-digest "$AAP_DIGEST" --artifact-name "$AAP_IMAGE_NAME" --out "$RUNNER_TEMP/aap-evidence" trivy.sarif
+          python3 "$RUNNER_TEMP/aap_evidence.py" verify "$RUNNER_TEMP/aap-evidence"
+      - name: Sign the manifest
+        if: ${{ !cancelled() && steps.manifest.outcome == 'success' }}
+        continue-on-error: true   # private repos without Enterprise Cloud: no attestation, evidence capped at C2
+        uses: actions/attest@1e69f48acb82d1966a394da916b4c1698aa569d6 # v4.2.2
+        with:
+          subject-path: ${{ runner.temp }}/aap-evidence/evidence-manifest.json
+          predicate-type: https://cipherfort.github.io/attestra/attestation/evidence/v1
+          predicate-path: ${{ runner.temp }}/aap-evidence/evidence-manifest.json
+      - name: Upload the evidence bundle
+        if: ${{ !cancelled() && steps.manifest.outcome == 'success' }}
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: aap-evidence-container
+          path: ${{ runner.temp }}/aap-evidence/
+          if-no-files-found: error
+          retention-days: 30

@@ -1,0 +1,505 @@
+# SPDX-License-Identifier: Apache-2.0
+"""`aap` command line: migrations, configuration, processes and the demo."""
+
+from __future__ import annotations
+
+import argparse
+import os
+import sys
+from collections import Counter
+
+from sqlalchemy import text
+
+
+def _engine():  # type: ignore[no-untyped-def]
+    from aap.db import get_engine
+
+    return get_engine()
+
+
+def cmd_migrate(_: argparse.Namespace) -> None:
+    from alembic import command
+    from alembic.config import Config
+
+    here = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+    cfg = Config(os.path.join(here, "alembic.ini"))
+    cfg.set_main_option("script_location", os.path.join(here, "migrations"))
+    command.upgrade(cfg, "head")
+    from aap.db import admin_connection
+
+    with admin_connection(_engine()) as conn:
+        created = conn.execute(text("SELECT aap.ensure_partitions(2)")).scalar_one()
+    print(f"migrated; {created} partition(s) created")
+
+
+def cmd_config_load(args: argparse.Namespace) -> None:
+    from aap.config import ConfigBundle
+    from aap.db import transaction
+    from aap.store import config_store
+
+    with transaction(_engine(), "aap_worker") as conn:
+        active = config_store.load(conn, ConfigBundle.load(), git_sha=args.git_sha)
+    print(f"configuration active: {len(active.controls)} controls, {len(active.ids)} config documents")
+
+
+def cmd_api(args: argparse.Namespace) -> None:
+    import uvicorn
+
+    uvicorn.run("aap.api.app:create_app", factory=True, host=args.host, port=args.port, log_level="info")
+
+
+def cmd_hook(args: argparse.Namespace) -> None:
+    import uvicorn
+
+    uvicorn.run("aap.hook.app:create_app", factory=True, host=args.host, port=args.port, log_level="info")
+
+
+def cmd_worker(args: argparse.Namespace) -> None:
+    import logging
+
+    from aap.config import ConfigBundle
+    from aap.worker.runner import Worker
+
+    logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(name)s %(message)s")
+    bundle = ConfigBundle.load()
+    github = None
+    if os.environ.get("AAP_GITHUB_APP_CLIENT_ID") and os.environ.get("AAP_GITHUB_ORG"):
+        from aap.integrations import github_client
+        from aap.secrets import secret_store
+
+        github = github_client(secret_store(), bundle)
+    w = Worker(_engine(), bundle, github=github)
+    if args.once:
+        print(f"processed {w.drain()} job(s)")
+    else:
+        w.forever()
+
+
+def cmd_demo_seed(_: argparse.Namespace) -> None:
+    from aap.blobstore import default_store
+    from aap.config import ConfigBundle
+    from aap.db import transaction
+    from aap.demo.scenario import seed
+
+    with transaction(_engine(), "aap_worker") as conn:
+        result = seed(conn, ConfigBundle.load(), default_store())
+    print(f"seeded {len(result.applications)} applications; forged evidence attempt → {result.rejections}")
+    print(
+        "next: uv run aap api --port 8765, then open http://localhost:8765 (add AAP_AUTH_MODE=dev for the persona switcher)"
+    )
+
+
+def cmd_demo_report(_: argparse.Namespace) -> None:
+    from aap.config import ConfigBundle
+    from aap.db import Scope, transaction
+    from aap.services import maturity_service
+    from aap.store import control_store, supply_chain
+
+    bundle = ConfigBundle.load()
+    with transaction(_engine(), "aap_api", Scope(scope_all=True)) as conn:
+        apps = conn.execute(
+            text("SELECT id, app_key, name, tier_rank FROM applications ORDER BY tier_rank, name")
+        ).all()
+        print("\n=== Application scorecards ===")
+        for a in apps:
+            per_control = maturity_service.app_states(conn, str(a.id))
+            mandatory = {k: v for k, v in per_control.items() if v.requirement == "mandatory"}
+            counts = Counter(v.state for v in mandatory.values())
+            detail = {}
+            for s in control_store.current_states(conn, str(a.id)):
+                k = s["control_key"]
+                if k in mandatory and s["state"] == mandatory[k].state and k not in detail:
+                    detail[k] = s
+            findings = conn.execute(
+                text(
+                    "SELECT priority, count(*) n FROM findings WHERE application_id = :a AND status "
+                    "NOT IN ('closed','false_positive') GROUP BY priority ORDER BY priority"
+                ),
+                {"a": a.id},
+            ).all()
+            report = maturity_service.application_maturity(conn, bundle, str(a.id))
+            print(f"\n{a.app_key}  {a.name}  (Tier {a.tier_rank})")
+            print(
+                f"  mandatory controls: {counts.get('satisfied', 0)}/{len(mandatory)} satisfied · "
+                + ", ".join(f"{k} {v}" for k, v in sorted(counts.items()) if k != "satisfied")
+            )
+            print("  open findings: " + (", ".join(f"{f.priority or 'unscored'}×{f.n}" for f in findings) or "none"))
+            print(
+                f"  SAMM (application practices): overall {report.overall:.2f}; meets tier target: {report.meets_target}"
+            )
+            for k in sorted(detail):
+                s = detail[k]
+                if s["state"] != "satisfied":
+                    scope = f" [{s['scope_ref'].split('/')[-1]}]" if s["scope_type"] == "repository" else ""
+                    print(f"    {k:<11} {s['state']:<14} {s['explanation'][:95]}{scope}")
+        impact = supply_chain.affected_applications(conn, "CVE-2021-44228")
+        if impact:
+            print("\n=== Which applications are affected by CVE-2021-44228 (Log4Shell)? ===")
+            for x in impact["affected"]:
+                print(
+                    f"  AFFECTED          {x['application']['app_key']} {x['application']['name']} (Tier "
+                    f"{x['application']['tier']}): {', '.join(c['purl'] for c in x['components'])}"
+                )
+            for x in impact["possibly_affected"]:
+                print(f"  POSSIBLY AFFECTED {x['application']['app_key']} {x['application']['name']}: {x['reason']}")
+            print(f"  not affected: {impact['not_affected_count']} application(s) with current SBOMs")
+        rej = conn.execute(text("SELECT reason_code, details->>'detail' AS d FROM evidence_rejections")).all()
+        print("\n=== Rejected evidence ===")
+        for x in rej:
+            print(f"  {x.reason_code}: {x.d}")
+
+
+def cmd_db_provision_logins(args: argparse.Namespace) -> None:
+    import secrets as pysecrets
+
+    from sqlalchemy.engine import make_url
+
+    from aap.db import PROCESS_LOGINS, database_url, set_login_password
+    from aap.secrets import secret_store
+
+    logins = list(PROCESS_LOGINS) if args.login == "all" else [args.login]
+    store = secret_store()
+    if args.from_store:  # Kubernetes / external secret managers: the URLs exist already and stay the source of truth
+        for login in logins:
+            process = login.removeprefix("aap_").removesuffix("_login")
+            url = store.get(f"database-url-{process}")
+            if not url:
+                print(f"{login}: no database-url-{process} in {store.describe()}; skipped", file=sys.stderr)
+                continue
+            parsed = make_url(url)
+            if parsed.username != login or not parsed.password:
+                raise SystemExit(f"database-url-{process} must connect as {login} with a password")
+            set_login_password(_engine(), login, parsed.password)
+            print(f"{login}: password set from database-url-{process}")
+        return
+    for login in logins:
+        password = pysecrets.token_urlsafe(32)
+        set_login_password(_engine(), login, password)
+        process = login.removeprefix("aap_").removesuffix("_login")
+        url = make_url(database_url()).set(username=login, password=password)
+        # one ready-to-use connection URL per process; each process can read only its own (Key Vault RBAC / mounts)
+        store.put(f"database-url-{process}", url.render_as_string(hide_password=False))
+        print(f"{login}: new password set; connection URL stored in {store.describe()} as database-url-{process}")
+
+
+def cmd_integrations_status(args: argparse.Namespace) -> None:
+    from aap.config import ConfigBundle
+    from aap.integrations import status
+
+    rows = status(_engine(), ConfigBundle.load())
+    width = max(len(r.name) for r in rows)
+    for r in rows:
+        mark = "configured" if r.configured else "NOT CONFIGURED"
+        last = r.last_run or {}
+        run = f"last run {last.get('status')} {last.get('started_at'):%Y-%m-%d %H:%M %Z}" if last else "never run"
+        print(f"{r.name:<{width}}  {mark:<15} {run}")
+        if not r.configured:
+            print(f"{'':<{width}}  missing: {', '.join(r.missing)}")
+            print(f"{'':<{width}}  set up:  {r.bootstrap}")
+
+
+def cmd_integrations_run(args: argparse.Namespace) -> None:
+    import logging
+
+    from aap.config import ConfigBundle
+    from aap.worker.runner import Worker
+
+    logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(name)s %(message)s")
+    Worker(_engine(), ConfigBundle.load()).connector({"connector": args.name})
+
+
+def cmd_bootstrap(args: argparse.Namespace) -> None:
+    from aap import bootstrap as b
+
+    target = args.target
+    if target == "github-app":
+        out = b.github_app(
+            args.org,
+            args.name,
+            args.public_url,
+            args.host,
+            args.port,
+            not args.no_browser,
+            with_issues=args.with_issues,
+        )
+    elif target == "dependency-track":
+        out = b.dependency_track(args.url)
+    elif target == "defectdojo":
+        out = b.defectdojo(args.url, args.admin_password_env)
+    elif target == "jira":
+        out = b.jira(args.url, args.email, args.token_env, args.create_project)
+    elif target == "gitlab":
+        out = b.gitlab(args.url, args.group, args.admin_token_env, args.public_url, with_issues=args.with_issues)
+    elif target == "oidc-dev":
+        out = b.oidc_dev()
+    elif target == "trust-root":
+        out = b.trust_root()
+    elif target == "github-app-key-to-keyvault":
+        out = b.github_app_key_to_keyvault()
+    else:  # pragma: no cover - argparse restricts choices
+        raise SystemExit(target)
+    if out:
+        print("\nSettings for the deployment (non-secret):")
+        for k, v in out.items():
+            print(f"  {k}={v}")
+
+
+def cmd_apps_register(args: argparse.Namespace) -> None:
+    """Operator registration (scripts, bulk onboarding). Runs platform-wide as aap_worker, so it is audited as the
+    operator's OS account; nobody is recorded as requester, so any AppSec engineer may decide a Tier 1/2 request."""
+    import getpass
+    from pathlib import Path
+
+    import yaml
+
+    from aap.config import ConfigBundle
+    from aap.db import transaction
+    from aap.services import onboarding
+    from aap.store import audit
+
+    try:
+        if args.application_yaml:
+            if not args.repository_id:
+                raise onboarding.OnboardingError(["--repository-id is required with --application-yaml"])
+            app_doc = yaml.safe_load(Path(args.application_yaml).read_text())
+            asvs_doc = yaml.safe_load(Path(args.asvs_yaml).read_text()) if args.asvs_yaml else None
+            repo = onboarding.RepoRef(args.provider, args.repository_id, args.repository)
+        elif args.provider == "gitlab":
+            repo, app_doc, asvs_doc = onboarding.fetch_contract_gitlab(onboarding.gitlab_api(), args.repository)
+        else:
+            api = onboarding.github_api(args.repository)
+            repo, app_doc, asvs_doc = onboarding.fetch_contract(api, args.repository)
+        with transaction(_engine(), "aap_worker") as conn:
+            reg = onboarding.register(conn, ConfigBundle.load(), repo=repo, app_doc=app_doc, asvs_doc=asvs_doc)
+            audit.write(
+                conn,
+                actor_type="system",
+                actor_id=f"cli:{getpass.getuser()}",
+                action="application.register",
+                outcome="success",
+                target_type="application",
+                target_id=reg.application_id,
+                application_id=reg.application_id,
+                details={"repository": repo.full_name, "tier": reg.tier, "decision": reg.decision},
+            )
+    except onboarding.OnboardingError as e:
+        for problem in e.problems:
+            print(f"error: {problem}", file=sys.stderr)
+        sys.exit(1)
+    print(f"registered {reg.app_key} ({repo.full_name}): Tier {reg.tier}, classification {reg.decision}")
+    print(f"  {reg.explanation}")
+    if reg.decision == "pending":
+        print("  Tier 1/2: an AppSec engineer must approve the classification (application page → Classification)")
+
+
+def cmd_pipelines(args: argparse.Namespace) -> None:
+    from pathlib import Path
+
+    from aap import pipelines
+
+    try:
+        gitlab = getattr(args, "provider", "github") == "gitlab"
+        if args.sub == "export":
+            for path in (pipelines.export_gitlab if gitlab else pipelines.export)(Path(args.to)):
+                print(f"wrote {path}")
+            print("Next: review, commit and push to your security-workflows repository, tag the release, then run")
+            print("  aap pipelines approve --repository <org>/security-workflows --sha <commit> --release <tag>")
+        elif args.sub == "approve":
+            out = (pipelines.approve_gitlab if gitlab else pipelines.approve)(args.sha, args.release, args.repository)
+            print(f"approved {out['sha']} ({out['release']}) for {out['workflows']} workflows in {out['path']}")
+            print("Open a pull request with this change: trusted producers change only through review.")
+        elif gitlab:
+            if not args.host:
+                raise pipelines.PipelineError("--host is required for GitLab (e.g. gitlab.example.org)")
+            print(pipelines.gitlab_include(args.host, args.repository, args.sha), end="")
+        else:
+            print(pipelines.caller(args.repository, args.sha, args.release), end="")
+    except pipelines.PipelineError as e:
+        print(f"error: {e}", file=sys.stderr)
+        sys.exit(1)
+
+
+def cmd_storage_init_s3(args: argparse.Namespace) -> None:
+    """Evaluation and development only: create the evidence bucket with Object Lock (COMPLIANCE) on an S3-compatible
+    server (RustFS, MinIO). Production buckets come from Terraform (examples/terraform/aws: S3 Object Lock)."""
+    import boto3
+    from botocore.config import Config
+    from botocore.exceptions import ClientError
+
+    if os.environ.get("AAP_ENV") == "production":
+        print("error: create production buckets with Terraform, not this command", file=sys.stderr)
+        sys.exit(1)
+    bucket = os.environ["AAP_BLOB_S3_BUCKET"]
+    s3 = boto3.client(
+        "s3",
+        endpoint_url=os.environ.get("AAP_BLOB_S3_ENDPOINT") or None,
+        region_name=os.environ.get("AAP_BLOB_S3_REGION", "us-east-1"),
+        config=Config(s3={"addressing_style": "path"}),
+    )
+    try:
+        s3.create_bucket(Bucket=bucket, ObjectLockEnabledForBucket=True)
+        print(f"created bucket {bucket} with Object Lock")
+    except ClientError as e:
+        if e.response["Error"]["Code"] not in ("BucketAlreadyOwnedByYou", "BucketAlreadyExists"):
+            raise
+        print(f"bucket {bucket} exists")
+    s3.put_object_lock_configuration(
+        Bucket=bucket,
+        ObjectLockConfiguration={
+            "ObjectLockEnabled": "Enabled",
+            "Rule": {"DefaultRetention": {"Mode": "COMPLIANCE", "Days": int(args.retention_days)}},
+        },
+    )
+    print(f"default retention: COMPLIANCE, {args.retention_days} days")
+
+
+def cmd_secrets_put(args: argparse.Namespace) -> None:
+    """Store a credential in the configured secret store. The value comes from a hidden prompt or stdin, never the
+    command line (shell history, process listings)."""
+    import getpass
+    import re
+
+    from aap.secrets import secret_store
+
+    if not re.fullmatch(r"[a-z0-9][a-z0-9-]{1,126}", args.name):
+        print("error: secret names use lower-case letters, digits and hyphens", file=sys.stderr)
+        sys.exit(1)
+    value = sys.stdin.read().strip() if not sys.stdin.isatty() else getpass.getpass(f"{args.name}: ")
+    if not value:
+        print("error: empty value", file=sys.stderr)
+        sys.exit(1)
+    store = secret_store()
+    store.put(args.name, value)
+    print(f"stored {args.name} in {store.describe()}")
+
+
+def cmd_settings_check(args: argparse.Namespace) -> None:
+    from aap.settings import load
+
+    values = load(args.file)
+    width = max((len(k) for k in values), default=0)
+    for k, v in sorted(values.items()):
+        print(f"{k:<{width}}  {v}{'   (overridden by the environment)' if k in os.environ else ''}")
+    print(f"OK {args.file}: {len(values)} settings, schema-valid, no secrets")
+
+
+def main(argv: list[str] | None = None) -> None:
+    from aap.settings import apply
+
+    apply()  # AAP_CONFIG_FILE → environment (environment variables win)
+    p = argparse.ArgumentParser(prog="aap", description="Attestra")
+    sub = p.add_subparsers(dest="cmd", required=True)
+    sub.add_parser("migrate", help="apply database migrations and create partitions").set_defaults(fn=cmd_migrate)
+    c = sub.add_parser("config", help="configuration").add_subparsers(dest="sub", required=True)
+    load = c.add_parser("load", help="load catalogue + config into the database")
+    load.add_argument("--git-sha", default="local")
+    load.set_defaults(fn=cmd_config_load)
+    for name, fn, port in (("api", cmd_api, 8000), ("hook", cmd_hook, 8001)):
+        sp = sub.add_parser(name)
+        sp.add_argument("--host", default="127.0.0.1")
+        sp.add_argument("--port", type=int, default=port)
+        sp.set_defaults(fn=fn)
+    w = sub.add_parser("worker")
+    w.add_argument("--once", action="store_true", help="drain the queue and exit")
+    w.set_defaults(fn=cmd_worker)
+    st = sub.add_parser("settings", help="deployment settings (aap.yaml)").add_subparsers(dest="sub", required=True)
+    stc = st.add_parser("check", help="validate an aap.yaml and show the settings it maps to")
+    stc.add_argument("file")
+    stc.set_defaults(fn=cmd_settings_check)
+    dbp = sub.add_parser("db", help="database administration").add_subparsers(dest="sub", required=True)
+    sp_pw = dbp.add_parser(
+        "provision-logins", help="set fresh passwords for the per-process logins and store each process's URL"
+    )
+    sp_pw.add_argument(
+        "login",
+        nargs="?",
+        default="all",
+        choices=["all", "aap_api_login", "aap_worker_login", "aap_hook_login", "aap_reporting_login"],
+    )
+    sp_pw.add_argument(
+        "--from-store",
+        action="store_true",
+        help="set each login's password from its existing database-url-<process> secret (Helm)",
+    )
+    sp_pw.set_defaults(fn=cmd_db_provision_logins)
+    i = sub.add_parser("integrations", help="external systems").add_subparsers(dest="sub", required=True)
+    i.add_parser("status", help="what is configured, what is missing, last runs").set_defaults(
+        fn=cmd_integrations_status
+    )
+    run = i.add_parser("run", help="run one integration sync now (recorded in connector_runs)")
+    run.add_argument("name", help="a plugin key (see `aap integrations status`)")
+    run.set_defaults(fn=cmd_integrations_run)
+    bs = sub.add_parser("bootstrap", help="set up an external system from nothing").add_subparsers(
+        dest="target", required=True
+    )
+    gh = bs.add_parser("github-app", help="create the read-only GitHub App (manifest flow; one click by an org owner)")
+    gh.add_argument("--org", required=True)
+    gh.add_argument("--name", default="Attestra")
+    gh.add_argument("--public-url", help="public https URL of the webhook receiver (omit locally: polling only)")
+    gh.add_argument("--host", default="github.com")
+    gh.add_argument("--port", type=int, default=8765)
+    gh.add_argument("--no-browser", action="store_true")
+    gh.add_argument("--with-issues", action="store_true", help="also issues: write, for the GitHub Issues plugin")
+    for name in ("dependency-track", "defectdojo"):
+        sp = bs.add_parser(name)
+        sp.add_argument("--url", required=True)
+        if name == "defectdojo":
+            sp.add_argument(
+                "--admin-password-env", help="environment variable holding the admin password (else prompt)"
+            )
+    jp = bs.add_parser("jira")
+    jp.add_argument("--url", required=True)
+    jp.add_argument("--email", required=True, help="the service account that owns the API token")
+    jp.add_argument("--token-env", help="environment variable holding the API token (else prompt)")
+    jp.add_argument("--create-project", metavar="KEY", help="create the security project if missing (Jira admin)")
+    glp = bs.add_parser("gitlab", help="group access token (read-only) and, on Premium, a group webhook")
+    glp.add_argument("--url", required=True)
+    glp.add_argument("--group", required=True)
+    glp.add_argument("--admin-token-env", help="environment variable holding a group Owner's api token (else prompt)")
+    glp.add_argument("--public-url", help="public https URL of the webhook receiver")
+    glp.add_argument("--with-issues", action="store_true", help="also a separate token that can open GitLab issues")
+    bs.add_parser("oidc-dev", help="client secret for the local mock identity provider")
+    bs.add_parser("trust-root", help="refresh config/sigstore/trusted_root.jsonl (gh attestation trusted-root)")
+    bs.add_parser("github-app-key-to-keyvault", help="move the App key into a non-exportable Key Vault key")
+    for target in bs.choices.values():
+        target.set_defaults(fn=cmd_bootstrap)
+    ap = sub.add_parser("apps", help="applications").add_subparsers(dest="sub", required=True)
+    reg = ap.add_parser("register", help="register an application from its repository's .security/application.yaml")
+    reg.add_argument("repository", help="owner/name")
+    reg.add_argument("--application-yaml", help="read the contract from this file instead of the repository")
+    reg.add_argument("--asvs-yaml", help="with --application-yaml: the asvs.yaml file")
+    reg.add_argument("--repository-id", help="with --application-yaml: the provider's numeric repository id")
+    reg.add_argument("--provider", choices=["github", "gitlab"], default="github")
+    reg.set_defaults(fn=cmd_apps_register)
+    stg = sub.add_parser("storage", help="evidence storage").add_subparsers(dest="sub", required=True)
+    s3i = stg.add_parser("init-s3", help="evaluation only: create the evidence bucket with Object Lock (COMPLIANCE)")
+    s3i.add_argument("--retention-days", type=int, default=30)
+    s3i.set_defaults(fn=cmd_storage_init_s3)
+    sec = sub.add_parser("secrets", help="credentials in the secret store").add_subparsers(dest="sub", required=True)
+    sp_put = sec.add_parser("put", help="store a secret (value from a hidden prompt or stdin)")
+    sp_put.add_argument("name")
+    sp_put.set_defaults(fn=cmd_secrets_put)
+    pl = sub.add_parser("pipelines", help="shipped security pipelines").add_subparsers(dest="sub", required=True)
+    ex = pl.add_parser("export", help="render the GitHub workflows for your security-workflows repository")
+    ex.add_argument("--to", required=True, help="a checkout of <org>/security-workflows")
+    apv = pl.add_parser("approve", help="trust a released commit of security-workflows (edits trusted-producers.yaml)")
+    apv.add_argument("--sha", required=True)
+    apv.add_argument("--release", required=True)
+    apv.add_argument("--repository", help="<org>/security-workflows (sets workflow_repository)")
+    cl = pl.add_parser("caller", help="print the workflow an application repository adds")
+    cl.add_argument("--repository", required=True)
+    cl.add_argument("--sha", required=True)
+    cl.add_argument("--release", required=True)
+    cl.add_argument("--host", help="GitLab: the instance host as CI sees it (CI_SERVER_FQDN)")
+    for sp in pl.choices.values():
+        sp.add_argument("--provider", choices=["github", "gitlab"], default="github")
+        sp.set_defaults(fn=cmd_pipelines)
+    d = sub.add_parser("demo", help="demo world").add_subparsers(dest="sub", required=True)
+    d.add_parser("seed").set_defaults(fn=cmd_demo_seed)
+    d.add_parser("report").set_defaults(fn=cmd_demo_report)
+    args = p.parse_args(argv)
+    args.fn(args)
+
+
+if __name__ == "__main__":
+    sys.exit(main())

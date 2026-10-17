@@ -1,0 +1,18 @@
+[project]
+name = "aap-plugin-jsonl"
+version = "0.1.0"
+description = "Example plugin for Attestra: curated security events as JSON Lines for a log shipper"
+license = "Apache-2.0"
+requires-python = ">=3.12"
+dependencies = []   # the platform (package `aap`) is the host; plugins must not pin it
+
+# The one line that makes this a plugin: the platform discovers it through this entry-point group.
+[project.entry-points."aap.plugins"]
+jsonl = "aap_plugin_jsonl:PLUGIN"
+
+[build-system]
+requires = ["hatchling>=1.25"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/aap_plugin_jsonl"]

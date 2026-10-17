@@ -1,0 +1,54 @@
+[
+  {
+    "name": "TimeGenerated",
+    "type": "datetime"
+  },
+  {
+    "name": "EventId",
+    "type": "string"
+  },
+  {
+    "name": "EventType",
+    "type": "string"
+  },
+  {
+    "name": "Severity",
+    "type": "string"
+  },
+  {
+    "name": "AppKey",
+    "type": "string"
+  },
+  {
+    "name": "AppTier",
+    "type": "int"
+  },
+  {
+    "name": "Repo",
+    "type": "string"
+  },
+  {
+    "name": "ResourceIds",
+    "type": "dynamic"
+  },
+  {
+    "name": "VulnIds",
+    "type": "dynamic"
+  },
+  {
+    "name": "Actor",
+    "type": "string"
+  },
+  {
+    "name": "PlatformUrl",
+    "type": "string"
+  },
+  {
+    "name": "CorrelationId",
+    "type": "string"
+  },
+  {
+    "name": "Details",
+    "type": "dynamic"
+  }
+]

@@ -1,0 +1,18 @@
+# SPDX-License-Identifier: Apache-2.0
+# Settings for the Compose evaluation stack (schemas/settings/aap.schema.json). No secrets here.
+version: 1
+env: development   # evaluation, not production (production also requires WORM evidence storage)
+public_url: http://localhost:8000
+auth:
+  mode: oidc
+  oidc:
+    issuer: http://localhost:8180/realms/aap
+    client_id: aap-web
+    internal_url: http://keycloak:8180   # the containers reach Keycloak by its service name
+secrets:
+  backend: mounted
+evidence_store:
+  kind: s3
+  bucket: aap-evidence
+  endpoint_url: http://rustfs:9000
+  region: us-east-1

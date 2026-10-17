@@ -1,0 +1,7 @@
+# schemas/repo-contract/threat-model.schema.json#/$defs/residualRiskFile
+# REFERENCES ONLY: the risk acceptance itself is an approved exception in the platform (ADR-021).
+schema_version: "1"
+residual_risks:
+  - threat: TM-04
+    rationale: Front Door rate limiting covers volumetric abuse; application-level per-user quotas planned for Q3.
+    exception_id: EX-000123

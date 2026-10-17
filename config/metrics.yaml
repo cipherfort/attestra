@@ -1,0 +1,367 @@
+# KPI / KRI catalogue: SOURCE OF TRUTH (rendered to docs/standards/kpi-kri-catalogue.md by
+# tools/metrics/render.py). Status: DESIGNED; targets/thresholds PROPOSED (Governance Board approval).
+#
+# Rules (TOM §7, brief §39):
+#   * No metric rewards finding FEWER issues. Raw finding counts are context only, never targets.
+#   * Metrics are computed by the platform from ledgers; none is self-reported.
+#   * Team/app/business-unit level only. Never per person.
+# kind: kpi (performance, has a target) | kri (risk, has an escalation threshold) | context (reported, no target)
+
+version: 1
+
+metrics:
+  # ---------------------------------------------------------------- Coverage
+  - id: COV-01
+    name: Registry coverage
+    kind: kpi
+    category: coverage
+    definition: Registered production applications ÷ discovered production applications (deployments to prod environments + cloud workloads)
+    unit: percent
+    direction: up
+    target: { tier_1_2: 100, all: 90 }
+    frequency: monthly
+    owner: head_of_appsec
+    anti_gaming: Denominator comes from discovery (E02), not from the registry itself, so not registering does not help.
+  - id: COV-02
+    name: Repository onboarding
+    kind: kpi
+    category: coverage
+    definition: Active repositories (push in 90 days) linked to an application and running a trusted security-workflows pin ÷ active repositories
+    unit: percent
+    direction: up
+    target: { all: 90 }
+    frequency: monthly
+    owner: platform_po
+    anti_gaming: Archiving active repos to shrink the denominator is visible in the repo-archive trend.
+  - id: COV-03
+    name: Critical applications assessed
+    kind: kpi
+    category: coverage
+    definition: Tier 1 apps with an approved SAMM application assessment in the last 12 months ÷ Tier 1 apps
+    unit: percent
+    direction: up
+    target: { tier_1: 100 }
+    frequency: quarterly
+    owner: head_of_appsec
+    anti_gaming: Assessments require an approver outside the team (M2).
+  - id: COV-04
+    name: Threat-model coverage
+    kind: kpi
+    category: coverage
+    definition: Tier 1/2 apps with ASC-TM-01 and ASC-TM-02 satisfied ÷ Tier 1/2 apps
+    unit: percent
+    direction: up
+    target: { tier_1: 100, tier_2: 80 }
+    frequency: monthly
+    owner: head_of_appsec
+    anti_gaming: Review evidence is bound to the commit of the reviewed files and invalidated by architecture-change signals.
+
+  # ---------------------------------------------------------------- Pipeline
+  - id: PIP-01
+    name: SAST coverage
+    kind: kpi
+    category: pipeline
+    definition: Applicable repos with ASC-BLD-01 satisfied (fresh C2+ evidence, all detected languages) ÷ applicable repos
+    unit: percent
+    direction: up
+    target: { tier_1_2: 95, all: 85 }
+    frequency: weekly
+    owner: platform_po
+    anti_gaming: Language coverage is checked against detection, so partial scans don't count as full coverage.
+  - id: PIP-02
+    name: SCA coverage
+    kind: kpi
+    category: pipeline
+    definition: Applicable repos with ASC-BLD-02 satisfied ÷ applicable repos
+    unit: percent
+    direction: up
+    target: { all: 95 }
+    frequency: weekly
+    owner: platform_po
+    anti_gaming: Ecosystem coverage checked against lockfile detection.
+  - id: PIP-03
+    name: SBOM coverage
+    kind: kpi
+    category: pipeline
+    definition: Deployed artifact digests with a current, quality-passing build SBOM ÷ deployed artifact digests
+    unit: percent
+    direction: up
+    target: { tier_1_2: 95 }
+    frequency: weekly
+    owner: platform_po
+    anti_gaming: Quality gate (purl coverage, NTIA elements). Inconclusive SBOMs do not count.
+  - id: PIP-04
+    name: DAST coverage
+    kind: kpi
+    category: pipeline
+    definition: Deployed Tier 1/2 web/API apps with ASC-TST-01 satisfied ÷ deployed Tier 1/2 web/API apps
+    unit: percent
+    direction: up
+    target: { tier_1_2: 90 }
+    frequency: monthly
+    owner: head_of_appsec
+    anti_gaming: Scans crawling below threshold are INCONCLUSIVE and do not count.
+  - id: PIP-05
+    name: Secrets protection coverage
+    kind: kpi
+    category: pipeline
+    definition: Repos with secret scanning, push protection and validity checks enabled ÷ repos
+    unit: percent
+    direction: up
+    target: { all: 100 }
+    frequency: weekly
+    owner: platform_po
+    anti_gaming: Read from GitHub settings (C1); enforced by org security configuration.
+
+  # ---------------------------------------------------------------- Vulnerability
+  - id: VUL-01
+    name: Open P1/P2 findings
+    kind: context
+    category: vulnerability
+    definition: Count of open findings by priority (contextual), by business unit
+    unit: count
+    direction: context
+    frequency: weekly
+    owner: head_of_appsec
+    anti_gaming: Context only, not a target. Reducing detection would lower it, so it is never used to rate teams.
+  - id: VUL-02
+    name: Mean/median time to remediate (verified)
+    kind: kpi
+    category: vulnerability
+    definition: Detection → closure by verification evidence, median and p90, by priority
+    unit: days
+    direction: down
+    target: { P1: 7, P2: 30 }
+    frequency: monthly
+    owner: unit_security_leads
+    anti_gaming: Closure requires re-scan evidence; ticket closure alone does not stop the clock.
+  - id: VUL-03
+    name: SLA compliance
+    kind: kpi
+    category: vulnerability
+    definition: Findings remediated within SLA ÷ findings that fell due, by priority (excepted findings counted separately)
+    unit: percent
+    direction: up
+    target: { P1: 95, P2: 90, P3: 90 }
+    frequency: monthly
+    owner: unit_security_leads
+    anti_gaming: Excepted findings are reported alongside, so exceptions can't hide breaches; renewals are tracked (VUL-06).
+  - id: VUL-04
+    name: Recurring vulnerabilities
+    kind: kpi
+    category: vulnerability
+    definition: Findings reopened (same fingerprint) within 180 days of verified closure ÷ verified closures
+    unit: percent
+    direction: down
+    target: { all: 5 }
+    frequency: quarterly
+    owner: head_of_appsec
+    anti_gaming: Fingerprints are deterministic; regressions are detected automatically.
+  - id: VUL-05
+    name: False-positive rate
+    kind: context
+    category: vulnerability
+    definition: Findings marked false positive ÷ triaged findings, by team and tool
+    unit: percent
+    direction: context
+    frequency: quarterly
+    owner: head_of_appsec
+    anti_gaming: P1/P2 FPs need a second reviewer; quarterly sampling. A high rate triggers tool tuning, not team rating.
+  - id: VUL-06
+    name: Exception health
+    kind: kpi
+    category: vulnerability
+    definition: Active exceptions by priority, renewals > 1, median age
+    unit: count
+    direction: down
+    frequency: monthly
+    owner: governance_analyst
+    target: { renewals_over_1: 0 }
+    anti_gaming: Expiry is automatic and creates findings.
+
+  # ---------------------------------------------------------------- Maturity
+  - id: MAT-01
+    name: Tier 1 apps meeting maturity target
+    kind: kpi
+    category: maturity
+    definition: Tier 1 apps whose SAMM practice scores all meet config/samm-targets.yaml ÷ Tier 1 apps
+    unit: percent
+    direction: up
+    target: { baseline_plus_points_at_18m: 30 }
+    frequency: monthly
+    owner: head_of_appsec
+    anti_gaming: Manual answers are capped by automated evidence; provenance is shown alongside.
+  - id: MAT-02
+    name: SAMM maturity by practice and business unit
+    kind: context
+    category: maturity
+    definition: Distribution (median, p25–p75) of application practice scores per business unit, plus trend
+    unit: score_0_3
+    direction: up
+    frequency: monthly
+    owner: head_of_appsec
+    anti_gaming: Distributions, not rankings. Methodology changes are marked on trends.
+  - id: MAT-03
+    name: Mandatory control coverage
+    kind: kpi
+    category: maturity
+    definition: Mandatory controls satisfied at required confidence ÷ applicable mandatory controls (observe-mode excluded)
+    unit: percent
+    direction: up
+    target: { tier_1_2: 90 }
+    frequency: weekly
+    owner: head_of_appsec
+    anti_gaming: N/A requires approval; excepted controls don't count as satisfied.
+
+  # ---------------------------------------------------------------- Evidence
+  - id: EVD-01
+    name: Evidence freshness
+    kind: kpi
+    category: evidence
+    definition: Evidence supporting mandatory controls in ACTIVE state ÷ total supporting evidence (ACTIVE + EXPIRING + EXPIRED)
+    unit: percent
+    direction: up
+    target: { all: 95 }
+    frequency: weekly
+    owner: platform_po
+    anti_gaming: Freshness is computed by the platform from policy.
+  - id: EVD-02
+    name: Missing evidence
+    kind: kpi
+    category: evidence
+    definition: Applicable mandatory (app, control) pairs in NO_EVIDENCE state
+    unit: count
+    direction: down
+    target: { tier_1_2_after_onboarding_grace: 0 }
+    frequency: weekly
+    owner: platform_po
+    anti_gaming: NO_EVIDENCE is treated as worse than findings in all views.
+  - id: EVD-03
+    name: Automated evidence share
+    kind: kpi
+    category: evidence
+    definition: Satisfied control states backed by C2/C3 evidence ÷ satisfied control states
+    unit: percent
+    direction: up
+    target: { all: 75 }
+    frequency: monthly
+    owner: head_of_appsec
+    anti_gaming: Confidence is assigned by the platform, never declared.
+  - id: EVD-04
+    name: Evaluator calibration agreement
+    kind: kpi
+    category: evidence
+    definition: Sampled SATISFIED states confirmed by manual AppSec check ÷ sampled
+    unit: percent
+    direction: up
+    target: { all: 97 }
+    frequency: quarterly
+    owner: head_of_appsec
+    anti_gaming: Random sample chosen by the platform.
+
+  # ---------------------------------------------------------------- People
+  - id: PPL-01
+    name: Champion coverage
+    kind: kpi
+    category: people
+    definition: Teams owning Tier 1–3 apps with an active, trained champion ÷ such teams
+    unit: percent
+    direction: up
+    target: { all: 90 }
+    frequency: quarterly
+    owner: head_of_appsec
+    anti_gaming: Training completion from LMS, not self-declared.
+  - id: PPL-02
+    name: Secure development training coverage
+    kind: kpi
+    category: people
+    definition: Recent contributors with current training ÷ recent contributors, per team (ASC-GOV-04)
+    unit: percent
+    direction: up
+    target: { all: 90 }
+    frequency: quarterly
+    owner: unit_security_leads
+    anti_gaming: Team level only.
+
+  # ---------------------------------------------------------------- KRIs
+  - id: KRI-01
+    name: KEV-listed vulnerabilities open on internet-facing apps
+    kind: kri
+    category: risk
+    definition: Open findings whose vulnerability is CISA KEV-listed, on apps with exposure internet_*
+    unit: count
+    threshold: "> 0 for > 7 days"
+    frequency: daily
+    owner: ciso
+  - id: KRI-02
+    name: P1 findings past SLA
+    kind: kri
+    category: risk
+    definition: Open P1 findings with sla_breached
+    unit: count
+    threshold: "> 0"
+    frequency: daily
+    owner: ciso
+  - id: KRI-03
+    name: Expired exceptions not remediated
+    kind: kri
+    category: risk
+    definition: exception_expired findings open > 7 days
+    unit: count
+    threshold: "> 0"
+    frequency: weekly
+    owner: head_of_appsec
+  - id: KRI-04
+    name: Dark applications
+    kind: kri
+    category: risk
+    definition: Registered production apps with no evidence ingested in 30 days ÷ registered production apps
+    unit: percent
+    threshold: "> 5%"
+    frequency: weekly
+    owner: head_of_appsec
+  - id: KRI-05
+    name: Unregistered repos with production deployments
+    kind: kri
+    category: risk
+    definition: Repos deploying to production environments that are not linked to a registered application
+    unit: count
+    threshold: "> 0 for 14 days"
+    frequency: weekly
+    owner: head_of_appsec
+  - id: KRI-06
+    name: Unattributed cloud findings
+    kind: kri
+    category: risk
+    definition: High/critical cloud posture findings not attributable to an application ÷ all such findings
+    unit: percent
+    threshold: "> 20%"
+    frequency: weekly
+    owner: cloud_security
+  - id: KRI-07
+    name: Unmanaged tool suppressions
+    kind: kri
+    category: risk
+    definition: Tool-level suppressions (DD risk accepted, GHAS dismissed, Checkov skip) without a platform exception
+    unit: count
+    threshold: "rising 3 consecutive months"
+    frequency: monthly
+    owner: head_of_appsec
+  - id: KRI-08
+    name: Evidence integrity failures
+    kind: kri
+    category: risk
+    definition: Daily verification job failures (hash chain or blob mismatch)
+    unit: count
+    threshold: "> 0"
+    frequency: daily
+    owner: platform_po
+  - id: KRI-09
+    name: Stale connectors
+    kind: kri
+    category: risk
+    definition: Connectors whose last success is older than 2× their schedule
+    unit: count
+    threshold: "> 0 for > 24h"
+    frequency: hourly
+    owner: platform_po

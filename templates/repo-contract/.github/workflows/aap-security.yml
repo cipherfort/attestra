@@ -1,0 +1,78 @@
+# SPDX-License-Identifier: Apache-2.0
+# Attestra: security pipeline caller. The only security workflow file an application repository
+# needs. Render it with your organization's values: `aap pipelines caller --repository <org>/security-workflows
+# --sha <approved SHA> --release <tag>`. Dependabot keeps the SHA current. No secrets: the platform pulls the
+# evidence artifacts through its read-only GitHub App.
+name: aap-security
+
+on:
+  pull_request:
+  push:
+    branches: [ main ]
+  schedule:
+    - cron: "17 3 * * 1"      # weekly, so evidence stays fresh even without pushes
+  workflow_dispatch:
+
+permissions: {}
+
+concurrency:
+  group: aap-security-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  sast:
+    permissions:
+      contents: read
+      id-token: write
+      attestations: write
+      security-events: write   # CodeQL results in the Security tab (Code Security on private repos)
+      actions: read
+    uses: example-org/security-workflows/.github/workflows/sast.yml@0000000000000000000000000000000000000000 # v0.0.0 (placeholder until first release)
+  sca:
+    permissions:
+      contents: read
+      id-token: write
+      attestations: write
+    uses: example-org/security-workflows/.github/workflows/sca.yml@0000000000000000000000000000000000000000 # v0.0.0 (placeholder until first release)
+  secrets:
+    permissions:
+      contents: read
+      id-token: write
+      attestations: write
+    uses: example-org/security-workflows/.github/workflows/secrets.yml@0000000000000000000000000000000000000000 # v0.0.0 (placeholder until first release)
+  iac:
+    permissions:
+      contents: read
+      id-token: write
+      attestations: write
+    uses: example-org/security-workflows/.github/workflows/iac.yml@0000000000000000000000000000000000000000 # v0.0.0 (placeholder until first release)
+  sbom:
+    permissions:
+      contents: read
+      id-token: write
+      attestations: write
+    uses: example-org/security-workflows/.github/workflows/sbom.yml@0000000000000000000000000000000000000000 # v0.0.0 (placeholder until first release)
+  workflow-lint:
+    permissions:
+      contents: read
+      id-token: write
+      attestations: write
+    uses: example-org/security-workflows/.github/workflows/workflow-lint.yml@0000000000000000000000000000000000000000 # v0.0.0 (placeholder until first release)
+  # Container images: call container.yml from your build workflow with the pushed image digest, e.g.
+  #   container:
+  #     needs: build
+  #     permissions: { contents: read, id-token: write, attestations: write, packages: read }
+  #     uses: example-org/security-workflows/.github/workflows/container.yml@<sha>
+  #     with:
+  #       image: ghcr.io/example-org/claims-api@${{ needs.build.outputs.digest }}
+  # Security tests: upload your JUnit XML in a test job, then package it as evidence, e.g.
+  #   security-tests:
+  #     needs: test            # your job: actions/upload-artifact with name junit-results
+  #     permissions: { contents: read, id-token: write, attestations: write, actions: read }
+  #     uses: example-org/security-workflows/.github/workflows/test-evidence.yml@<sha>
+  #     with: { results_artifact: junit-results }
+  # Deployments (in your CD workflow, before the deploy step):
+  #   deploy-evidence:
+  #     permissions: { contents: read, id-token: write, attestations: write, packages: read }
+  #     uses: example-org/security-workflows/.github/workflows/deploy-evidence.yml@<sha>
+  #     with: { image: "ghcr.io/example-org/claims-api@sha256:...", environment: production, owner: example-org }

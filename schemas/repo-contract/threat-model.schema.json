@@ -1,0 +1,164 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cipherfort.github.io/attestra/schemas/repo-contract/threat-model.schema.json",
+  "title": ".security/threat-model/*.yaml",
+  "description": "Status: DESIGNED. One schema per structured threat-model file, selected via $defs: assets.yaml → #/$defs/assetsFile, threats.yaml → #/$defs/threatsFile, mitigations.yaml → #/$defs/mitigationsFile, residual-risk.yaml → #/$defs/residualRiskFile. IDs are stable across versions (never renumber). Narrative files (system-context.md, data-flow.md, trust-boundaries.md) are free-form Markdown with Mermaid diagrams.",
+  "$defs": {
+    "assetId": { "type": "string", "pattern": "^AS-[0-9]{2,3}$" },
+    "flowId": { "type": "string", "pattern": "^DF-[0-9]{2,3}$" },
+    "boundaryId": { "type": "string", "pattern": "^TB-[0-9]{2,3}$" },
+    "threatId": { "type": "string", "pattern": "^TM-[0-9]{2,3}$" },
+    "assetsFile": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["schema_version", "assets"],
+      "properties": {
+        "schema_version": { "const": "1" },
+        "assets": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["id", "name", "type", "classification"],
+            "properties": {
+              "id": { "$ref": "#/$defs/assetId" },
+              "name": { "type": "string", "maxLength": 120 },
+              "type": { "enum": ["data", "credential", "service", "infrastructure", "process", "reputation"] },
+              "classification": { "type": "string", "description": "Label from config/profiles/<profile>/classification.yaml data_classification" },
+              "description": { "type": "string", "maxLength": 1000 },
+              "location": { "type": "string", "maxLength": 200 }
+            }
+          }
+        },
+        "data_flows": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["id", "from", "to", "data"],
+            "properties": {
+              "id": { "$ref": "#/$defs/flowId" },
+              "from": { "type": "string" },
+              "to": { "type": "string" },
+              "data": { "type": "array", "items": { "$ref": "#/$defs/assetId" } },
+              "protocol": { "type": "string" },
+              "crosses": { "type": "array", "items": { "$ref": "#/$defs/boundaryId" } },
+              "authenticated": { "type": "boolean" }
+            }
+          }
+        },
+        "trust_boundaries": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["id", "name"],
+            "properties": {
+              "id": { "$ref": "#/$defs/boundaryId" },
+              "name": { "type": "string" },
+              "description": { "type": "string" }
+            }
+          }
+        }
+      }
+    },
+    "threatsFile": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["schema_version", "methodology", "threats"],
+      "properties": {
+        "schema_version": { "const": "1" },
+        "methodology": { "enum": ["stride", "stride+attack-trees", "linddun", "other"] },
+        "threats": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["id", "title", "stride", "rating", "status"],
+            "properties": {
+              "id": { "$ref": "#/$defs/threatId" },
+              "title": { "type": "string", "maxLength": 200 },
+              "description": { "type": "string", "maxLength": 3000 },
+              "stride": {
+                "type": "array",
+                "minItems": 1,
+                "uniqueItems": true,
+                "items": { "enum": ["spoofing", "tampering", "repudiation", "information_disclosure", "denial_of_service", "elevation_of_privilege"] }
+              },
+              "assets": { "type": "array", "items": { "$ref": "#/$defs/assetId" } },
+              "flows": { "type": "array", "items": { "$ref": "#/$defs/flowId" } },
+              "likelihood": { "enum": ["low", "medium", "high"] },
+              "impact": { "enum": ["low", "medium", "high"] },
+              "rating": { "enum": ["low", "medium", "high", "critical"] },
+              "status": { "enum": ["open", "mitigated", "accepted", "transferred"] },
+              "attack_tree": { "type": "string", "description": "Relative path to an attack-tree Markdown/Mermaid file" },
+              "cwe": { "type": "array", "items": { "type": "integer" } }
+            }
+          }
+        }
+      }
+    },
+    "mitigationsFile": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["schema_version", "mitigations"],
+      "properties": {
+        "schema_version": { "const": "1" },
+        "mitigations": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["threat", "refs", "status"],
+            "properties": {
+              "threat": { "$ref": "#/$defs/threatId" },
+              "description": { "type": "string", "maxLength": 2000 },
+              "refs": {
+                "type": "array",
+                "minItems": 1,
+                "items": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": ["type", "ref"],
+                  "properties": {
+                    "type": { "enum": ["control", "requirement", "ticket", "test", "description"] },
+                    "ref": { "type": "string", "maxLength": 300 }
+                  },
+                  "allOf": [
+                    { "if": { "properties": { "type": { "const": "control" } } }, "then": { "properties": { "ref": { "pattern": "^ASC-[A-Z]{2,3}-[0-9]{2}$" } } } },
+                    { "if": { "properties": { "type": { "const": "ticket" } } }, "then": { "properties": { "ref": { "pattern": "^[A-Z][A-Z0-9]+-[0-9]+$" } } } }
+                  ]
+                }
+              },
+              "status": { "enum": ["planned", "implemented", "verified"] }
+            }
+          }
+        }
+      }
+    },
+    "residualRiskFile": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["schema_version", "residual_risks"],
+      "properties": {
+        "schema_version": { "const": "1" },
+        "residual_risks": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["threat", "rationale"],
+            "properties": {
+              "threat": { "$ref": "#/$defs/threatId" },
+              "rationale": { "type": "string", "maxLength": 2000 },
+              "exception_id": { "type": "string", "pattern": "^EX-[0-9]{6}$", "description": "Platform exception (approved there, verified by the platform)" },
+              "risk_id": { "type": "string", "format": "uuid" }
+            },
+            "anyOf": [ { "required": ["exception_id"] }, { "required": ["risk_id"] } ]
+          }
+        }
+      }
+    }
+  }
+}

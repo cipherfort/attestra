@@ -1,0 +1,7 @@
+# CODEOWNERS: required paths for ASC-SRC-02. Replace team handles with your own.
+# Security-sensitive paths need review from the owning team AND the security champion group.
+*                         @example-org/claims
+/.github/workflows/       @example-org/claims-leads @example-org/security-champions
+/.github/CODEOWNERS       @example-org/claims-leads
+/.security/               @example-org/claims-leads @example-org/security-champions
+/infra/                   @example-org/claims-leads
