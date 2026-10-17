@@ -8,6 +8,14 @@ Contributions are welcome: bug reports, plugins for systems we don't support yet
 - **Anything larger** (a new plugin, a schema change, a new control): open an issue first, so we agree the approach before you spend time. Design decisions are recorded as ADRs in [`adr/`](adr/README.md).
 - **Security issues:** never in public. See [SECURITY.md](SECURITY.md).
 
+## Reporting a bug
+
+1. Check [open issues](https://github.com/cipherfort/attestra/issues) first; add to an existing report rather than opening a duplicate.
+2. Open a [bug report](https://github.com/cipherfort/attestra/issues/new?template=bug.yml). Include the version (image tag or commit), how you deployed it (Compose, Helm, local), what you did, what you expected, and what happened, with logs if you have them.
+3. Leave out secrets, tokens and personal data. For anything that could be a vulnerability, use [SECURITY.md](SECURITY.md) instead.
+
+Questions that aren't bugs go to [Discussions](https://github.com/cipherfort/attestra/discussions).
+
 ## Developer Certificate of Origin (DCO)
 
 We use the [DCO](https://developercertificate.org/), not a contributor licence agreement. Every commit must be signed off, certifying you have the right to contribute it under the project's licence (Apache-2.0):

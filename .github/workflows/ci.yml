@@ -191,6 +191,12 @@ jobs:
             rhysd/actionlint:1.7.7@sha256:887a259a5a534f3c4f36cb02dca341673c6089431057242cdc931e9f133147e9 -no-color
       - name: zizmor
         run: uvx zizmor@1.31.0 --offline --no-progress "$RUNNER_TEMP/security-workflows"
+      # this repository's own workflows get the same checks (template injection, permissions, pinning)
+      - name: actionlint and zizmor (this repository's workflows)
+        run: |
+          docker run --rm -v "$PWD:/repo" -w /repo \
+            rhysd/actionlint:1.7.7@sha256:887a259a5a534f3c4f36cb02dca341673c6089431057242cdc931e9f133147e9 -no-color
+          uvx zizmor@1.31.0 --offline --no-progress .github/workflows
 
   contract:
     name: API contract (Schemathesis against the demo world)
