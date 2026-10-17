@@ -105,3 +105,36 @@ Project details on the form: **name** Attestra; **description** "Evidence-driven
 | dynamic_analysis_unsafe | N/A | Attestra is written in memory-safe languages (Python, TypeScript). |
 | dynamic_analysis_enable_assertions | Met | Python assertions stay enabled in tests and fuzzing, and Schemathesis checks every response against the API contract. |
 | dynamic_analysis_fixed | Met | Fuzzing found crashes in the SARIF and SBOM parsers and the component verifier. They were fixed before the first public commit, and the cases are kept as regression tests. |
+
+## OpenSSF Baseline, level 1
+
+Badge: **Baseline level 1**, awarded 2026-10-17 ([bestpractices.dev/en/projects/15625/baseline-1](https://www.bestpractices.dev/en/projects/15625/baseline-1)),
+against Baseline criteria version 2026.08.28. Repository and organization settings were checked through the GitHub API
+when the answers were given (for example, two-factor authentication is required for the cipherfort organization).
+
+| Control | Answer | Justification |
+|---|---|---|
+| OSPS-AC-01.01 | Met | The cipherfort GitHub organization requires two-factor authentication for every member (Organization settings, Authentication security). |
+| OSPS-AC-02.01 | Met | The organization's base repository permission is Read; anything more is granted manually per collaborator or team. |
+| OSPS-AC-03.01 | Met | A repository ruleset on main requires a pull request and all CI checks to pass; direct pushes are rejected. |
+| OSPS-AC-03.02 | Met | The same ruleset blocks deletion and force-pushes of main. |
+| OSPS-BR-01.01 | Met | Workflows never interpolate untrusted event data into scripts; values pass through environment variables. actionlint, zizmor and CodeQL (Actions) check every pull request: https://github.com/cipherfort/attestra/blob/main/.github/workflows/ci.yml |
+| OSPS-BR-01.03 | Met | Pull requests run on the pull_request trigger (never pull_request_target): forks get no secrets and a read-only token. The default workflow token is read-only and checkouts do not persist credentials. |
+| OSPS-BR-03.01 | Met | Official channels are HTTPS only: https://github.com/cipherfort/attestra and https://cipherfort.github.io/attestra/ |
+| OSPS-BR-03.02 | Met | Source is distributed over HTTPS from GitHub; images and charts over HTTPS from GHCR, signed with cosign (keyless) and with SLSA provenance: https://github.com/cipherfort/attestra/blob/main/RELEASING.md |
+| OSPS-BR-07.01 | Met | gitleaks scans the full history on every pull request, and GitHub secret scanning with push protection is enabled. |
+| OSPS-DO-01.01 | Met | User documentation covers installation, configuration and use: https://cipherfort.github.io/attestra/ |
+| OSPS-DO-02.01 | Met | How to report a bug: https://github.com/cipherfort/attestra/blob/main/CONTRIBUTING.md#reporting-a-bug |
+| OSPS-GV-02.01 | Met | GitHub Issues and Discussions: https://github.com/cipherfort/attestra/issues and https://github.com/cipherfort/attestra/discussions |
+| OSPS-GV-03.01 | Met | https://github.com/cipherfort/attestra/blob/main/CONTRIBUTING.md |
+| OSPS-LE-02.01 | Met | Apache-2.0 (OSI-approved). |
+| OSPS-LE-02.02 | Met | Released images and Helm charts are Apache-2.0. |
+| OSPS-LE-03.01 | Met | https://github.com/cipherfort/attestra/blob/main/LICENSE |
+| OSPS-LE-03.02 | Met | The image ships /app/LICENSE and /app/NOTICE (label org.opencontainers.image.licenses=Apache-2.0); the release workflow packages LICENSE and NOTICE into the Helm chart. |
+| OSPS-QA-01.01 | Met | https://github.com/cipherfort/attestra |
+| OSPS-QA-01.02 | Met | Git records every change, its author and date: https://github.com/cipherfort/attestra/commits/main |
+| OSPS-QA-02.01 | Met | Direct dependencies are declared in backend/pyproject.toml and frontend/package.json, with lockfiles (uv.lock, package-lock.json). |
+| OSPS-QA-04.01 | N/A | The project is a single repository: https://github.com/cipherfort/attestra |
+| OSPS-QA-05.01 | Met | No generated executables are committed; build outputs are git-ignored and produced in CI. |
+| OSPS-QA-05.02 | Met | The only binary file is a documented test fixture (a snappy-compressed public Sigstore bundle, decoded by the tests): https://github.com/cipherfort/attestra/blob/main/backend/tests/fixtures/attestations/README.md |
+| OSPS-VM-02.01 | Met | Security contacts: https://github.com/cipherfort/attestra/blob/main/SECURITY.md |
