@@ -49,14 +49,14 @@ export function Register() {
           Next: add the shared security pipeline to the repository so scans produce evidence
           (<code>templates/repo-contract/.github/workflows/</code>).
         </p>
-        <p><a href={`#/apps/${done.app_key}`}>Open {done.app_key} →</a></p>
+        <p><a href={`/apps/${done.app_key}`}>Open {done.app_key} →</a></p>
       </div>
     </>
   );
 
   return (
     <>
-      <p className="small"><a href="#/apps">← Applications</a></p>
+      <p className="small"><a href="/apps">← Applications</a></p>
       <h1>Register an application</h1>
       <p className="muted">
         The platform reads the application's contract, <code>.security/application.yaml</code> (and optionally

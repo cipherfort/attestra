@@ -35,3 +35,5 @@ deploy/compose/secrets/
 .schemathesis/
 .hypothesis/
 *.tsbuildinfo
+frontend/test-results/
+frontend/playwright-report/

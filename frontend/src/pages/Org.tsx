@@ -2,6 +2,7 @@
 import { useState } from "react";
 import { api } from "../api";
 import { Loadable, Tier, useLoad } from "../components/ui";
+import { go } from "../router";
 
 export function CvePage({ initial }: { initial?: string }) {
   const [query, setQuery] = useState(initial ?? "CVE-2021-44228");
@@ -14,7 +15,7 @@ export function CvePage({ initial }: { initial?: string }) {
         Searches every application's current SBOM. Applications with no SBOM, or a stale one, are listed as
         <strong> possibly affected</strong> — never as unaffected. You only see applications in your scope.
       </p>
-      <form className="row card" onSubmit={(e) => { e.preventDefault(); setSubmitted(query.trim()); window.location.hash = `#/cve/${query.trim()}`; }}>
+      <form className="row card" onSubmit={(e) => { e.preventDefault(); setSubmitted(query.trim()); go(`/cve/${query.trim()}`); }}>
         <label className="small muted" htmlFor="vuln">CVE / GHSA / OSV id</label>
         <input id="vuln" value={query} onChange={(e) => setQuery(e.target.value)} size={28} />
         <button type="submit">Check</button>
@@ -40,7 +41,7 @@ export function CvePage({ initial }: { initial?: string }) {
                   <tbody>
                     {r.affected.map((x) => x.components.map((c) => (
                       <tr key={x.application.id + c.purl}>
-                        <td><a href={`#/apps/${x.application.app_key}`}>{x.application.name}</a></td>
+                        <td><a href={`/apps/${x.application.app_key}`}>{x.application.name}</a></td>
                         <td><Tier tier={x.application.tier} /></td>
                         <td className="small">{x.application.exposure?.replaceAll("_", " ")}</td>
                         <td className="mono">{c.purl}</td>
@@ -58,7 +59,7 @@ export function CvePage({ initial }: { initial?: string }) {
                   <tbody>
                     {r.possibly_affected.map((x) => (
                       <tr key={x.application.id}>
-                        <td><a href={`#/apps/${x.application.app_key}`}>{x.application.name}</a></td>
+                        <td><a href={`/apps/${x.application.app_key}`}>{x.application.name}</a></td>
                         <td><Tier tier={x.application.tier} /></td>
                         <td className="small">{x.reason === "no_sbom" ? "No SBOM has ever been ingested" : x.reason === "stale_sbom" ? "SBOM is older than its freshness ceiling" : x.reason}</td>
                       </tr>

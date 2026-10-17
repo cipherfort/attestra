@@ -30,6 +30,7 @@
   --color-neutral: var(--neutral);
   --color-good-ink: var(--good-ink);
   --color-critical-ink: var(--critical-ink);
+  --color-banner: var(--banner);
   --font-sans: "Inter Variable", system-ui, -apple-system, "Segoe UI", sans-serif;
   --font-mono: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, monospace;
   --shadow-card: var(--shadow);

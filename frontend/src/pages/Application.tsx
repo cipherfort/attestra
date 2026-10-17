@@ -3,6 +3,7 @@ import { useState } from "react";
 import { ApiError, api, type Classification, type ControlItem, type ControlStateValue, type Finding } from "../api";
 import { CoverageBar, CoverageLegend, MaturityChart } from "../components/charts";
 import { date, Loadable, PriorityChip, STATE, StateBadge, Tier, useLoad } from "../components/ui";
+import { go } from "../router";
 
 const DOMAINS: Record<string, string> = {
   GOV: "Governance & registration", REQ: "Security requirements", TM: "Threat modelling", ARC: "Architecture",
@@ -73,7 +74,7 @@ export function Application({ id }: { id: string }) {
     <Loadable state={app}>
       {(a) => (
         <>
-          <p className="small"><a href="#/apps">← Applications</a></p>
+          <p className="small"><a href="/apps">← Applications</a></p>
           <div className="row">
             <h1>{a.name}</h1><Tier tier={a.tier} /><span className="muted">{a.app_key} · {a.org_unit} · {a.lifecycle}</span>
           </div>
@@ -190,7 +191,7 @@ function Attention({ items, appKey }: { items: ControlItem[]; appKey: string }) 
                 <td><StateBadge state={r.state} /></td>
                 <td><strong>{r.title}</strong><div className="muted small">{r.control_key}{r.scope.type === "repository" ? ` · ${r.scope.ref.split("/").pop()}` : ""}</div></td>
                 <td className="small">{r.explanation}</td>
-                <td className="small"><a href={`#/exceptions/new?app=${appKey}&type=control&ref=${r.control_key}`}>Request exception</a></td>
+                <td className="small"><a href={`/exceptions/new?app=${appKey}&type=control&ref=${r.control_key}`}>Request exception</a></td>
               </tr>
             ))}
           </tbody>
@@ -209,22 +210,22 @@ function OpenWork({ appKey }: { appKey: string }) {
     <div className="grid two">
       <div className="card">
         <div className="row"><h2>Exceptions</h2><span className="spacer" />
-          <a href={`#/exceptions/new?app=${appKey}`}>Request an exception</a></div>
+          <a href={`/exceptions/new?app=${appKey}`}>Request an exception</a></div>
         <Loadable state={exceptions}>
           {(xs) => xs.length === 0 ? <p className="muted small">None.</p> : (
             <ul className="plain small">{xs.slice(0, 8).map((x) => (
-              <li key={x.id}><a href={`#/exceptions/${x.exception_key}`}>{x.exception_key}</a> · {x.target_type} {x.target_ref.slice(0, 14)} ·{" "}
+              <li key={x.id}><a href={`/exceptions/${x.exception_key}`}>{x.exception_key}</a> · {x.target_type} {x.target_ref.slice(0, 14)} ·{" "}
                 {x.status.replaceAll("_", " ")}{x.expires_at ? ` · expires ${date(x.expires_at)}` : ""}</li>))}</ul>
           )}
         </Loadable>
       </div>
       <div className="card">
         <div className="row"><h2>Assessments</h2><span className="spacer" />
-          <a href={`#/assessments/new?app=${appKey}`}>Start an assessment</a></div>
+          <a href={`/assessments/new?app=${appKey}`}>Start an assessment</a></div>
         <Loadable state={assessments}>
           {(xs) => xs.length === 0 ? <p className="muted small">None.</p> : (
             <ul className="plain small">{xs.slice(0, 8).map((x) => (
-              <li key={x.id}><a href={`#/assessments/${x.id}`}>{x.type.replaceAll("_", " ")}</a> · {x.status.replaceAll("_", " ")}
+              <li key={x.id}><a href={`/assessments/${x.id}`}>{x.type.replaceAll("_", " ")}</a> · {x.status.replaceAll("_", " ")}
                 {x.confidence ? ` · ${x.confidence}` : ""}</li>))}</ul>
           )}
         </Loadable>
@@ -244,9 +245,9 @@ function Findings({ items }: { items: Finding[] }) {
           <thead><tr><th>Priority</th><th>Finding</th><th>Status</th><th>Fix by</th></tr></thead>
           <tbody>
             {sorted.map((f) => (
-              <tr key={f.id} className="clickable" onClick={() => { window.location.hash = `#/findings/${f.id}`; }}>
+              <tr key={f.id} className="clickable" onClick={() => { go(`/findings/${f.id}`); }}>
                 <td><PriorityChip p={f.priority} /></td>
-                <td><a href={`#/findings/${f.id}`}>{f.title}</a>
+                <td><a href={`/findings/${f.id}`}>{f.title}</a>
                   <div className="muted small">{f.type} · {String(f.location?.uri ?? f.location?.purl ?? f.scope_ref)}</div></td>
                 <td className="small">{f.status.replaceAll("_", " ")}</td>
                 <td className={`small ${f.sla_breached ? "error" : ""}`}>{date(f.sla_due_at)}{f.sla_breached ? " (past SLA)" : ""}</td>
@@ -289,7 +290,7 @@ function Controls({ items }: { items: ControlItem[] }) {
                         <td><StateBadge state={s.state} /></td>
                         <td className="small">{s.explanation}</td>
                         <td className="small">{s.evidence_ids.length ? s.evidence_ids.map((e) => (
-                          <div key={e}><a href={`#/evidence/${e}`} className="mono">EV-{e.replaceAll("-", "").slice(-8).toUpperCase()}</a></div>
+                          <div key={e}><a href={`/evidence/${e}`} className="mono">EV-{e.replaceAll("-", "").slice(-8).toUpperCase()}</a></div>
                         )) : <span className="muted">none</span>}</td>
                       </tr>
                     ))}

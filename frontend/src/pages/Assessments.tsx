@@ -3,6 +3,7 @@ import { useState } from "react";
 import { ApiError, api, type Assessment } from "../api";
 import { date, Loadable, useLoad } from "../components/ui";
 import { hashQuery } from "./Exceptions";
+import { go } from "../router";
 
 export const KINDS: Record<string, { label: string; fields: [string, string][] }> = {
   manual_control: { label: "Manual control attestation", fields: [["control_key", "Control (e.g. ASC-REQ-03)"],
@@ -65,8 +66,8 @@ function AssessmentList() {
             <table>
               <thead><tr><th>Assessment</th><th>Application</th><th>Lead</th><th>Status</th><th>Confidence</th></tr></thead>
               <tbody>{rows.map((r) => (
-                <tr key={r.id} className="clickable" onClick={() => { window.location.hash = `#/assessments/${r.id}`; }}>
-                  <td><a href={`#/assessments/${r.id}`}>{KINDS[r.type]?.label ?? r.type}</a></td>
+                <tr key={r.id} className="clickable" onClick={() => { go(`/assessments/${r.id}`); }}>
+                  <td><a href={`/assessments/${r.id}`}>{KINDS[r.type]?.label ?? r.type}</a></td>
                   <td className="small">{r.app_key} · {r.application_name}</td><td className="small">{r.lead_assessor}</td>
                   <td className="small">{STATUS[r.status] ?? r.status}</td><td className="small">{r.confidence ?? "—"}</td>
                 </tr>))}
@@ -88,12 +89,12 @@ function NewAssessment() {
     e.preventDefault();
     try {
       const a = await api.createAssessment({ type: kind, application: app });
-      window.location.hash = `#/assessments/${a.id}`;
+      go(`/assessments/${a.id}`);
     } catch (err) { setError(message(err)); }
   };
   return (
     <>
-      <p className="small"><a href="#/assessments">← Assessments</a></p>
+      <p className="small"><a href="/assessments">← Assessments</a></p>
       <h1>Start an assessment</h1>
       <form className="card" onSubmit={create}>
         <dl className="kv">
@@ -129,9 +130,9 @@ function AssessmentBody({ s, onDone }: { s: Assessment; onDone: () => void }) {
   };
   return (
     <>
-      <p className="small"><a href="#/assessments">← Assessments</a></p>
+      <p className="small"><a href="/assessments">← Assessments</a></p>
       <div className="row"><h1>{kind?.label ?? s.type}</h1>
-        <span className="muted">{STATUS[s.status] ?? s.status} · <a href={`#/apps/${s.app_key}`}>{s.app_key}</a> · lead {s.lead_assessor}</span></div>
+        <span className="muted">{STATUS[s.status] ?? s.status} · <a href={`/apps/${s.app_key}`}>{s.app_key}</a> · lead {s.lead_assessor}</span></div>
       <div className="card">
         <dl className="kv">
           {kind?.fields.map(([k, label]) => (
@@ -145,7 +146,7 @@ function AssessmentBody({ s, onDone }: { s: Assessment; onDone: () => void }) {
           ))}
           {s.approved_by && <><dt>Reviewed by</dt><dd>{s.approved_by} · {date(s.approved_at)}
             {typeof s.scope?.confidence === "string" && <> · {s.scope.confidence === "M2" ? "M2 (independent)" : "M1 (owning team)"}</>}</dd></>}
-          {s.evidence_id && <><dt>Evidence</dt><dd><a href={`#/evidence/${s.evidence_id}`}>view the evidence record</a></dd></>}
+          {s.evidence_id && <><dt>Evidence</dt><dd><a href={`/evidence/${s.evidence_id}`}>view the evidence record</a></dd></>}
         </dl>
         {s.can_record && (
           <p className="row">
