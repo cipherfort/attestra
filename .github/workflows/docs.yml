@@ -1,0 +1,46 @@
+# Publish the documentation site to GitHub Pages (https://cipherfort.github.io/attestra/), with the JSON schemas
+# served at their $id URLs (…/attestra/schemas/…). The pull-request build check stays in ci.yml (docs-site).
+name: docs
+on:
+  push:
+    branches: [main]
+    paths: [docs/**, schemas/**, mkdocs.yml, .github/workflows/docs.yml]
+  workflow_dispatch:
+permissions: {}
+concurrency:
+  group: pages
+  cancel-in-progress: false
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: astral-sh/setup-uv@c18668ad3cf93ea998bef934396af7bb5c839dc7 # v10.2.0
+        with:
+          enable-cache: false
+      - run: uvx --with "mkdocs-material==9.*" mkdocs build --strict
+      - name: Serve the schemas at their $id URLs
+        run: |
+          mkdir -p site/schemas
+          (cd schemas && find . -name '*.json' -exec install -D -m 0644 {} ../site/schemas/{} \;)
+      - uses: actions/upload-pages-artifact@fc324d3547104276b827a68afc52ff2a11cc49c9 # v5.0.0
+        with:
+          path: site
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    timeout-minutes: 10
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@368f82528645a54fb793d4d04e342629a3f51346 # v5.0.1

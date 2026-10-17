@@ -1,7 +1,8 @@
 # Documentation site (M0 skeleton; reorganised into getting started / install / configure / guides in M6).
 # Build: uvx --with mkdocs-material mkdocs build    Serve: uvx --with mkdocs-material mkdocs serve
 site_name: Attestra
-site_description: Evidence-driven application security assurance (working name)
+site_description: Evidence-driven application security assurance
+site_url: https://cipherfort.github.io/attestra/
 repo_url: https://github.com/cipherfort/attestra
 edit_uri: edit/main/docs/
 docs_dir: docs
