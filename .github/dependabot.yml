@@ -12,6 +12,11 @@ updates:
     schedule: { interval: weekly }
     cooldown: { default-days: 3 }
     groups: { frontend: { patterns: ["*"], update-types: [minor, patch] } }
+    # TypeScript 7 (the native compiler) has no stable JavaScript API, and openapi-typescript (which generates
+    # src/api-types.ts) supports TypeScript 5 only. Lift this once openapi-typescript supports 7.
+    ignore:
+      - dependency-name: typescript
+        update-types: [version-update:semver-major]
   - package-ecosystem: github-actions
     directory: /
     schedule: { interval: weekly }
