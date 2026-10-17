@@ -1,6 +1,7 @@
 # OpenSSF Best Practices: self-assessment (passing level)
 
-Badge entry: [bestpractices.dev/en/projects/15625](https://www.bestpractices.dev/en/projects/15625). This page
+Badge: **passing**, awarded 2026-10-17 ([bestpractices.dev/en/projects/15625](https://www.bestpractices.dev/en/projects/15625)).
+This page
 records the answer and the evidence for every "passing" criterion, in the order of the badge form, so the answers can
 be checked against the repository. Links point at `main`.
 
