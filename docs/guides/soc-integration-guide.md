@@ -64,9 +64,14 @@ AppSecPlatform_CL
 
 The rules are illustrative. Table and field names for source logs must be confirmed against the workspace.
 
-## 4. Exabeam (if used)
+## 4. Other SIEMs (Splunk, Elastic, Exabeam, …)
 
-PROPOSED: forward the same JSON events via Exabeam's HTTP/syslog collector. Field mapping to be agreed with the SOC.
+The same events go to any SIEM through one of two sinks (one SIEM sink is active per deployment):
+
+- **HTTPS** (`siem_http`): set `AAP_SIEM_HTTP_URL` and store the ingest token with `aap secrets put siem-http-token`. For Splunk, also set `AAP_SIEM_HTTP_FORMAT=splunk_hec`.
+- **Syslog** (`syslog`): RFC 5424 messages over TLS (RFC 5425). Set `AAP_SIEM_SYSLOG=host:port` (usually port 6514), and `AAP_SIEM_SYSLOG_CA` for a private CA.
+
+Field names are the same as in the Sentinel table above; agree the mapping and detection rules with the SOC.
 
 ## 5. Escalation and response
 
@@ -74,5 +79,5 @@ PROPOSED: forward the same JSON events via Exabeam's HTTP/syslog collector. Fiel
 |---|---|---|
 | `secret.exposed_active` | Hunt for credential use. Confirm rotation with the owner. | Platform on-call / AppSec |
 | `package.malicious_detected` | Incident: assess CI runners and secrets exposed to builds | AppSec lead |
-| `evidence.integrity_failure` | Incident: possible platform compromise | Platform on-call + Head of AppSec |
+| `evidence.integrity_failure` | Incident: possible platform compromise | Platform on-call + AppSec lead |
 | Others | Triage per SOC playbook | AppSec triage channel |

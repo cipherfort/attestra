@@ -14,7 +14,7 @@ Scale application security through engineers embedded in every team who own secu
 
 | Aspect | Definition |
 |---|---|
-| Who | An engineer in the owning team, nominated by the team lead, agreed with the Directorate Security Lead |
+| Who | An engineer in the owning team, nominated by the team lead, agreed with the Business Unit Security Lead |
 | Time | ~10% (about half a day per week), protected in team planning |
 | Coverage | At least one champion per team owning Tier 1–3 applications. Tier 1 teams: a primary and a deputy. |
 | Responsibilities | Lead threat modelling (with AppSec for Tier 1) · triage findings and confirm priorities · first reviewer for security-sensitive PRs (CODEOWNERS on `.security/` and workflows) · maintain `application.yaml`/`asvs.yaml` · ensure the team runs the paved road · raise exceptions properly · share learning |
@@ -44,7 +44,7 @@ Annual refresh (2h). Role-based secure-development training for all engineers is
 
 ## 5. Community and support
 
-Fortnightly community session (trends from the platform: recurring CWEs, new controls, tool changes) · a Teams channel with AppSec response within 1 business day · office hours weekly · quarterly "champions update" from the Head of AppSec.
+Fortnightly community session (trends from the platform: recurring CWEs, new controls, tool changes) · a Teams channel with AppSec response within 1 business day · office hours weekly · quarterly "champions update" from the AppSec lead.
 
 ## 6. Metrics (team level only; no individual leaderboards)
 

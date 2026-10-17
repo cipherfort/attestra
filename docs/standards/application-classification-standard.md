@@ -36,7 +36,7 @@ The final tier is the more critical of the two. The platform shows the inputs, t
 | CLS-01 | Every application shall be classified before onboarding completes and before production release | ASC-GOV-02 |
 | CLS-02 | Tier 1 and Tier 2 classifications shall be approved by an AppSec engineer | ASC-GOV-02 (M2) |
 | CLS-03 | Classification shall be re-attested at least every 12 months, and whenever a classification input changes in `application.yaml` | event_bound freshness on `registry.classification` |
-| CLS-04 | A tier lower than the computed tier requires an override approved by AppSec (Head of AppSec for Tier 1/2 → lower). The computed tier applies until then. | Workflow + abuse case AC-09 |
+| CLS-04 | A tier lower than the computed tier requires an override approved by AppSec (AppSec lead for Tier 1/2 → lower). The computed tier applies until then. | Workflow + abuse case AC-09 |
 | CLS-05 | Where cloud inventory shows greater exposure than declared, the **more exposed** value shall be used | Exposure verification (E15-F03-S02) |
 | CLS-06 | Prototypes shall not process real personal data. A prototype that does must be reclassified. | Attestation + floor rules |
 

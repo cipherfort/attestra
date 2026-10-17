@@ -39,7 +39,7 @@ gantt
 | **4 Evidence platform** | Evidence in, controls out | Ingestion + verification, WORM, hash chain + checkpoints, freshness engine, evaluator framework + 20 automated evaluators, control-state API | AC-01/02/05 pass. Freshness transitions verified. Integrity job green 14 days. |
 | **5 Vulnerability / SBOM** | Contextual findings and CVE query | DD/DT connectors, finding projection + fingerprints, risk engine v1, EPSS/KEV feeds, CVE impact query, licence evaluation | CVE query < 15 min (target < 1 min). Dedup verified across 10 consecutive runs. |
 | **6 SAMM/ASVS automation** | Evidence-derived maturity | SAMM import, maturity calculation + snapshots, ASVS import + applicability + requirement status, manual assessment workflow | Pilot apps have explainable maturity with provenance |
-| **7 Dashboard** | Role-based views | Engineer, team, owner, directorate, leadership, executive views. Drill-down to evidence. | Usability test with 5 users per persona |
+| **7 Dashboard** | Role-based views | Engineer, team, owner, business unit, leadership, executive views. Drill-down to evidence. | Usability test with 5 users per persona |
 | **8 Cloud / SOC / Jira** | Close the loop | Jira create/sync/close-by-evidence, Defender/Security Hub, Sentinel events + analytics rules | Ticket dedup + reopen-on-fail demonstrated. SOC signs off the event catalogue. |
 | **9 Pilot** | End-to-end proof on real apps | Pilot report, survey, tuned catalogue, platform pen test | [Pilot criteria](#pilot-phase-9) met |
 | **10 Rollout** | Scale by tier | Waves: Tier 1 → Tier 2 → Tier 3/4 self-service. Gates enabled per wave. | Charter exit criteria trending |
@@ -57,7 +57,7 @@ gantt
 
 | Horizon | Outcomes |
 |---|---|
-| **6 months** | Registry live for pilot directorates. `security-workflows` v1 released and pinned in pilot repos. Evidence engine with ~20 automated controls. DD/DT integrated via the platform (no repo-held keys in pilot repos). Risk engine v1 with EPSS/KEV. CVE impact query working. First evidence-derived maturity for pilot apps (baseline). |
+| **6 months** | Registry live for pilot business units. `security-workflows` v1 released and pinned in pilot repos. Evidence engine with ~20 automated controls. DD/DT integrated via the platform (no repo-held keys in pilot repos). Risk engine v1 with EPSS/KEV. CVE impact query working. First evidence-derived maturity for pilot apps (baseline). |
 | **12 months** | Pilot complete and signed off. Tier 1 wave onboarded. Jira closure-by-evidence in use. Sentinel events live. Dashboards for all personas. Platform pen tested. KPIs reported monthly from the platform. O2 (≥ 90% Tier 1/2 current evidence) on track. |
 | **18 months** | Tier 2 complete. Tier 3/4 self-service onboarding open. Gates enabled for Tier 1/2 per [pipeline gating roadmap](../../../docs/architecture/05-pipeline-architecture.md#9-gating-roadmap-observe--gate). Second annual SAMM cycle shows a measured trend with provenance. Catalogue v1.x reviewed. Programme moving to BAU per charter exit criteria. |
 

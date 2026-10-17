@@ -28,7 +28,7 @@
 ## F02: Ownership verification
 
 ### E03-F02-S01: Resolve owners against Entra and GitHub · M · Phase 2
-- **Story:** As Head of AppSec, I want declared owners resolved to active identities and departed owners detected, so that escalations reach real people.
+- **Story:** As AppSec lead, I want declared owners resolved to active identities and departed owners detected, so that escalations reach real people.
 - **AC:** Owners resolve to `users` rows with Entra OID and/or GitHub login. A deactivated owner flips ASC-GOV-01 to `not_satisfied` within 24h, with an explanation naming the field.
 - **Depends on:** E19-F01 (Entra sync).
 - **Tests:** Fixtures: active, disabled, unknown, team handle.

@@ -50,7 +50,7 @@ def client(engine, bundle, demo, app_id):
     os.environ["AAP_AUTH_MODE"] = "dev"
     os.environ["AAP_ENV"] = "development"
     with transaction(engine, "aap_worker") as conn:
-        lead = registry.upsert_user(conn, "Head of AppSec", "hlead")
+        lead = registry.upsert_user(conn, "AppSec lead", "hlead")
         registry.grant_role(conn, lead, "security_leadership")
     return TestClient(create_app(engine, bundle))
 
@@ -97,7 +97,7 @@ def test_tier1_control_exception_needs_the_right_role_and_a_cosign(client, app_i
     assert too_long.status_code == 422 and "90-day" in too_long.json()["detail"]
     ok = act(client, "hlead", x["id"], "decision", **decide)
     assert ok.status_code == 200, ok.text
-    assert ok.json()["status"] == "approved" and ok.json()["approver"] == "Head of AppSec"
+    assert ok.json()["status"] == "approved" and ok.json()["approver"] == "AppSec lead"
     assert [e["type"] for e in ok.json()["events"]] == ["created", "submitted", "cosigned", "approved"]
 
     with transaction(engine, "aap_worker") as conn:

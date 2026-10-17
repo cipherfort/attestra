@@ -11,7 +11,7 @@
 The platform's credibility rests on three properties, which get the heaviest testing:
 1. **Evaluations are correct.** No control is reported satisfied without valid evidence.
 2. **Evidence is trustworthy.** It cannot be forged, altered or deleted undetectably.
-3. **Access is correctly scoped.** No cross-directorate leakage, and SoD holds.
+3. **Access is correctly scoped.** No cross-unit leakage, and SoD holds.
 
 ## 2. Test levels
 

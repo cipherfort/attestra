@@ -26,7 +26,7 @@
 ### E16-F02-S03: Team / champion work queue · M · Phase 7
 - **AC:** Triage queue (new P1–P3), FP requests awaiting a second reviewer, expiring evidence and exceptions, onboarding to-dos.
 
-### E16-F02-S04: Directorate view · M · Phase 7
+### E16-F02-S04: Business unit view · M · Phase 7
 - **AC:** Distribution of control coverage and maturity across apps (box plots, not league tables), SLA performance, gaps by control, exceptions due, unmanaged suppressions. Anonymised org comparison (ADR-022).
 
 ### E16-F02-S05: Security leadership and executive views · M · Phase 7
@@ -35,4 +35,4 @@
 ## F03: Reporting
 
 ### E16-F03-S01: Report packs (PDF/CSV) · S · Phase 7
-- **AC:** Monthly directorate and leadership packs generated from snapshots. Exports audited (`data.bulk_export`).
+- **AC:** Monthly business unit and leadership packs generated from snapshots. Exports audited (`data.bulk_export`).

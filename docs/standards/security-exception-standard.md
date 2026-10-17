@@ -37,10 +37,10 @@ Application · target · justification · risk description · residual priority 
 
 | Residual priority | Tier 1 | Tier 2 | Tier 3 | Tier 4 | Max duration |
 |---|---|---|---|---|---|
-| P1 | CISO | CISO | Head of AppSec | Head of AppSec | 30 days, 1 renewal |
-| P2 | Head of AppSec | Head of AppSec | Directorate Security Lead | Directorate Security Lead | 90 days |
-| P3 | Head of AppSec | Directorate Security Lead | Directorate Security Lead | AppSec engineer | 180 days |
-| P4 | Directorate Security Lead | AppSec engineer | AppSec engineer | AppSec engineer | 365 days |
+| P1 | CISO | CISO | AppSec lead | AppSec lead | 30 days, 1 renewal |
+| P2 | AppSec lead | AppSec lead | Business Unit Security Lead | Business Unit Security Lead | 90 days |
+| P3 | AppSec lead | Business Unit Security Lead | Business Unit Security Lead | AppSec engineer | 180 days |
+| P4 | Business Unit Security Lead | AppSec engineer | AppSec engineer | AppSec engineer | 365 days |
 
 - A more senior approver may always approve.
 - **Tier 1/2: the business owner co-signs.**
@@ -51,7 +51,7 @@ Application · target · justification · risk description · residual priority 
 
 `draft → pending_approval → approved | rejected` · `approved → expired | revoked | closed (remediated)` · renewal creates a new exception linked to the previous one (fresh approval; more than 2 renewals escalate a level).
 
-On **expiry**: an `exception_expired` finding is created with half the normal SLA, the original finding or control gap reopens, and the owner, approver and Directorate Security Lead are notified. Reminders go out at 30, 14 and 3 days before expiry.
+On **expiry**: an `exception_expired` finding is created with half the normal SLA, the original finding or control gap reopens, and the owner, approver and Business Unit Security Lead are notified. Reminders go out at 30, 14 and 3 days before expiry.
 
 ## 7. Compensating controls
 

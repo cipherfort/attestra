@@ -42,7 +42,7 @@
 | **AppSec Platform Engineers** | Security Engineering | Build and run the platform, connectors and reusable workflows. | 3 → 4 |
 | **Application Security Engineers** | Security Engineering | Threat-model facilitation, architecture review, manual verification, triage escalation, champion support. | 2 → 1 per ~40 Tier 1/2 apps |
 | **Security Governance / GRC Analyst** | Central Security Governance | Exception workflow, risk register linkage, reporting packs, audit liaison. | 0.5 → 1 |
-| **Directorate Security Lead** | Each directorate | Accountable for directorate maturity and SLA performance. Approves Tier 3/4 exceptions. | Role, not FTE |
+| **Business Unit Security Lead** | Each business unit | Accountable for business unit maturity and SLA performance. Approves Tier 3/4 exceptions. | Role, not FTE |
 | **Application Owner (business)** | Product / service | Accountable for application risk. Signs off risk acceptance with the security approver. | Role |
 | **Technical Owner** | Engineering team | Accountable for remediation and for control implementation in their repos. | Role |
 | **Security Champion** | Engineering team | Primary contact. Leads threat modelling with AppSec support. Triages findings within the team. | ~10% of one engineer per team |
@@ -59,7 +59,7 @@
 | ASVS target (proposed) | L3 | L2 | L1 + automatable L2 | L1 |
 | Pen test | Annual + on major change | Biennial or on major change | Risk-based | No |
 | Manual SAMM assessment | Annual, independent | Annual, champion + AppSec | Automated-only, with sampling | Automated-only |
-| Exception approver | Head of AppSec (+ CISO above threshold) | Head of AppSec | Directorate Security Lead | Directorate Security Lead |
+| Exception approver | AppSec lead (+ CISO above threshold) | AppSec lead | Business Unit Security Lead | Business Unit Security Lead |
 
 The tier boundaries and ASVS levels above are **PROPOSED** and **REQUIRE HUMAN APPROVAL**. The [classification model](../../docs/standards/control-framework.md#3-application-classification-model) is configuration, so they can change without code changes.
 
@@ -75,7 +75,7 @@ The tier boundaries and ASVS levels above are **PROPOSED** and **REQUIRE HUMAN A
 | **Remediation verification** | Fix merged | Re-scan evidence closes the finding. The ticket transitions automatically. | None |
 | **Exception** | Team cannot meet a control or SLA | Workflow with risk pre-filled | Approver decision. Expiry is enforced automatically. |
 | **CVE response** | High-profile CVE / KEV addition | Component search across all SBOMs, including stale ones | AppSec declares an incident-grade response if needed |
-| **Maturity reporting** | Monthly | Snapshot and trend | Narrative from Head of AppSec |
+| **Maturity reporting** | Monthly | Snapshot and trend | Narrative from AppSec lead |
 
 ## 6. Service levels the programme offers teams
 

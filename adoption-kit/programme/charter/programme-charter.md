@@ -69,7 +69,7 @@ Commercial off-the-shelf software without source access (registry entry only, su
 |---|---|---|
 | CISO | Organisational risk, assurance, regulatory posture | Sponsor. Quarterly review. |
 | CTO / Heads of Engineering | Delivery speed, developer experience | Steering. Gating decisions. |
-| Directorate leaders | Their services' risk and compliance | Monthly directorate review |
+| Business unit leaders | Their services' risk and compliance | Monthly business unit review |
 | Engineering teams and champions | Actionable, low-noise work | Pilot co-design. Champions community. |
 | Cloud Security / Platform Engineering | Cloud integrations, GitHub org settings | Working group |
 | SOC | High-value, low-noise events | Event catalogue sign-off |
@@ -79,7 +79,7 @@ Commercial off-the-shelf software without source access (registry entry only, su
 
 ## 8. Governance
 
-Sponsor: CISO. Owner: Head of AppSec. Decision forum: the **AppSec Governance Board** (monthly), escalating to the **Security Leadership Review** (quarterly). Decision rights, risk-acceptance thresholds and escalation: [governance model](../../governance/governance-model.md).
+Sponsor: CISO. Owner: AppSec lead. Decision forum: the **AppSec Governance Board** (monthly), escalating to the **Security Leadership Review** (quarterly). Decision rights, risk-acceptance thresholds and escalation: [governance model](../../governance/governance-model.md).
 
 ## 9. Assumptions
 
@@ -95,7 +95,7 @@ Existing licences and tools are reused before buying new ones · data stays in t
 |---|---|---|---|
 | R-01 | Engineering teams see the programme as overhead and resist onboarding | High | Paved road (one file), pilot co-design, observe-first, champions, visible noise reduction |
 | R-02 | Insufficient platform team capacity → slipping roadmap | High | Phase-gated scope. Build vs buy check at Phase 0 exit. |
-| R-03 | Ownership data is wrong or missing | High | Owner resolution checks. Departed-owner detection. Directorate accountability. |
+| R-03 | Ownership data is wrong or missing | High | Owner resolution checks. Departed-owner detection. Business unit accountability. |
 | R-04 | Evidence model too strict early → "everything red" demoralises teams | Medium | Observe mode for new controls, grace periods, tier-phased targets |
 | R-05 | GitHub App / platform compromise exposes the organisation's vulnerability map | Medium (high impact) | Read-only App, private networking, threat model, independent pen test |
 | R-06 | Key external configurations delayed (org rulesets, Entra, AWS federation, Jira) | Medium | Raised in Phase 0 with named owners and dates |
@@ -148,7 +148,7 @@ The project creates and owns every technical integration ([ADR-031](../../../adr
 
 | Role | Phase 0–1 | Phase 2–9 | Steady state |
 |---|---|---|---|
-| Head of AppSec (programme owner) | 0.5 | 0.5 | 0.3 |
+| AppSec lead (programme owner) | 0.5 | 0.5 | 0.3 |
 | Platform Product Owner | 1 | 1 | 1 |
 | Platform engineers (Python, Azure, GitHub) | 2 | 4 | 3 |
 | Frontend engineer | 0 | 1 | 0.5 |
@@ -198,11 +198,11 @@ Operating model: [target operating model](../../governance/target-operating-mode
 
 | Benefit | Measure | Baseline (Phase 0) | Target | Owner | Review |
 |---|---|---|---|---|---|
-| Faster response to critical CVEs | Time to list affected apps | Measure on a recent CVE exercise | < 15 min | Head of AppSec | Each major CVE |
-| Less wasted remediation effort | % remediation effort on P1/P2 (contextual) vs tool-critical | Pilot sample | ≥ 60% of effort on P1/P2 | Directorate leads | Quarterly |
+| Faster response to critical CVEs | Time to list affected apps | Measure on a recent CVE exercise | < 15 min | AppSec lead | Each major CVE |
+| Less wasted remediation effort | % remediation effort on P1/P2 (contextual) vs tool-critical | Pilot sample | ≥ 60% of effort on P1/P2 | Business unit leads | Quarterly |
 | Reduced exposure to exploited vulns | KEV-listed open on internet-facing apps (count × days) | Phase 0 scan | ↓ 80% by month 12 | CISO | Monthly |
 | Audit efficiency | Hours to evidence a control for audit | Last audit | ↓ 70% | GOV | Annually |
-| Defensible maturity | % maturity answers backed by C2+/M2 evidence | ~0% | ≥ 60% for application practices | Head of AppSec | Quarterly |
+| Defensible maturity | % maturity answers backed by C2+/M2 evidence | ~0% | ≥ 60% for application practices | AppSec lead | Quarterly |
 | Developer experience | Pilot team survey: clarity, noise | Pre-pilot survey | ≥ 70% positive | Platform PO | Pilot exit + 6-monthly |
 
 ## 22. Exit criteria (programme → business as usual)

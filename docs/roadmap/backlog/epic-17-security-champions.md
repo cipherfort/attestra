@@ -5,7 +5,7 @@
 ## F01: Programme design
 
 ### E17-F01-S01: Security Champions Framework · M · Phase 2
-- **Story:** As Head of AppSec, I want a documented framework (role, time allocation ~10%, nomination, onboarding curriculum, community cadence, recognition), so that champions are a sustained capability.
+- **Story:** As AppSec lead, I want a documented framework (role, time allocation ~10%, nomination, onboarding curriculum, community cadence, recognition), so that champions are a sustained capability.
 - **AC:** Framework document (Stage 3 doc #20) approved by the Board. Curriculum: threat modelling, triage, secure code review, platform use, ASVS tagging. Training requirements per tier.
 
 ### E17-F01-S02: Champion onboarding course in the LMS · S · Phase 2–6

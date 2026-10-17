@@ -19,7 +19,7 @@ The organisation cannot evidence the security of its applications. Tools exist b
 | **2. Buy a commercial ASPM** | Aggregation and prioritisation product | Faster start for aggregation | Licence scales with repos/devs. Weaker evidence immutability and SAMM/ASVS semantics (to verify). Data leaves the tenant. Integration still needed. | **Evaluate in Phase 0** against the must-have requirements |
 | **3. Build the assurance layer on existing tools (recommended, subject to option 2 check)** | This design | Full fit (evidence model, SoD, residency, SAMM/ASVS). Reuses licensed and scaffolded tools. No per-repo licences. | Build and run cost. Delivery risk (R-02). | Preferred if option 2 fails must-haves or costs more over 3 years |
 
-**Must-have requirements for any option:** verifiable evidence with confidence levels · immutability/tamper evidence · SoD-enforced exceptions with expiry · contextual risk with explainability · CVE impact across SBOMs with honest "unknown" · UK data residency · Entra SSO/RBAC with directorate scoping · API access.
+**Must-have requirements for any option:** verifiable evidence with confidence levels · immutability/tamper evidence · SoD-enforced exceptions with expiry · contextual risk with explainability · CVE impact across SBOMs with honest "unknown" · UK data residency · Entra SSO/RBAC with business unit scoping · API access.
 
 ## 3. Cost model (to be priced)
 
@@ -32,7 +32,7 @@ The organisation cannot evidence the security of its applications. Tools exist b
 | Product owner | 1 | 1 | 1 |
 | AppSec engineers | 1 | 2 | ~1 per 40 Tier 1/2 apps |
 | Governance analyst | 0.5 | 0.5 | 1 |
-| Head of AppSec (share) | 0.5 | 0.5 | 0.3 |
+| AppSec lead (share) | 0.5 | 0.5 | 0.3 |
 | Champions (distributed) | — | ~10% per pilot team | ~10% per team |
 
 ### 3.2 Azure run costs: drivers and initial sizing

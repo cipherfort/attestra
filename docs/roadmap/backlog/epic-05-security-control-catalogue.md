@@ -30,7 +30,7 @@
 ## F03: Control gap findings
 
 ### E05-F03-S01: Create `control_gap` findings after the grace period · M · Phase 4
-- **Story:** As Head of AppSec, I want mandatory controls failing beyond the grace period to become findings, so that gaps enter the same SLA and ticket flow as vulnerabilities.
+- **Story:** As AppSec lead, I want mandatory controls failing beyond the grace period to become findings, so that gaps enter the same SLA and ticket flow as vulnerabilities.
 - **AC:** Fingerprint `gap|app|control|scope`. One finding per gap (dedup). Auto-closes when the control is satisfied (closure evidence = the satisfying evaluation). Respects active exceptions.
 - **Tests:** Lifecycle tests including flapping (satisfied → not → satisfied) without duplicate findings.
 

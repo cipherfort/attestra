@@ -60,4 +60,4 @@ Usually an expired pin (`UNAPPROVED_WORKFLOW_REF` after the 90-day window) or a 
 
 ## 5. Escalation
 
-Platform on-call → platform tech lead → Head of AppSec. Security incidents → [incident response runbook](../runbooks/incident-response.md) + SOC.
+Platform on-call → platform tech lead → AppSec lead. Security incidents → [incident response runbook](../runbooks/incident-response.md) + SOC.

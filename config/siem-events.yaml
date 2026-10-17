@@ -1,7 +1,7 @@
 # Curated application-security events exported to the SIEM (ADR-020).
 # Status: DESIGNED. REQUIRES HUMAN APPROVAL from the SOC lead (E18-F01-S01).
 # Only these event types leave the platform. Routine findings, control states and evaluations do NOT.
-# Destination: Sentinel custom table AppSecPlatform_CL via the Logs Ingestion API (DCR). Exabeam: PROPOSED.
+# Destination: Sentinel custom table AppSecPlatform_CL via the Logs Ingestion API (DCR). Other SIEMs: the HTTPS (JSON or Splunk HEC) or syslog (RFC 5424, TLS) sink.
 
 version: 1
 

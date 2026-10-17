@@ -16,7 +16,7 @@
 | A-05 | Artifact attestations available for private/internal repos | Platform tech lead | 2026-10-08 | **Resolved**: public repos yes (Sigstore public-good, verified in-process); private/internal repos need **GitHub Enterprise Cloud** (GitHub's Sigstore instance, verified with `gh attestation verify`). Both backends implemented and tested against a real attestation. | Without Enterprise Cloud, private-repo evidence is C2 (D-018) |
 | A-06 | 100–500 apps, 300–2,000 repos | AppSec | Phase 0 wk 4 (inventory) | Open | Sizing, rollout waves |
 | A-07 | An information classification scheme exists | Information governance | Phase 0 wk 3 | Open | Classification labels |
-| A-08 | Sentinel is the SIEM. **The project deploys it** (`modules/sentinel`) | Platform lead | Phase 0 wk 1 | Open | Exabeam only if the organization adopts it (PROPOSED adapter) |
+| A-08 | Sentinel is the SIEM. **The project deploys it** (`modules/sentinel`) | Platform lead | Phase 0 wk 1 | Open | Other SIEMs (Splunk, Elastic, Exabeam, …) connect through the HTTPS or syslog sink instead |
 | A-09 | Org rulesets support "require workflows" on the org's plan | Platform lead | Phase 0 wk 2 | Replaced by D-018 | Repository rulesets otherwise (applied per repo at onboarding) |
 | A-10 | Teams can allocate ~10% of one engineer as champion | Engineering leadership | Phase 0 | Open | Champions model |
 

@@ -26,7 +26,7 @@ ADR-001 to ADR-031 were **Proposed** during the original design; ADR-032 is **Ac
 | [019](ADR-019-cloud-integration.md) | Cloud integration | Resource Graph/Defender + Security Hub aggregator. Tag-based attribution. |
 | [020](ADR-020-siem-integration.md) | SIEM integration | 11 curated event types to Sentinel, not every finding |
 | [021](ADR-021-security-exceptions.md) ★ | Security exceptions | Platform-only, SoD, expiry → finding, tool suppressions not trusted |
-| [022](ADR-022-multi-directorate-model.md) | Multi-directorate model | Single deployment, org-unit RLS, org-wide config |
+| [022](ADR-022-multi-unit-model.md) | Multi-unit model | Single deployment, org-unit RLS, org-wide config |
 | [023](ADR-023-api-architecture.md) | API architecture and stack | REST + OpenAPI 3.1, FastAPI/Python, React/TS SPA |
 | [024](ADR-024-event-queue-architecture.md) | Event/queue | PostgreSQL queue + transactional outbox. Service Bus as upgrade path. |
 | [025](ADR-025-deployment-model.md) | Deployment model | Container Apps in a private VNet. Only the webhook receiver is public. |

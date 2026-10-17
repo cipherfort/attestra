@@ -35,7 +35,7 @@ All data held by the platform: PostgreSQL records, Blob evidence storage, logs a
 |---|---|
 | RET-01 | Immutable (WORM) retention policies stay **unlocked** until this policy is approved. Locking is a change-controlled action with two-person approval. |
 | RET-02 | Personal data is minimised **before** it enters WORM storage (secret values redacted; normalised records strip committer emails where not needed), because WORM data cannot be erased early |
-| RET-03 | Legal hold: the Head of AppSec, on Legal instruction, may suspend disposal for named data. Holds are recorded in the decision log. |
+| RET-03 | Legal hold: the AppSec lead, on Legal instruction, may suspend disposal for named data. Holds are recorded in the decision log. |
 | RET-04 | Data subject requests are handled via the DPO. Erasure inside WORM artefacts may not be possible before expiry. This limitation is recorded in the DPIA. |
 | RET-05 | Disposal jobs log what was disposed (category, partition, count), never the content |
 | RET-06 | This policy is reviewed annually and on any change to the organisational records schedule |
