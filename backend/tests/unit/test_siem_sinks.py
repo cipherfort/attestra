@@ -136,6 +136,13 @@ def test_syslog_refuses_an_untrusted_server(tmp_path):
         SyslogSink(f"localhost:{port}", ca_file=str(other)).send([ROW])
 
 
+def test_syslog_refuses_tls_older_than_1_2():
+    ctx = SyslogSink("localhost:6514")._ctx
+    assert ctx.minimum_version >= ssl.TLSVersion.TLSv1_2
+    assert ctx.verify_mode == ssl.CERT_REQUIRED
+    assert ctx.check_hostname
+
+
 def test_only_one_sink_may_take_the_events(monkeypatch):
     from aap.worker import connectors
 

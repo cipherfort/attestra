@@ -1,0 +1,3 @@
+# Checkov for the Terraform job in ci.yml. Lock: tools/requirements-checkov.txt, regenerate with
+#   uv pip compile --universal --generate-hashes --python-version 3.12 tools/requirements-checkov.in -o tools/requirements-checkov.txt
+checkov==3.3.29

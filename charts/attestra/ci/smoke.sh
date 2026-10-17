@@ -61,8 +61,11 @@ kubectl -n "$ns" port-forward svc/attestra-api 18000:80 >/dev/null 2>&1 &
 pf=$!; trap 'kill $pf 2>/dev/null || true' EXIT
 for _ in $(seq 30); do curl -sf http://127.0.0.1:18000/api/v1/health/ready >/dev/null && break; sleep 1; done
 curl -sf http://127.0.0.1:18000/api/v1/health/ready
-apps=$(curl -sf -H "X-AAP-Dev-User: cpatel" http://127.0.0.1:18000/api/v1/applications | python3 -c "import json,sys; print(len(json.load(sys.stdin)['items']))")
-team=$(curl -sf -H "X-AAP-Dev-User: ajones" http://127.0.0.1:18000/api/v1/applications | python3 -c "import json,sys; print(len(json.load(sys.stdin)['items']))")
+count='import json,sys; print(len(json.load(sys.stdin)["items"]))'
+appsec_json=$(curl -sf -H "X-AAP-Dev-User: cpatel" http://127.0.0.1:18000/api/v1/applications)
+team_json=$(curl -sf -H "X-AAP-Dev-User: ajones" http://127.0.0.1:18000/api/v1/applications)
+apps=$(python3 -c "$count" <<<"$appsec_json")
+team=$(python3 -c "$count" <<<"$team_json")
 echo; echo "applications: AppSec sees $apps, a Claims champion sees $team"
 if ! { [ "$apps" -ge 4 ] && [ "$team" -lt "$apps" ]; }; then echo "scoping check failed" >&2; exit 1; fi
 # the security context really applies: no root, read-only root filesystem
