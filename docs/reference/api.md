@@ -70,6 +70,8 @@ Errors are `application/problem+json`. Out-of-scope objects return 404, never 40
 | Operation | Request | Permission | Summary |
 |---|---|---|---|
 | `listEvidence` | `GET /applications/{appId}/evidence` | `evidence.read` |  |
+| `listAllEvidence` | `GET /evidence` | `evidence.read` | Evidence across every application in scope, newest first |
+| `listEvidenceRejections` | `GET /evidence-rejections` | `evidence.read` | Evidence the platform refused (forged, unapproved or tampered), newest first |
 | `getEvidence` | `GET /evidence/{evidenceId}` | `evidence.read` | Evidence record with freshness history and verification details |
 | `createEvidenceDownloadLink` *(designed)* | `POST /evidence/{evidenceId}/download-links` | `evidence.raw.read` | Short-lived download link for a raw artefact (audited) |
 
@@ -103,8 +105,10 @@ Errors are `application/problem+json`. Out-of-scope objects return 404, never 40
 | Operation | Request | Permission | Summary |
 |---|---|---|---|
 | `getApplicationMaturity` | `GET /applications/{appId}/maturity` | `application.read` |  |
-| `listMaturitySnapshots` *(designed)* | `GET /maturity/snapshots` | `maturity.rollup.read` |  |
-| `getOrgUnitMaturity` *(designed)* | `GET /org-units/{orgUnitId}/maturity` | `maturity.rollup.read` | Distribution of application maturity (not a league table) plus org-level Governance practices |
+| `getApplicationTrend` | `GET /applications/{appId}/trend` | `application.read` | Monthly posture and SAMM maturity for one application (from the monthly snapshots) |
+| `listMaturitySnapshots` | `GET /maturity/snapshots` | `maturity.rollup.read` |  |
+| `getOrgUnitMaturity` | `GET /org-units/{orgUnitId}/maturity` | `maturity.rollup.read` | Distribution of application maturity (not a league table) plus org-level Governance practices |
+| `getOrgUnitTrend` | `GET /org-units/{orgUnitId}/trend` | `maturity.rollup.read` | Monthly posture and SAMM maturity for an org unit and everything below it (aggregates only) |
 
 ## Organisation
 
@@ -118,6 +122,7 @@ Errors are `application/problem+json`. Out-of-scope objects return 404, never 40
 
 | Operation | Request | Permission | Summary |
 |---|---|---|---|
+| `listActivity` | `GET /activity` | `application.read` | What happened recently (evidence accepted or rejected, findings opened or closed, exceptions decided) |
 | `getLiveness` | `GET /health/live` | `public` | Liveness probe |
 | `getReadiness` | `GET /health/ready` | `public` | Readiness probe (DB reachable, config loaded) |
 | `listIntegrations` | `GET /integrations` | `integration.read` | Every external integration, whether it is configured, what is missing, and its last run |

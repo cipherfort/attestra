@@ -13,7 +13,7 @@ others at application scope.
 from __future__ import annotations
 
 from collections.abc import Callable, Mapping, Sequence
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from datetime import datetime, timedelta
 from typing import Any
 
@@ -71,6 +71,7 @@ class ScopeResult:
     state: str
     explanation: str
     changed: bool
+    details: dict[str, Any] = field(default_factory=dict)
 
 
 def build_id() -> str:
@@ -80,9 +81,18 @@ def build_id() -> str:
 
 
 def _views(
-    conn: Connection, bundle: ConfigBundle, app: Mapping[str, Any], now: datetime, compare: CompareFn | None
+    conn: Connection,
+    bundle: ConfigBundle,
+    app: Mapping[str, Any],
+    now: datetime,
+    compare: CompareFn | None,
+    *,
+    as_of: bool = False,
+    project: bool = True,
 ) -> list[EvidenceView]:
     rows = evidence_store.evidence_for_application(conn, str(app["id"]))
+    if as_of:  # history: only what had been observed by then
+        rows = [r for r in rows if r.observed_at <= now]
     heads = {r["full_name"]: r["head_sha"] for r in app["repositories"] or []}
     newest: dict[tuple[str, str], datetime] = {}
     for r in rows:
@@ -100,7 +110,8 @@ def _views(
             facts = _facts(r, policy, heads, now, compare)
             res = freshness(r.observed_at, policy, facts)
             state, until, reason = res.state, res.valid_until, res.reason
-        evidence_store.update_projection(conn, r.evidence_id, state.value, until, reason)
+        if project:
+            evidence_store.update_projection(conn, r.evidence_id, state.value, until, reason)
         views.append(
             EvidenceView(
                 id=str(r.evidence_id),
@@ -130,17 +141,26 @@ def _facts(
     return FreshnessFacts(now=now, changed_paths=tuple(paths) if paths is not None else None)
 
 
-def _findings(conn: Connection, application_id: str, now: datetime) -> list[FindingView]:
+def _findings(conn: Connection, application_id: str, now: datetime, *, as_of: bool = False) -> list[FindingView]:
     out = []
     for f in findings_store.for_application(conn, application_id):
-        triage_overdue = f["status"] == "new" and f["triage_due_at"] is not None and f["triage_due_at"] < now
+        status, breached = f["status"], bool(f["sla_breached"])
+        if as_of:  # history: the finding as it stood then
+            if f["first_seen_at"] > now:
+                continue
+            if f["closed_at"] is not None and f["closed_at"] > now:
+                status = "triaged"
+            breached = (
+                status not in ("closed", "false_positive") and f["sla_due_at"] is not None and f["sla_due_at"] < now
+            )
+        triage_overdue = status == "new" and f["triage_due_at"] is not None and f["triage_due_at"] < now
         out.append(
             FindingView(
                 str(f["id"]),
                 f["finding_type"],
-                f["status"],
+                status,
                 f["priority"],
-                bool(f["sla_breached"]),
+                breached,
                 source=str((f["location"] or {}).get("source", f["source_system"])),
                 details={
                     "validity": (f["location"] or {}).get("validity", "unknown"),
@@ -169,15 +189,21 @@ def evaluate_application(
     now: datetime,
     compare: CompareFn | None = None,
     gap_grace: timedelta | None = timedelta(days=14),
+    *,
+    record: bool = True,
+    as_of: bool = False,
 ) -> list[ScopeResult]:
+    """Evaluate every control for the application at `now`. `record=False` computes without writing anything
+    (no ledger entry, no projection, no gap findings); with `as_of=True` it uses only the evidence and findings that
+    existed at `now`, which is how historical snapshots are computed."""
     app = registry.application_context(conn, application_id)
     if app is None:
         raise LookupError(application_id)
     if app["tier_rank"] is None:
         raise ValueError(f"{app['app_key']} has no approved tier; classify it first")
     cfg = config_store.active(conn)
-    evidence = _views(conn, bundle, app, now, compare)
-    findings = _findings(conn, application_id, now)
+    evidence = _views(conn, bundle, app, now, compare, as_of=as_of, project=record)
+    findings = _findings(conn, application_id, now, as_of=as_of)
     exceptions = _active_exceptions(conn, application_id, now)
     profile = dict(app["profile"] or {})
     profile["lifecycle"] = app["lifecycle"]
@@ -196,6 +222,20 @@ def evaluate_application(
             scoped = [e for e in evidence if scope_type == "application" or e.scope_ref == scope_ref]
             res = evaluate_control(control, facts, scoped, findings, now, exceptions.get(key))
             requirement = applicability(control, facts).requirement
+            if not record:
+                results.append(
+                    ScopeResult(
+                        key,
+                        scope_type,
+                        scope_ref,
+                        requirement,
+                        res.state.value,
+                        res.explanation,
+                        False,
+                        dict(res.details),
+                    )
+                )
+                continue
             changed = control_store.record(
                 conn,
                 application_id=application_id,
@@ -213,10 +253,19 @@ def evaluate_application(
                 details=dict(res.details),
             )
             results.append(
-                ScopeResult(key, scope_type, scope_ref, requirement, res.state.value, res.explanation, changed)
+                ScopeResult(
+                    key,
+                    scope_type,
+                    scope_ref,
+                    requirement,
+                    res.state.value,
+                    res.explanation,
+                    changed,
+                    dict(res.details),
+                )
             )
 
-    if gap_grace is not None:
+    if record and gap_grace is not None:
         raise_control_gaps(conn, application_id, results, now, gap_grace)
     return results
 

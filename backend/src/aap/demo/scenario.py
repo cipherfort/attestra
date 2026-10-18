@@ -19,7 +19,7 @@ import hashlib
 from dataclasses import dataclass
 from datetime import UTC, datetime, timedelta
 
-from sqlalchemy import Connection
+from sqlalchemy import Connection, text
 
 from aap.blobstore import EvidenceBlobStore
 from aap.config import ConfigBundle
@@ -28,7 +28,7 @@ from aap.demo import bundles
 from aap.demo.seed import AppSpec, RepoSpec, connector_evidence, demo_trusted, good_repo_settings, register
 from aap.domain.evidence import RunInfo
 from aap.ingest.pipeline import ingest_workflow_run
-from aap.services import evaluation, risk_service, vuln_service
+from aap.services import evaluation, risk_service, snapshots, vuln_service
 from aap.store import config_store, findings_store, registry, supply_chain
 
 LOG4SHELL = {
@@ -578,4 +578,15 @@ def seed(conn: Connection, bundle: ConfigBundle, blobs: EvidenceBlobStore, now: 
         risk_service.score_application(conn, bundle, app_id)
         risk_service.publish_posture(conn, app_id, now)
         evaluation.evaluate_application(conn, bundle, app_id, now, gap_grace=None)
+
+    # ---------------------------------------------------------------- history for the trend charts
+    # The applications joined over the year, so the portfolio grows. Each month is then computed as of its last day by
+    # the real evaluator, from the evidence and findings that existed then (snapshots.backfill): nothing is invented.
+    onboarded_days_ago = {"Claims API": 330, "Payments Portal": 260, "HR Leave Tracker": 190, "Team Wiki Helper": 100}
+    for name, days in onboarded_days_ago.items():
+        conn.execute(
+            text("UPDATE applications SET created_at = :t WHERE id = :a"),
+            {"t": now - timedelta(days=days), "a": apps[name]},
+        )
+    snapshots.backfill(conn, bundle, 12, now)
     return DemoResult(apps, users, forged)

@@ -36,6 +36,13 @@ def app_states(conn: Connection, application_id: str) -> dict[str, StateInput]:
 
 
 def application_maturity(conn: Connection, bundle: ConfigBundle, application_id: str) -> MaturityReport:
+    return maturity_from_states(conn, bundle, application_id, app_states(conn, application_id))
+
+
+def maturity_from_states(
+    conn: Connection, bundle: ConfigBundle, application_id: str, states: Mapping[str, StateInput]
+) -> MaturityReport:
+    """Maturity for a given set of control states: the current ones, or those of a historical snapshot."""
     app = registry.application_context(conn, application_id)
     if app is None:
         raise LookupError(application_id)
@@ -50,7 +57,7 @@ def application_maturity(conn: Connection, bundle: ConfigBundle, application_id:
         if not p["id"].startswith("G-")
     }
     return compute(
-        app_states(conn, application_id),
+        dict(states),
         bundle.controls,
         bundle.doc("samm"),
         bundle.doc("maturity_methodology"),
