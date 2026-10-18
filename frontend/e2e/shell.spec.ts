@@ -5,6 +5,8 @@ const PAGES: [string, string][] = [
   ["/", "Overview"],
   ["/apps", "Applications"],
   ["/apps/APP-00001", "Claims API"],
+  ["/findings", "Findings"],
+  ["/evidence", "Evidence"],
   ["/cve", "Are we affected?"],
   ["/leadership", "Leadership"],
   ["/exceptions", "Exceptions"],
@@ -103,4 +105,26 @@ test("application tabs live in the URL and a control opens in a drawer", async (
   await expect(page.locator("main tbody tr").first()).toBeVisible();
   await page.reload();
   await expect(page.getByRole("tab", { name: "Evidence" })).toHaveAttribute("aria-selected", "true");
+});
+
+test("the forged submission is rejected with its reason, and accepted evidence shows how it was verified", async ({ page, problems }) => {
+  void problems;
+  await visit(page, "/evidence");
+  await page.getByRole("tab", { name: /Rejected/ }).click();
+  await expect(page).toHaveURL(/\/evidence\/view\/rejected/);
+  await expect(page.locator("main")).toContainText("Untrusted producer");
+  await expect(page.locator("main")).toContainText("refused");
+  await page.getByRole("tab", { name: /Accepted/ }).click();
+  await page.getByRole("link", { name: "Static analysis" }).first().click();
+  const chain = page.getByRole("list", { name: "How this evidence was verified" });
+  await expect(chain).toContainText("Produced by an approved workflow at an approved commit");
+  await expect(chain).toContainText("Append-only ledger");
+});
+
+test("a finding opens from the global list with its risk explanation", async ({ page, problems }) => {
+  void problems;
+  await visit(page, "/findings");
+  await page.locator("main tbody tr").first().getByRole("link").first().click();
+  await expect(page.getByRole("heading", { name: /Why P\d|Why unscored/ })).toBeVisible();
+  await expect(page.locator("main")).toContainText("History");
 });

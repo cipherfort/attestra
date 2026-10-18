@@ -3,7 +3,7 @@ import AxeBuilder from "@axe-core/playwright";
 import { expect, test, visit } from "./fixtures";
 
 // WCAG 2.2 AA on the redesigned pages, in both themes. Pages still on the pre-redesign styles join as they move.
-const PAGES = ["/", "/apps", "/apps/APP-00001", "/apps/APP-00001/controls", "/apps/APP-00001/evidence"];
+const PAGES = ["/", "/apps", "/apps/APP-00001", "/apps/APP-00001/controls", "/apps/APP-00001/evidence", "/evidence", "/evidence/view/rejected", "/findings"];
 
 for (const theme of ["dark", "light"] as const) {
   for (const path of PAGES) {
