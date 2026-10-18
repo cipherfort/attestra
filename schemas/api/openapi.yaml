@@ -497,6 +497,7 @@ paths:
                 required: [items]
                 properties:
                   items: { type: array, items: { $ref: "#/components/schemas/EvidenceListItem" } }
+        "404": { $ref: "#/components/responses/NotFound" }   # the application filter is unknown or out of scope
         "400": { $ref: "#/components/responses/BadRequest" }
         "401": { $ref: "#/components/responses/Unauthorized" }
         "403": { $ref: "#/components/responses/Forbidden" }
@@ -520,6 +521,7 @@ paths:
                 required: [items]
                 properties:
                   items: { type: array, items: { $ref: "#/components/schemas/EvidenceRejection" } }
+        "404": { $ref: "#/components/responses/NotFound" }   # the application filter is unknown or out of scope
         "400": { $ref: "#/components/responses/BadRequest" }
         "401": { $ref: "#/components/responses/Unauthorized" }
         "403": { $ref: "#/components/responses/Forbidden" }
@@ -543,6 +545,7 @@ paths:
                 required: [items]
                 properties:
                   items: { type: array, items: { $ref: "#/components/schemas/ActivityItem" } }
+        "404": { $ref: "#/components/responses/NotFound" }   # the application filter is unknown or out of scope
         "400": { $ref: "#/components/responses/BadRequest" }
         "401": { $ref: "#/components/responses/Unauthorized" }
         "403": { $ref: "#/components/responses/Forbidden" }
