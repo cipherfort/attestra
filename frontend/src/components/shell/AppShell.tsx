@@ -43,7 +43,7 @@ export function AppShell() {
         <div className="flex min-w-0 flex-1 flex-col">
           <DevBanner me={me.data} />
           <TopBar me={me.data} onSearch={() => setPalette(true)} />
-          <main id="main" className="mx-auto w-full max-w-[1400px] px-8 py-6">
+          <main id="main" tabIndex={-1} className="mx-auto w-full max-w-[1400px] px-8 py-6 outline-none">
             <Suspense fallback={<SkeletonRows rows={8} />}>
               <Outlet />
             </Suspense>

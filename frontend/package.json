@@ -8,6 +8,9 @@
     "dev": "vite",
     "build": "tsc -b && vite build",
     "typecheck": "tsc -b",
+    "budget": "node scripts/bundle-budget.mjs",
+    "screenshots": "DOCS=1 playwright test --project=docs",
+    "screenshots:webp": "sh scripts/screenshots-webp.sh",
     "types": "openapi-typescript ../schemas/api/openapi.yaml --default-non-nullable false -o src/api-types.ts",
     "types:check": "openapi-typescript ../schemas/api/openapi.yaml --default-non-nullable false -o /tmp/aap-api-types.ts && diff -q src/api-types.ts /tmp/aap-api-types.ts"
   },

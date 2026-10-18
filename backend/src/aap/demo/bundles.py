@@ -13,7 +13,9 @@ from datetime import UTC, datetime
 from typing import Any
 
 WORKFLOW_REPO = "example-org/security-workflows"
-DEMO_WORKFLOW_SHA = "d" * 40  # DEMO ONLY: registered as trusted by the demo's producer overlay, never in config/
+DEMO_WORKFLOW_SHA = hashlib.sha1(
+    b"example-org/security-workflows@v1.0.0", usedforsecurity=False
+).hexdigest()  # DEMO ONLY: registered as trusted by the demo's producer overlay, never in config/
 
 MEDIA = {".sarif": "application/sarif+json", ".json": "application/vnd.cyclonedx+json"}
 WORKFLOW_FOR = {

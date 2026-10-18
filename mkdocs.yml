@@ -27,6 +27,7 @@ validation:
   links: { not_found: info, anchors: info, unrecognized_links: info }
 nav:
   - Home: README.md
+  - Tour: tour.md
   - Getting started: getting-started.md
   - Install:
       - Kubernetes (Helm): install/helm.md

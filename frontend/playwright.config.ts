@@ -13,5 +13,11 @@ export default defineConfig({
     viewport: { width: 1440, height: 900 },
     trace: "retain-on-failure",
   },
-  projects: [{ name: "chromium", use: { ...devices["Desktop Chrome"], viewport: { width: 1440, height: 900 } } }],
+  projects: [
+    { name: "chromium", testIgnore: /docs(-video)?\.spec\.ts/, use: { ...devices["Desktop Chrome"], viewport: { width: 1440, height: 900 } } },
+    // launch assets (npm run screenshots): crisp 2× captures, only when asked for, never in the normal run or CI
+    ...(process.env.DOCS
+      ? [{ name: "docs", testMatch: /docs(-video)?\.spec\.ts/, use: { ...devices["Desktop Chrome"], viewport: { width: 1440, height: 900 }, deviceScaleFactor: 2 } }]
+      : []),
+  ],
 });

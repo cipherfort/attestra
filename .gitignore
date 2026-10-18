@@ -37,3 +37,4 @@ deploy/compose/secrets/
 *.tsbuildinfo
 frontend/test-results/
 frontend/playwright-report/
+frontend/launch-assets/

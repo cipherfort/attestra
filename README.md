@@ -11,6 +11,17 @@ Status: **pre-release (0.x)**, not yet production-ready · [Roadmap to 1.0](ROAD
 
 **An open-source engine that answers one question for every application your organization runs: is it built and run securely, and what is the proof?**
 
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/assets/screenshots/overview-dark.webp">
+  <img alt="The overview: mandatory controls proven, open P1 findings, findings past their deadline and rejected evidence, with twelve months of trends" src="docs/assets/screenshots/overview-light.webp">
+</picture>
+
+| How a piece of evidence was verified | Forged evidence is refused | Are we affected? |
+|---|---|---|
+| [![Evidence chain](docs/assets/screenshots/evidence-chain-dark.webp)](docs/tour.md#how-a-piece-of-evidence-was-verified) | [![Rejected evidence](docs/assets/screenshots/evidence-rejected-dark.webp)](docs/tour.md#forged-evidence-is-refused) | [![Are we affected](docs/assets/screenshots/are-we-affected-dark.webp)](docs/tour.md#are-we-affected) |
+
+[Take the tour](docs/tour.md): eight screens from the demo world.
+
 Security tools each report on their own slice: a scanner here, a cloud alert there. None of them knows which application a finding belongs to, how critical that application is, which controls it must have, or whether those controls actually *ran* rather than merely being configured. This platform adds that layer:
 
 ```text
