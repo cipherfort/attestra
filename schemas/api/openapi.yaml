@@ -2377,9 +2377,10 @@ components:
           type: array
           items:
             type: object
-            required: [item, values]
+            required: [item, name, values]
             properties:
               item: { type: string }
+              name: { type: string }
               values: { type: array, items: { type: [number, "null"] } }
     EvidenceListItem:
       type: object

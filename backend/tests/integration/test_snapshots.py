@@ -38,15 +38,29 @@ def test_the_demo_has_a_year_of_snapshots_with_only_the_current_month_provisiona
 def test_history_counts_only_applications_and_evidence_that_existed_then(engine, demo):
     current = snapshots.month_start(datetime.now(UTC))
     claims, wiki = demo.applications["Claims API"], demo.applications["Team Wiki Helper"]
+    past = snapshots.add_months(current, -6)
     with transaction(engine, "aap_worker") as conn:
-        year_ago = snapshots.add_months(current, -10)
-        assert _metrics(conn, year_ago, "application", claims)  # registered 330 days ago
-        assert _metrics(conn, year_ago, "application", wiki) == {}  # registered 100 days ago: not yet there
-        then = _metrics(conn, year_ago, "application", claims)
-        now = _metrics(conn, current, "application", claims)
-    # the demo's evidence is from the last four months: ten months ago none of it existed
-    assert then["mandatory_satisfied"] < now["mandatory_satisfied"]
-    assert then["evidence_accepted"] == 0
+        assert _metrics(conn, snapshots.add_months(current, -10), "application", wiki) == {}  # onboarded 100 days ago
+        then = _metrics(conn, past, "application", claims)
+        observed = conn.execute(
+            text("SELECT count(*) FROM evidence WHERE application_id = :a AND observed_at >= :s AND observed_at <= :e"),
+            {"a": claims, "s": datetime(past.year, past.month, 1, tzinfo=UTC), "e": snapshots.month_end(past)},
+        ).scalar_one()
+        opened_later = conn.execute(
+            text("SELECT count(*) FROM findings WHERE application_id = :a AND first_seen_at > :e"),
+            {"a": claims, "e": snapshots.month_end(past)},
+        ).scalar_one()
+    # as of that month: exactly the evidence observed during it, and no finding first seen afterwards
+    assert then["evidence_accepted"] == observed > 0
+    assert opened_later > 0  # the demo has later findings, and none of them are counted then
+    open_then = sum(then[f"findings_open_{p}"] for p in ("p1", "p2", "p3", "p4"))
+    with transaction(engine, "aap_worker") as conn:
+        recount = conn.execute(
+            text("""SELECT count(*) FROM findings WHERE application_id = :a AND first_seen_at <= :e AND priority IS NOT NULL
+                    AND status <> 'false_positive' AND (closed_at IS NULL OR closed_at > :e)"""),
+            {"a": claims, "e": snapshots.month_end(past)},
+        ).scalar_one()
+    assert open_then == recount
 
 
 def test_org_units_roll_up_their_applications(engine, demo):

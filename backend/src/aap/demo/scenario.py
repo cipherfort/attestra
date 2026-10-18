@@ -304,6 +304,220 @@ def seed(conn: Connection, bundle: ConfigBundle, blobs: EvidenceBlobStore, now: 
         return out.rejected
 
     codeql = {"query_suite": "security-extended"}
+
+    # ---------------------------------------------------------------- a year of history (for the trend charts)
+    # Earlier scans and settings syncs, ingested in date order through the same verification pipeline: a few days
+    # before each month end (as regular CI runs and the daily settings sync would), from the month after each
+    # application was onboarded. Each scan reports a slightly different set of issues, so findings are found and
+    # then fixed (a later scan that no longer reports one closes it, as of that scan). Every month is later computed
+    # as of its last day by snapshots.backfill: the trends come from the engine, nothing is drawn by hand.
+    onboarded_days_ago = {"Claims API": 330, "Payments Portal": 260, "HR Leave Tracker": 190, "Team Wiki Helper": 100}
+    pools = {
+        "example-org/claims-api": [
+            (
+                "java/xxe",
+                "XML external entity expansion",
+                9.1,
+                611,
+                "src/main/java/org/example/claims/ImportService.java",
+            ),
+            (
+                "java/path-injection",
+                "Uncontrolled data used in path expression",
+                7.5,
+                22,
+                "src/main/java/org/example/claims/Files.java",
+            ),
+            ("js/prototype-pollution", "Prototype-polluting assignment", 7.3, 1321, "web/src/util/merge.ts"),
+            (
+                "java/log-injection",
+                "Log entries created from user input",
+                5.0,
+                117,
+                "src/main/java/org/example/claims/Audit.java",
+            ),
+            (
+                "java/weak-cryptographic-algorithm",
+                "Use of a broken cryptographic algorithm",
+                7.5,
+                327,
+                "src/main/java/org/example/claims/Tokens.java",
+            ),
+            ("js/reflected-xss", "Reflected cross-site scripting", 6.1, 79, "web/src/pages/Search.tsx"),
+            ("java/ssrf", "Server-side request forgery", 9.1, 918, "src/main/java/org/example/claims/Fetcher.java"),
+        ],
+        "example-org/payments-portal": [
+            (
+                "go/sql-injection",
+                "Database query built from user-controlled sources",
+                8.8,
+                89,
+                "internal/ledger/query.go",
+            ),
+            (
+                "java/insecure-cookie",
+                "Cookie without the Secure flag",
+                4.3,
+                614,
+                "src/main/java/org/example/pay/Session.java",
+            ),
+            ("go/clear-text-logging", "Clear-text logging of sensitive information", 7.5, 312, "internal/audit/log.go"),
+        ],
+        "example-org/leave-tracker": [
+            ("py/flask-debug", "Flask app run in debug mode", 7.5, 215, "app/main.py"),
+            ("py/reflective-xss", "Reflected server-side cross-site scripting", 6.1, 79, "app/views.py"),
+        ],
+    }
+    # month index after onboarding → which issues of the pool that month's scan still reports
+    plans = {
+        "example-org/claims-api": [
+            [0, 1, 2, 3],
+            [0, 1, 2, 3, 4],
+            [1, 2, 4],
+            [2, 4, 5],
+            [4, 5, 6],
+            [5, 6],
+            [6],
+            [6],
+            [],
+        ],
+        "example-org/payments-portal": [[0, 1], [0, 1, 2], [0, 2], [2], [2], [2], [2]],
+        "example-org/leave-tracker": [[0, 1], [1], [1], [], []],
+    }
+    repos_of = {
+        "Claims API": [
+            ("example-org/claims-api", 7001, ["java", "javascript"], ["maven", "npm"]),
+            ("example-org/claims-infra", 7002, [], ["terraform"]),
+        ],
+        "Payments Portal": [("example-org/payments-portal", 7101, ["java", "go"], ["maven", "gomod"])],
+        "HR Leave Tracker": [("example-org/leave-tracker", 7201, ["python"], ["pypi"])],
+        "Team Wiki Helper": [],
+    }
+    sboms = {
+        "example-org/claims-api": [
+            ("spring-boot", "3.3.4", "pkg:maven/org.springframework.boot/spring-boot@3.3.4", "Apache-2.0")
+        ],
+        "example-org/payments-portal": [("gin", "1.10.0", "pkg:golang/github.com/gin-gonic/gin@v1.10.0", "MIT")],
+        "example-org/leave-tracker": [("django", "4.2.16", "pkg:pypi/django@4.2.16", "BSD-3-Clause")],
+    }
+
+    def latest(app_id: str, etype: str) -> tuple[dict[str, object], str] | None:
+        row = conn.execute(
+            text(
+                "SELECT summary, confidence::text AS c FROM evidence WHERE application_id = :a AND evidence_type = :t "
+                "ORDER BY observed_at DESC LIMIT 1"
+            ),
+            {"a": app_id, "t": etype},
+        ).first()
+        return (dict(row.summary or {}), row.c) if row else None
+
+    current_month = snapshots.month_start(now)
+    month_ends: list[datetime] = []
+    for i in range(11, 0, -1):
+        month_ends.append(snapshots.month_end(snapshots.add_months(current_month, -i)))
+    for end in month_ends:
+        for name, days in onboarded_days_ago.items():
+            onboarded = now - timedelta(days=days)
+            if end - timedelta(days=3) <= onboarded:
+                continue
+            k = sum(1 for e in month_ends if onboarded < e - timedelta(days=3) <= end) - 1  # months since onboarding
+            synced = end - timedelta(hours=2)  # the daily connector sync, within its re-confirmation window
+            app_key = conn.execute(
+                text("SELECT app_key FROM applications WHERE id = :a"), {"a": apps[name]}
+            ).scalar_one()
+            for etype in ("registry.application", "registry.classification"):
+                prior = latest(apps[name], etype)
+                if prior:
+                    connector_evidence(conn, apps[name], app_key, synced, {etype: prior[0]}, confidence=prior[1])
+            if name == "Claims API":
+                connector_evidence(
+                    conn,
+                    apps[name],
+                    app_key,
+                    synced,
+                    {
+                        "siem.log_source_health": {"events": 9000 + 700 * k},
+                        "training.completion": {"courses": ["champion-onboarding"]},
+                    },
+                    confidence="C3",
+                )
+                if k == 3:  # the first independent reviews, three months after onboarding
+                    connector_evidence(
+                        conn,
+                        apps[name],
+                        app_key,
+                        end - timedelta(days=5),
+                        {
+                            "assessment.threat_model": {
+                                "reviewer": "Chandra Patel (AppSec)",
+                                "model_commit": sha("claims-api@main"),
+                            },
+                            "assessment.pentest": {"reviewer": "External tester (CREST)", "outcome": "approved"},
+                        },
+                        confidence="M2",
+                    )
+            for repo, gid, languages, ecosystems in repos_of[name]:
+                connector_evidence(conn, apps[name], repo, synced, good_repo_settings())
+                connector_evidence(
+                    conn, apps[name], repo, synced, {"scan.secrets": {"open_alerts": 0}}, confidence="C3"
+                )
+                if not languages:
+                    continue  # infrastructure repository: settings and secrets only
+                plan = plans[repo]
+                issues = [pools[repo][j] for j in plan[min(k, len(plan) - 1)]]
+                tag = repo.split("/")[1]
+                pipeline(
+                    repo,
+                    gid,
+                    "scan.sast",
+                    {
+                        "results.sarif": bundles.sarif(
+                            "CodeQL",
+                            "2.18.4",
+                            [
+                                {
+                                    "rule": r,
+                                    "message": m,
+                                    "score": sc,
+                                    "cwe": cwe,
+                                    "file": fl,
+                                    "line": 10 + j,
+                                    "fp": f"{tag}-h{j}",
+                                }
+                                for j, (r, m, sc, cwe, fl) in enumerate(pools[repo])
+                                if (r, m, sc, cwe, fl) in issues
+                            ],
+                        )
+                    },
+                    "CodeQL",
+                    "2.18.4",
+                    {"languages": languages, "languages_detected": languages, **codeql},
+                    produced=end - timedelta(days=3),
+                    result="findings" if issues else "pass",
+                )
+                pipeline(
+                    repo,
+                    gid,
+                    "scan.sca",
+                    {"osv.json": b'{"results": []}'},
+                    "osv-scanner",
+                    "1.8.5",
+                    {"ecosystems": ecosystems, "ecosystems_detected": ecosystems},
+                    produced=end - timedelta(days=3),
+                )
+                pipeline(
+                    repo,
+                    gid,
+                    "sbom",
+                    {"bom.json": bundles.cyclonedx(sboms[repo])},
+                    "syft",
+                    "1.14.0",
+                    produced=end - timedelta(days=3),
+                    result="pass",
+                )
+            risk_service.score_application(conn, bundle, apps[name])  # findings are scored while they are open
+            risk_service.publish_posture(conn, apps[name], synced)
+
     pipeline(
         "example-org/claims-api",
         7001,
@@ -582,7 +796,6 @@ def seed(conn: Connection, bundle: ConfigBundle, blobs: EvidenceBlobStore, now: 
     # ---------------------------------------------------------------- history for the trend charts
     # The applications joined over the year, so the portfolio grows. Each month is then computed as of its last day by
     # the real evaluator, from the evidence and findings that existed then (snapshots.backfill): nothing is invented.
-    onboarded_days_ago = {"Claims API": 330, "Payments Portal": 260, "HR Leave Tracker": 190, "Team Wiki Helper": 100}
     for name, days in onboarded_days_ago.items():
         conn.execute(
             text("UPDATE applications SET created_at = :t WHERE id = :a"),

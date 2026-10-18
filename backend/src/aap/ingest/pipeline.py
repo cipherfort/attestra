@@ -410,6 +410,7 @@ def _apply_sarif(
         source_system="platform",
         seen=seen,
         evidence_id=evidence_id,
+        at=seen_at,
     )
     out.findings_closed += len(closed)
 

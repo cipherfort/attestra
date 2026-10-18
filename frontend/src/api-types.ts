@@ -1905,6 +1905,7 @@ export interface components {
             };
             samm_functions: {
                 item: string;
+                name: string;
                 values: (number | null)[];
             }[];
         };
