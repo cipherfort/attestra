@@ -8,6 +8,9 @@ const PAGES: [string, string][] = [
   ["/findings", "Findings"],
   ["/evidence", "Evidence"],
   ["/cve", "Are we affected?"],
+  ["/supply-chain", "Supply chain"],
+  ["/controls", "Controls"],
+  ["/maturity", "Maturity"],
   ["/leadership", "Leadership"],
   ["/exceptions", "Exceptions"],
   ["/assessments", "Assessments"],
@@ -127,4 +130,39 @@ test("a finding opens from the global list with its risk explanation", async ({ 
   await page.locator("main tbody tr").first().getByRole("link").first().click();
   await expect(page.getByRole("heading", { name: /Why P\d|Why unscored/ })).toBeVisible();
   await expect(page.locator("main")).toContainText("History");
+});
+
+test("the control catalogue explains what counts as proof and where each control stands", async ({ page, problems }) => {
+  void problems;
+  await visit(page, "/controls");
+  await page.getByRole("link", { name: "Dependency vulnerability analysis (SCA) executes" }).click();
+  await expect(page).toHaveURL(/\/controls\/ASC-BLD-02$/);
+  const drawer = page.getByRole("dialog");
+  await expect(drawer).toContainText("What counts as proof");
+  await expect(drawer).toContainText("Claims API");
+  await page.keyboard.press("Escape");
+  await expect(page).toHaveURL(/\/controls$/);
+});
+
+test("maturity shows the spread across applications, and roles without roll-ups are told where to look", async ({ page, problems }) => {
+  void problems;
+  await visit(page, "/maturity");
+  await expect(page.getByRole("group", { name: "SAMM practice scores across applications", exact: true })).toBeVisible();
+  await expect(page.locator("main")).toContainText("By business function");
+  await visit(page, "/maturity", "ajones");
+  await expect(page.locator("main")).toContainText("Roll-ups are for leads and governance roles");
+});
+
+test("supply chain: an application without an SBOM is never reported as unaffected", async ({ page, problems }) => {
+  void problems;
+  await visit(page, "/supply-chain");
+  await expect(page.locator("main")).toContainText("No SBOM");
+  await page.getByRole("tab", { name: "Find a component" }).click();
+  await page.getByLabel("Component name").fill("log4j");
+  await page.getByRole("button", { name: "Search", exact: true }).click();
+  await expect(page.locator("main tbody")).toContainText("log4j-core");
+  await visit(page, "/apps/APP-00001/supply-chain");
+  await page.getByRole("link", { name: "CVE-2021-44228" }).click();
+  await expect(page.getByRole("heading", { name: "Are we affected?" })).toBeVisible();
+  await expect(page.locator("main")).toContainText("Possibly affected");
 });

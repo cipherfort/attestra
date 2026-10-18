@@ -90,3 +90,22 @@ def test_the_activity_feed_is_newest_first_and_scoped(client):
     theirs = get(client, "/activity?limit=50", "ekim").json()["items"]
     assert theirs and {x["app_key"] for x in theirs} == {"APP-00002"}
     assert all(x["app_key"] == "APP-00001" for x in get(client, "/activity?application=APP-00001").json()["items"])
+
+
+def test_sbom_components_page_by_purl_with_matched_vulnerabilities(client):
+    sboms = get(client, "/applications/APP-00001/sboms").json()["items"]
+    current = next(s for s in sboms if s["is_current"])
+    first = get(client, f"/sboms/{current['id']}/components?limit=2").json()
+    assert len(first["items"]) == 2 and first["page"]["next_cursor"]
+    rest = get(client, f"/sboms/{current['id']}/components?limit=200&cursor={first['page']['next_cursor']}").json()
+    purls = [c["purl"] for c in first["items"] + rest["items"]]
+    assert purls == sorted(purls) and len(purls) == current["component_count"] and rest["page"]["next_cursor"] is None
+    assert any(c["vulnerabilities"] for c in first["items"] + rest["items"])  # the demo's vulnerable dependency
+    assert get(client, f"/sboms/{current['id']}/components", "ekim").status_code == 404  # Payments team: not theirs
+    assert get(client, f"/sboms/{current['id']}/components?cursor=%%%").status_code == 400
+
+
+def test_sbom_list_says_whether_each_sbom_is_fresh_and_how_many_components_are_vulnerable(client):
+    current = next(s for s in get(client, "/applications/APP-00001/sboms").json()["items"] if s["is_current"])
+    assert current["freshness"] in {"active", "expiring", "expired", "superseded", "revoked"}
+    assert current["vulnerable_components"] >= 1

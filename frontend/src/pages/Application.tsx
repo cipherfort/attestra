@@ -20,6 +20,7 @@ import { EmptyState, SkeletonRows } from "../components/ui/States";
 import { TabPanel, Tabs } from "../components/ui/Tabs";
 import { useMe } from "../hooks/useMe";
 import { DOMAINS } from "./Overview";
+import { SbomPanel } from "./SupplyChain";
 
 /** One row per control: the worst state across its scopes (a control is only as good as its weakest repository). */
 function perControl(items: ControlItem[]): { worst: ControlItem; scopes: ControlItem[] }[] {
@@ -40,7 +41,7 @@ const DECISION: Record<Classification["decision"], string> = {
 const date = (s: string | null | undefined, time = false) =>
   !s ? "–" : new Date(s).toLocaleString(undefined, time ? { dateStyle: "medium", timeStyle: "short" } : { dateStyle: "medium" });
 
-const TABS = ["overview", "controls", "findings", "evidence", "maturity", "activity"] as const;
+const TABS = ["overview", "controls", "findings", "evidence", "supply-chain", "maturity", "activity"] as const;
 type Tab = (typeof TABS)[number];
 
 export function Application({ id }: { id: string }) {
@@ -103,6 +104,7 @@ export function Application({ id }: { id: string }) {
           { value: "controls", label: "Controls", count: rows.length || undefined },
           { value: "findings", label: "Findings", count: open.length || undefined },
           { value: "evidence", label: "Evidence" },
+          { value: "supply-chain", label: "Supply chain" },
           { value: "maturity", label: "Maturity" },
           { value: "activity", label: "Activity" },
         ]}
@@ -113,6 +115,7 @@ export function Application({ id }: { id: string }) {
         <TabPanel value="controls"><ControlsTab rows={rows} loading={controls.isPending} /></TabPanel>
         <TabPanel value="findings"><FindingsTab items={open} loading={findings.isPending} /></TabPanel>
         <TabPanel value="evidence"><EvidenceTab appKey={a.app_key} /></TabPanel>
+        <TabPanel value="supply-chain"><SbomPanel appKey={a.app_key} /></TabPanel>
         <TabPanel value="maturity" className="space-y-4">
           <Card title={a.tier ? `SAMM practices against the Tier ${a.tier} target` : "SAMM practices"} description="From control states and assessments (OWASP SAMM 0–3). Hover a bar for how much rests on automated evidence, independent review or self-assessment.">
             {maturity.data ? (

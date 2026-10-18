@@ -1608,6 +1608,10 @@ export interface components {
             evidence_id?: string;
             /** Format: date-time */
             generated_at?: string;
+            /** @description State of the SBOM's evidence. Only an active or expiring SBOM can show an application is not affected. */
+            freshness?: components["schemas"]["EvidenceState"];
+            /** @description Components with at least one known vulnerability */
+            vulnerable_components?: number;
         };
         SbomComponent: {
             purl: string;
@@ -1808,6 +1812,7 @@ export interface components {
             };
             distribution: {
                 practice?: string;
+                name?: string;
                 median?: number;
                 p25?: number;
                 p75?: number;
