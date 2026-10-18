@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: Apache-2.0
 import { useQueries, useQuery } from "@tanstack/react-query";
-import { Activity, Boxes, FileCheck2, FileX2, ShieldAlert, ShieldCheck, Sparkles, XCircle } from "lucide-react";
+import { Activity, Boxes, FileCheck2, FileX2, ShieldAlert, ShieldCheck, XCircle } from "lucide-react";
 import { Link } from "react-router";
 import { api, type ActivityItem, type ControlItem, type OrgUnitRow, type PostureTrend } from "../api";
 import { BulletBars } from "../components/charts/BulletBars";
@@ -8,11 +8,11 @@ import { Heatmap } from "../components/charts/Heatmap";
 import { LineChart } from "../components/charts/LineChart";
 import { ConfidenceBadge, PriorityChip } from "../components/domain/badges";
 import { evidenceLabel } from "../components/domain/evidence";
-import { ButtonLink } from "../components/ui/Button";
 import { Card } from "../components/ui/Card";
 import { Kpi } from "../components/ui/Kpi";
 import { PageHeader } from "../components/ui/PageHeader";
 import { EmptyState, Skeleton } from "../components/ui/States";
+import { GettingStarted } from "../components/domain/GettingStarted";
 import { useMe } from "../hooks/useMe";
 
 export const DOMAINS: Record<string, string> = {
@@ -25,7 +25,7 @@ const pct = (n: number) => `${Math.round(n)}%`;
 const month = (p: string) => new Date(`${p}-01T00:00:00Z`).toISOString();
 
 /** The unit an aggregate view starts from: the organisation for org-wide roles, otherwise the highest unit in scope. */
-function topUnit(units: OrgUnitRow[]): OrgUnitRow | undefined {
+export function topUnit(units: OrgUnitRow[]): OrgUnitRow | undefined {
   const ids = new Set(units.map((u) => u.id));
   return units.find((u) => !u.parent_id) ?? units.find((u) => !u.parent_id || !ids.has(u.parent_id));
 }
@@ -80,12 +80,16 @@ export function Overview() {
     return (
       <>
         <PageHeader title="Overview" />
-        <Card>
-          <EmptyState icon={Sparkles} title="Let's get your first application in" action={perms.has("application.register") && <ButtonLink to="/register" variant="primary">Register an application</ButtonLink>}>
-            Connect your source control (Settings → Integrations), publish the shipped security pipelines, then register an
-            application. Its controls are evaluated as soon as evidence arrives.
-          </EmptyState>
-        </Card>
+        <GettingStarted perms={perms} apps={0} />
+      </>
+    );
+  }
+
+  if (!canApps && !canRollup && perms.has("org.admin")) {
+    return (
+      <>
+        <PageHeader title="Overview" description="As a platform administrator you manage sign-in, integrations and the organisation; application data is visible only to the roles that work with it." />
+        <GettingStarted perms={perms} apps={null} />
       </>
     );
   }

@@ -6,6 +6,7 @@ import { setPersona } from "./api";
 export const PERSONAS = [
   { login: "ajones", name: "Amira Jones", role: "Security champion, Claims team" },
   { login: "ekim", name: "Eun Kim", role: "Engineer, Payments team" },
+  { login: "gokafor", name: "Grace Okafor", role: "Engineer, People Systems team" },
   { login: "dlee", name: "Dana Lee", role: "Security lead, Benefits business unit" },
   { login: "cpatel", name: "Chandra Patel", role: "AppSec engineer (organisation-wide)" },
   { login: "fwong", name: "Farah Wong", role: "Executive (aggregates only)" },

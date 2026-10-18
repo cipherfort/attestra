@@ -7,7 +7,7 @@ const mac = typeof navigator !== "undefined" && /Mac|iPhone|iPad/.test(navigator
 
 export function TopBar({ me, onSearch }: { me: Me | undefined; onSearch: () => void }) {
   return (
-    <header className="sticky top-0 z-20 flex h-12 items-center gap-3 border-b border-line bg-page/85 px-6 backdrop-blur">
+    <header className="print:hidden sticky top-0 z-20 flex h-12 items-center gap-3 border-b border-line bg-page/85 px-6 backdrop-blur">
       <button
         type="button"
         onClick={onSearch}
