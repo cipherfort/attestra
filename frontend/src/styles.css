@@ -4,7 +4,7 @@
 h1, h2 { font-weight: 650; }
 h3 { font-weight: 600; }
 p { margin: 1em 0; }
-ul:not(.plain), ol { list-style: revert; padding-left: 1.5em; }
+ul:not(.plain), ol:not(.plain) { list-style: revert; padding-left: 1.5em; }
 body { margin: 0; font-size: 14px; line-height: 1.45; }
 a { color: var(--accent-ink); text-decoration: none; }
 a:hover { text-decoration: underline; }

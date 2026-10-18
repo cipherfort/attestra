@@ -202,6 +202,8 @@ export const api = {
   maturity: (id: string) => request<Maturity>(`/applications/${id}/maturity`).then((r) => r.data),
   findings: (appId: string) =>
     request<{ items: Finding[] }>(`/findings?application=${encodeURIComponent(appId)}&status=open`).then((r) => r.data.items),
+  findingsAll: (openOnly = true) =>
+    request<{ items: Finding[] }>(`/findings${openOnly ? "?status=open" : ""}`).then((r) => r.data.items),
   openFindings: (priority = "P1,P2") =>
     request<{ items: Finding[] }>(`/findings?status=open&priority=${priority}`).then((r) => r.data.items),
   finding: (id: string) => request<FindingDetail>(`/findings/${id}`),

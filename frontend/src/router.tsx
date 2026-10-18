@@ -7,8 +7,10 @@ import { AppShell } from "./components/shell/AppShell";
 const Admin = lazy(() => import("./pages/Admin").then((m) => ({ default: m.Admin })));
 const Application = lazy(() => import("./pages/Application").then((m) => ({ default: m.Application })));
 const Assessments = lazy(() => import("./pages/Assessments").then((m) => ({ default: m.Assessments })));
-const EvidencePage = lazy(() => import("./pages/Detail").then((m) => ({ default: m.EvidencePage })));
-const FindingPage = lazy(() => import("./pages/Detail").then((m) => ({ default: m.FindingPage })));
+const EvidencePage = lazy(() => import("./pages/Evidence").then((m) => ({ default: m.EvidencePage })));
+const EvidenceExplorer = lazy(() => import("./pages/Evidence").then((m) => ({ default: m.EvidenceExplorer })));
+const FindingPage = lazy(() => import("./pages/Findings").then((m) => ({ default: m.FindingPage })));
+const FindingsList = lazy(() => import("./pages/Findings").then((m) => ({ default: m.FindingsList })));
 const Exceptions = lazy(() => import("./pages/Exceptions").then((m) => ({ default: m.Exceptions })));
 const Integrations = lazy(() => import("./pages/Integrations").then((m) => ({ default: m.Integrations })));
 const CvePage = lazy(() => import("./pages/Org").then((m) => ({ default: m.CvePage })));
@@ -46,7 +48,10 @@ export const router = createBrowserRouter([
       { path: "apps/:id", element: <AppRoute /> },
       { path: "apps/:id/:tab", element: <AppRoute /> },
       { path: "register", element: <Register /> },
+      { path: "findings", element: <FindingsList /> },
       { path: "findings/:id", element: <FindingRoute /> },
+      { path: "evidence", element: <EvidenceExplorer /> },
+      { path: "evidence/view/:tab", element: <EvidenceExplorer /> },
       { path: "evidence/:id", element: <EvidenceRoute /> },
       { path: "cve", element: <CveRoute /> },
       { path: "cve/:id", element: <CveRoute /> },

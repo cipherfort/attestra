@@ -2,7 +2,7 @@
 import * as RTabs from "@radix-ui/react-tabs";
 import type { ReactNode } from "react";
 
-export interface TabDef { value: string; label: ReactNode; count?: number }
+export interface TabDef { value: string; label: ReactNode; count?: number; more?: boolean }
 
 /** Underlined tabs. Controlled by the caller so the active tab can live in the URL. */
 export function Tabs({
@@ -29,7 +29,7 @@ export function Tabs({
           >
             {t.label}
             {t.count !== undefined && (
-              <span className="rounded-full bg-surface-3 px-1.5 text-[11px] font-semibold text-ink-2">{t.count}</span>
+              <span className="rounded-full bg-surface-3 px-1.5 text-[11px] font-semibold text-ink-2">{t.count}{t.more ? "+" : ""}</span>
             )}
           </RTabs.Trigger>
         ))}
