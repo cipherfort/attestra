@@ -1,7 +1,7 @@
 # Install on Kubernetes (Helm)
 
 The supported production path. The chart, its values and the full procedure (verify, credentials, install, upgrade,
-rotate, back up) are documented with the chart: [charts/attestra/README.md](../../charts/attestra/README.md).
+rotate, back up) are documented with the chart: [charts/fortproof/README.md](../../charts/fortproof/README.md).
 
 Before you start you need:
 - a Kubernetes cluster (1.27 or later) and an ingress controller;

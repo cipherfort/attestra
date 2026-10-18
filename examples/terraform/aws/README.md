@@ -13,7 +13,7 @@ terraform output -json helm_values > aap-values.json   # merge into your Helm va
 Then:
 1. Create the database logins' URLs: the migration job creates the `aap_*_login` roles; give each a random password
    in the `aap-secrets` Secret (`database-url-api`, ...) and the admin URL (`database-url`) from the RDS master
-   secret (`terraform output database`). See [the chart README](../../../charts/attestra/README.md).
+   secret (`terraform output database`). See [the chart README](../../../charts/fortproof/README.md).
 2. Install the chart with the values from `helm_values`: the service-account annotation gives the platform its
    S3 role through IRSA, so no storage keys exist anywhere.
 

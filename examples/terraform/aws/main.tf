@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: Apache-2.0
-# EXAMPLE: Attestra on AWS. EKS for the Helm chart, RDS PostgreSQL 16, an S3 evidence bucket with
+# EXAMPLE: FortProof on AWS. EKS for the Helm chart, RDS PostgreSQL 16, an S3 evidence bucket with
 # Object Lock (COMPLIANCE) and KMS, and an IRSA role so the platform reaches S3 without keys. See README.md.
 
 locals {

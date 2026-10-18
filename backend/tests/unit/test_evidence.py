@@ -43,7 +43,7 @@ def trusted(runner_caps=None):
 def manifest(**over):
     m = {
         "schema_version": "1.0",
-        "predicate_type": "https://cipherfort.github.io/attestra/attestation/evidence/v1",
+        "predicate_type": "https://fortproof.dev/attestation/evidence/v1",
         "evidence_type": "scan.sast",
         "repository": {"full_name": "org/claims-api", "id": 42},
         "commit_sha": "3" * 40,

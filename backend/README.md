@@ -1,4 +1,4 @@
-# aap: Attestra backend
+# aap: FortProof backend
 
 Python 3.12 · FastAPI · SQLAlchemy 2 · PostgreSQL 16 · one package, three processes (`api`, `hook`, `worker`). Design: [`docs/architecture/02-platform-architecture.md`](../docs/architecture/02-platform-architecture.md).
 

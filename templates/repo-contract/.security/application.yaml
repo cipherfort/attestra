@@ -1,4 +1,4 @@
-# .security/application.yaml: proposed by Attestra onboarding PR.
+# .security/application.yaml: proposed by FortProof onboarding PR.
 # Everything here is DECLARED and verified by the platform where possible (see docs/architecture/06-repository-structure.md section B.3).
 # Classification values must be labels from the active classification model (config/profiles/<profile>/classification.yaml).
 schema_version: "1"

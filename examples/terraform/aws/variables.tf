@@ -13,7 +13,7 @@ variable "availability_zones" {
 }
 variable "name" {
   type    = string
-  default = "attestra"
+  default = "fortproof"
 }
 variable "vpc_cidr" {
   type    = string
@@ -25,13 +25,13 @@ variable "kubernetes_version" {
 }
 variable "namespace" {
   type        = string
-  default     = "attestra"
+  default     = "fortproof"
   description = "Kubernetes namespace of the Helm release"
 }
 variable "release" {
   type        = string
-  default     = "attestra"
-  description = "Helm release name (the chart names its service account <release>, or <release>-attestra)"
+  default     = "fortproof"
+  description = "Helm release name (the chart names its service account <release>, or <release>-fortproof)"
 }
 variable "evidence_retention_days" {
   type        = number

@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # SPDX-License-Identifier: Apache-2.0
-"""aap-evidence: write an evidence manifest for Attestra inside a CI job.
+"""aap-evidence: write an evidence manifest for FortProof inside a CI job.
 
 Standard library only (it runs on any runner with Python 3.9+). `aap pipelines export` inlines this file into every
 shipped workflow, so approving a workflow's commit SHA (config/trusted-producers.yaml) also approves this code.
@@ -29,7 +29,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 SCHEMA_VERSION = "1.0"
-PREDICATE_TYPE = "https://cipherfort.github.io/attestra/attestation/evidence/v1"
+PREDICATE_TYPE = "https://fortproof.dev/attestation/evidence/v1"
 MANIFEST = "evidence-manifest.json"
 MAX_FILES = 50
 MAX_FILE_BYTES = 200 * 1024 * 1024

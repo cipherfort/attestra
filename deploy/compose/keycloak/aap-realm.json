@@ -1,13 +1,13 @@
 {
   "realm": "aap",
   "enabled": true,
-  "displayName": "Attestra (evaluation)",
+  "displayName": "FortProof (evaluation)",
   "sslRequired": "none",
   "registrationAllowed": false,
   "clients": [
     {
       "clientId": "aap-web",
-      "name": "Attestra",
+      "name": "FortProof",
       "protocol": "openid-connect",
       "publicClient": false,
       "secret": "${AAP_OIDC_CLIENT_SECRET}",

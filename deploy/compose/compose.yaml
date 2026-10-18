@@ -2,11 +2,11 @@
 # Evaluate the platform in ~15 minutes: the platform (api, worker, hook) + PostgreSQL + RustFS (S3 with Object Lock,
 # Apache-2.0) + Keycloak (OIDC sign-in with demo users). `--profile full` adds Dependency-Track.
 #   deploy/compose/setup.sh                      # secrets, then `docker compose up`, then the demo world
-# Not for production: use the Helm chart (charts/attestra) or your own platform with managed PostgreSQL and S3.
+# Not for production: use the Helm chart (charts/fortproof) or your own platform with managed PostgreSQL and S3.
 name: aap
 
 x-aap: &aap
-  image: ${AAP_IMAGE:-ghcr.io/cipherfort/attestra:latest}
+  image: ${AAP_IMAGE:-ghcr.io/cipherfort/fortproof:latest}
   user: "10001:10001"
   read_only: true
   security_opt: ["no-new-privileges:true"]

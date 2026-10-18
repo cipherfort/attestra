@@ -1,8 +1,8 @@
 # SPDX-License-Identifier: Apache-2.0
-# Attestra Helm values. Schema: values.schema.json. Guide: docs/install/helm.md.
+# FortProof Helm values. Schema: values.schema.json. Guide: docs/install/helm.md.
 
 image:
-  repository: ghcr.io/cipherfort/attestra
+  repository: ghcr.io/cipherfort/fortproof
   # Pin by digest in production (the release workflow fills it for published charts); tag is used when empty.
   digest: ""
   tag: ""

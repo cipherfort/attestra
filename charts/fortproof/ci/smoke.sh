@@ -2,11 +2,11 @@
 # SPDX-License-Identifier: Apache-2.0
 # Helm smoke test on kind: build the image, PostgreSQL in the cluster, the Secret, `helm install`, then check the
 # migration hook, the per-process logins, rollout, health, a demo world and a scoped API call. CI: .github/workflows/ci.yml.
-#   charts/attestra/ci/smoke.sh            (needs docker, kind, kubectl, helm; ~2 GB RAM)
+#   charts/fortproof/ci/smoke.sh            (needs docker, kind, kubectl, helm; ~2 GB RAM)
 set -euo pipefail
 root="$(cd "$(dirname "$0")/../../.." && pwd)"
 cluster="${AAP_SMOKE_CLUSTER:-aap-smoke}"
-ns=attestra
+ns=fortproof
 rand() { python3 -c "import secrets; print(secrets.token_hex(16))"; }
 
 kind get clusters | grep -qx "$cluster" || kind create cluster --name "$cluster" --wait 120s
@@ -47,8 +47,8 @@ for p in api worker hook reporting; do
 done
 kubectl -n "$ns" create secret generic aap-secrets "${args[@]}" --dry-run=client -o yaml | kubectl apply -f - >/dev/null
 
-helm upgrade --install attestra "$root/charts/attestra" -n "$ns" -f "$root/charts/attestra/ci/smoke-values.yaml" --wait --timeout 10m
-for c in api worker hook; do kubectl -n "$ns" rollout status "deploy/attestra-$c" --timeout=180s; done
+helm upgrade --install fortproof "$root/charts/fortproof" -n "$ns" -f "$root/charts/fortproof/ci/smoke-values.yaml" --wait --timeout 10m
+for c in api worker hook; do kubectl -n "$ns" rollout status "deploy/fortproof-$c" --timeout=180s; done
 
 # each process connects as its own least-privilege login
 logins=$(kubectl -n "$ns" exec deploy/postgres -- psql -U postgres -d aap -Atc \
@@ -56,8 +56,8 @@ logins=$(kubectl -n "$ns" exec deploy/postgres -- psql -U postgres -d aap -Atc \
 echo "connected logins: $logins"
 [[ "$logins" == *aap_api_login* && "$logins" == *aap_worker_login* ]] || { echo "process logins not in use" >&2; exit 1; }
 
-kubectl -n "$ns" exec deploy/attestra-worker -- aap demo seed >/dev/null
-kubectl -n "$ns" port-forward svc/attestra-api 18000:80 >/dev/null 2>&1 &
+kubectl -n "$ns" exec deploy/fortproof-worker -- aap demo seed >/dev/null
+kubectl -n "$ns" port-forward svc/fortproof-api 18000:80 >/dev/null 2>&1 &
 pf=$!; trap 'kill $pf 2>/dev/null || true' EXIT
 for _ in $(seq 30); do curl -sf http://127.0.0.1:18000/api/v1/health/ready >/dev/null && break; sleep 1; done
 curl -sf http://127.0.0.1:18000/api/v1/health/ready
@@ -69,10 +69,10 @@ team=$(python3 -c "$count" <<<"$team_json")
 echo; echo "applications: AppSec sees $apps, a Claims champion sees $team"
 if ! { [ "$apps" -ge 4 ] && [ "$team" -lt "$apps" ]; }; then echo "scoping check failed" >&2; exit 1; fi
 # the security context really applies: no root, read-only root filesystem
-kubectl -n "$ns" exec deploy/attestra-api -- sh -c 'id -u; touch /app/x 2>/dev/null && echo WRITABLE || echo read-only' | tr '\n' ' '
+kubectl -n "$ns" exec deploy/fortproof-api -- sh -c 'id -u; touch /app/x 2>/dev/null && echo WRITABLE || echo read-only' | tr '\n' ' '
 echo
 # an upgrade runs the migration hook again (forward-only, idempotent) and rolls the processes
-helm upgrade attestra "$root/charts/attestra" -n "$ns" -f "$root/charts/attestra/ci/smoke-values.yaml" --set api.replicas=2 --wait --timeout 10m
-[ "$(kubectl -n "$ns" get deploy attestra-api -o jsonpath='{.status.readyReplicas}')" = "2" ] || { echo "upgrade did not roll out" >&2; exit 1; }
+helm upgrade fortproof "$root/charts/fortproof" -n "$ns" -f "$root/charts/fortproof/ci/smoke-values.yaml" --set api.replicas=2 --wait --timeout 10m
+[ "$(kubectl -n "$ns" get deploy fortproof-api -o jsonpath='{.status.readyReplicas}')" = "2" ] || { echo "upgrade did not roll out" >&2; exit 1; }
 curl -sf http://127.0.0.1:18000/api/v1/health/live >/dev/null || true
 echo "helm smoke test passed (install and upgrade)"

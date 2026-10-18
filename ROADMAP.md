@@ -26,7 +26,7 @@ Estimates assume one full-time maintainer; contributors shorten them. 0.x previe
 
 ## Next: the first release
 
-Before 0.1.0: a richer web UI (overview dashboard, evidence explorer, maturity trends), maturity snapshots over time, a recorded GitHub end-to-end run, and the documentation sweep. Progress is tracked in [Discussions](https://github.com/cipherfort/attestra/discussions) and the issue tracker.
+Before 0.1.0: a richer web UI (overview dashboard, evidence explorer, maturity trends), maturity snapshots over time, a recorded GitHub end-to-end run, and the documentation sweep. Progress is tracked in [Discussions](https://github.com/cipherfort/fortproof/discussions) and the issue tracker.
 
 ## After 1.0 (not committed)
 

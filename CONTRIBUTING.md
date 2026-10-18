@@ -10,11 +10,11 @@ Contributions are welcome: bug reports, plugins for systems we don't support yet
 
 ## Reporting a bug
 
-1. Check [open issues](https://github.com/cipherfort/attestra/issues) first; add to an existing report rather than opening a duplicate.
-2. Open a [bug report](https://github.com/cipherfort/attestra/issues/new?template=bug.yml). Include the version (image tag or commit), how you deployed it (Compose, Helm, local), what you did, what you expected, and what happened, with logs if you have them.
+1. Check [open issues](https://github.com/cipherfort/fortproof/issues) first; add to an existing report rather than opening a duplicate.
+2. Open a [bug report](https://github.com/cipherfort/fortproof/issues/new?template=bug.yml). Include the version (image tag or commit), how you deployed it (Compose, Helm, local), what you did, what you expected, and what happened, with logs if you have them.
 3. Leave out secrets, tokens and personal data. For anything that could be a vulnerability, use [SECURITY.md](SECURITY.md) instead.
 
-Questions that aren't bugs go to [Discussions](https://github.com/cipherfort/attestra/discussions).
+Questions that aren't bugs go to [Discussions](https://github.com/cipherfort/fortproof/discussions).
 
 ## Developer Certificate of Origin (DCO)
 

@@ -120,7 +120,7 @@ def sync(conn: Connection, jira: TicketSystem, policy: dict[str, Any], platform_
                             else f"Application: {head.app_name} ({head.app_key}). Priority {head.priority}.",
                             f"{n} finding(s) in {head.scope_ref}. Closing this ticket does not close the findings: "
                             "the next scan verifies the fix.",
-                            link=("Open in Attestra", f"{platform_url}/#/findings/{head.id}"),
+                            link=("Open in FortProof", f"{platform_url}/#/findings/{head.id}"),
                         ),
                         dedup_key=key,
                         labels=[
@@ -230,6 +230,6 @@ def _reconcile_one(
         if jira.transition_to(key, "done", prefer=("Done", "Closed")):
             jira.comment(
                 key,
-                adf("Verified fixed: the latest scan no longer reports this issue. Closed automatically by Attestra."),
+                adf("Verified fixed: the latest scan no longer reports this issue. Closed automatically by FortProof."),
             )
             rep.closed_tickets.append(key)

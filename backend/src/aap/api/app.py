@@ -1631,7 +1631,7 @@ def catalogue(request: Request) -> dict[str, Any]:
 def create_app(engine: Engine | None = None, config: ConfigBundle | None = None) -> FastAPI:
     auth_mode()  # fail fast on a forbidden auth configuration
     app = FastAPI(
-        title="Attestra API",
+        title="FortProof API",
         version="1.0.0-draft",
         root_path="",
         openapi_url="/api/v1/openapi.json",

@@ -1,6 +1,6 @@
 -- SPDX-License-Identifier: Apache-2.0
 -- =============================================================================
--- Attestra: core schema (PostgreSQL 16)
+-- FortProof: core schema (PostgreSQL 16)
 -- Status: DESIGNED. Applied cleanly to postgres:16 in a scratch container (see
 -- docs/architecture/03-data-model.md section 7). Becomes the first Alembic migration in Phase 1.
 --

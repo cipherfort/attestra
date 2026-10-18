@@ -57,7 +57,8 @@ def oidc_settings() -> OidcSettings:
     missing = [v for v in ("AAP_OIDC_ISSUER", "AAP_OIDC_CLIENT_ID", "AAP_PUBLIC_URL") if not os.environ.get(v)]
     if missing:
         raise AuthConfigurationError(
-            f"OIDC is not configured: set {', '.join(missing)} (see docs/install/helm.md and charts/attestra/README.md)"
+            f"OIDC is not configured: set {', '.join(missing)} "
+            "(see docs/install/helm.md and charts/fortproof/README.md)"
         )
     public = os.environ["AAP_PUBLIC_URL"].rstrip("/")
     if os.environ.get("AAP_ENV") == "production" and not public.startswith("https://"):

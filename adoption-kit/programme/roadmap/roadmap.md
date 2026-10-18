@@ -11,7 +11,7 @@
 gantt
   dateFormat  YYYY-MM-DD
   axisFormat  M%m
-  title Attestra Programme (T0 = 2026-11-02, illustrative)
+  title FortProof Programme (T0 = 2026-11-02, illustrative)
   section Foundation
   P0 Discovery & governance        :p0, 2026-11-02, 6w
   P1 Architecture & foundation     :p1, after p0, 9w

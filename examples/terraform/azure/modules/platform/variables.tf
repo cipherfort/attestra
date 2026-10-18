@@ -82,7 +82,7 @@ variable "app_settings" {
 }
 
 variable "github_deploy_subjects" {
-  description = "GitHub OIDC subjects allowed to deploy, e.g. [\"repo:acme/attestra:environment:production\"]. Empty = no CI deploy identity."
+  description = "GitHub OIDC subjects allowed to deploy, e.g. [\"repo:acme/fortproof:environment:production\"]. Empty = no CI deploy identity."
   type        = list(string)
   default     = []
 }

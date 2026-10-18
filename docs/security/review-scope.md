@@ -21,7 +21,7 @@ that matter most:
 | Webhook receiver | `/github/webhook`, `/gitlab/webhook` (the only internet-facing process) | `hook/app.py` |
 | Database | Row-level security, role separation, ledgers and hash chains | `schemas/database/0001_core.sql`, `migrations/`, `tests/database/` |
 | Write-capable integrations | Jira, GitHub/GitLab Issues, chat webhooks, SIEM sinks | `connectors/`, `services/ticketing.py` |
-| Deployment | Helm chart, container image, Compose stack | `charts/attestra/`, `Dockerfile`, `deploy/compose/` |
+| Deployment | Helm chart, container image, Compose stack | `charts/fortproof/`, `Dockerfile`, `deploy/compose/` |
 
 Out of scope: the adopter's own identity provider, cloud accounts and scanners; findings in demo data.
 

@@ -403,7 +403,7 @@ def main(argv: list[str] | None = None) -> None:
     from aap.settings import apply
 
     apply()  # AAP_CONFIG_FILE → environment (environment variables win)
-    p = argparse.ArgumentParser(prog="aap", description="Attestra")
+    p = argparse.ArgumentParser(prog="aap", description="FortProof")
     sub = p.add_subparsers(dest="cmd", required=True)
     sub.add_parser("migrate", help="apply database migrations and create partitions").set_defaults(fn=cmd_migrate)
     c = sub.add_parser("config", help="configuration").add_subparsers(dest="sub", required=True)
@@ -450,7 +450,7 @@ def main(argv: list[str] | None = None) -> None:
     )
     gh = bs.add_parser("github-app", help="create the read-only GitHub App (manifest flow; one click by an org owner)")
     gh.add_argument("--org", required=True)
-    gh.add_argument("--name", default="Attestra")
+    gh.add_argument("--name", default="FortProof")
     gh.add_argument("--public-url", help="public https URL of the webhook receiver (omit locally: polling only)")
     gh.add_argument("--host", default="github.com")
     gh.add_argument("--port", type=int, default=8765)

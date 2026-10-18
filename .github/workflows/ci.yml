@@ -40,7 +40,7 @@ jobs:
       - name: Markdown links and anchors
         run: python tools/docs/check_links.py
       - name: Shell scripts (shellcheck)
-        run: shellcheck deploy/local/*.sh deploy/compose/setup.sh charts/attestra/ci/smoke.sh tools/api/contract_test.sh tests/database/run.sh
+        run: shellcheck deploy/local/*.sh deploy/compose/setup.sh charts/fortproof/ci/smoke.sh tools/api/contract_test.sh tests/database/run.sh
 
   database:
     name: Schema security-property tests (PostgreSQL 16)
@@ -294,20 +294,20 @@ jobs:
       - uses: azure/setup-helm@9bc31f4ebc9c6b171d7bfbaa5d006ae7abdb4310 # v5.0.1
       - name: Lint and validate the rendered manifests (Kubernetes 1.27 and 1.31)
         run: |
-          helm lint charts/attestra
+          helm lint charts/fortproof
           curl -sSLo /tmp/kc.tgz https://github.com/yannh/kubeconform/releases/download/v0.8.0/kubeconform-linux-amd64.tar.gz
           echo "$(curl -sSL https://github.com/yannh/kubeconform/releases/download/v0.8.0/CHECKSUMS | grep 'kubeconform-linux-amd64.tar.gz' | cut -d' ' -f1)  /tmp/kc.tgz" | sha256sum -c -
           tar -xzf /tmp/kc.tgz -C /tmp kubeconform
           for v in 1.27.0 1.31.0; do
-            helm template t charts/attestra | /tmp/kubeconform -strict -summary -kubernetes-version "$v"
-            helm template t charts/attestra --set api.autoscaling.enabled=true --set ingress.enabled=true \
+            helm template t charts/fortproof | /tmp/kubeconform -strict -summary -kubernetes-version "$v"
+            helm template t charts/fortproof --set api.autoscaling.enabled=true --set ingress.enabled=true \
               --set ingress.hookHost=hooks.example.org | /tmp/kubeconform -strict -summary -kubernetes-version "$v"
           done
       - uses: helm/kind-action@1544676c07bb3570fcb70166beaa07c4528fd4aa # v1.15.1
         with:
           cluster_name: aap-smoke
-      - name: Install, check, upgrade (charts/attestra/ci/smoke.sh)
-        run: charts/attestra/ci/smoke.sh
+      - name: Install, check, upgrade (charts/fortproof/ci/smoke.sh)
+        run: charts/fortproof/ci/smoke.sh
 
   docs-site:
     name: Documentation site builds

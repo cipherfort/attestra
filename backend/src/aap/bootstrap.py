@@ -60,7 +60,7 @@ def github_manifest(
     return {
         "name": name,
         "url": public_url or "https://github.com",
-        "description": "Attestra (read-only): collects verified security evidence.",
+        "description": "FortProof (read-only): collects verified security evidence.",
         "hook_attributes": hook,
         "redirect_url": redirect,
         "public": False,
@@ -101,7 +101,7 @@ def github_app(
                 page = (
                     f'<form id="f" method="post" action="{html.escape(action)}">'
                     f'<input type="hidden" name="manifest" value="{html.escape(json.dumps(manifest))}">'
-                    "<p>Creating Attestra GitHub App…</p><button>Continue</button></form>"
+                    "<p>Creating FortProof GitHub App…</p><button>Continue</button></form>"
                     "<script>document.getElementById('f').submit()</script>"
                 )
                 self._send(200, page)
@@ -232,7 +232,7 @@ def gitlab(
     r = gl.post(
         f"/groups/{gid}/access_tokens",
         json={
-            "name": "attestra",
+            "name": "fortproof",
             "scopes": ["read_api", "read_repository"],
             "access_level": 20,
             "expires_at": (date.today() + timedelta(days=364)).isoformat(),
@@ -247,7 +247,7 @@ def gitlab(
         r = gl.post(
             f"/groups/{gid}/access_tokens",
             json={
-                "name": "attestra-issues",
+                "name": "fortproof-issues",
                 "scopes": ["api"],
                 "access_level": 20,
                 "expires_at": (date.today() + timedelta(days=364)).isoformat(),

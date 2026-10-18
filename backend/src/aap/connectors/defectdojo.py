@@ -6,7 +6,7 @@ UI. DefectDojo is never a ticket writer (Jira push disabled) and never the sourc
 closure stays evidence-based in the platform.
 
 Access model (DefectDojo 3.x OSS has no role/membership API; it uses `authorized_users` on organizations):
-bootstrap creates ONE organization, "Attestra", authorizes only the `aap-platform` service user on
+bootstrap creates ONE organization, "FortProof", authorizes only the `aap-platform` service user on
 it, and every application becomes an asset (product) inside it. The service user is not staff, not superuser, and
 has no configuration permissions, so it cannot reach anything outside that organization.
 """
@@ -18,7 +18,7 @@ from typing import Any
 
 import httpx
 
-ORGANIZATION = "Attestra"
+ORGANIZATION = "FortProof"
 SERVICE_USER = "aap-platform"
 SCAN_TYPES = {"application/sarif+json": "SARIF"}
 

@@ -1,4 +1,4 @@
-# Attestra Helm chart
+# FortProof Helm chart
 
 Status: IMPLEMENTED. Linted, validated with kubeconform (Kubernetes 1.27 and 1.31), and installed and then upgraded
 on kind in CI (`ci/smoke.sh`).
@@ -21,10 +21,10 @@ platform does not expose metrics yet.
 
 ```bash
 # 1. Verify the chart and the image you are about to run (both are signed by the release workflow)
-cosign verify ghcr.io/cipherfort/charts/attestra:<version> \
-  --certificate-identity-regexp '^https://github.com/cipherfort/attestra/.github/workflows/release.yml@' \
+cosign verify ghcr.io/cipherfort/charts/fortproof:<version> \
+  --certificate-identity-regexp '^https://github.com/cipherfort/fortproof/.github/workflows/release.yml@' \
   --certificate-oidc-issuer https://token.actions.githubusercontent.com
-gh attestation verify oci://ghcr.io/cipherfort/attestra@<digest> --repo cipherfort/attestra
+gh attestation verify oci://ghcr.io/cipherfort/fortproof@<digest> --repo cipherfort/fortproof
 
 # 2. Credentials: one Secret (or an ExternalSecret) with these keys; each process mounts only its own
 kubectl -n aap create secret generic aap-secrets \
@@ -36,7 +36,7 @@ kubectl -n aap create secret generic aap-secrets \
   --from-literal=oidc-client-secret='...'          # plus the keys your plugins need (values.yaml: secrets.keys)
 
 # 3. Install with your settings (values.yaml → settings is your aap.yaml)
-helm install attestra oci://ghcr.io/cipherfort/charts/attestra --version <version> -n attestra -f my-values.yaml
+helm install fortproof oci://ghcr.io/cipherfort/charts/fortproof --version <version> -n fortproof -f my-values.yaml
 ```
 
 `settings` is the platform's `aap.yaml` (`schemas/settings/aap.schema.json`): public URL, OIDC issuer and client, the
@@ -49,7 +49,7 @@ No storage keys in the Secret.
 ## Upgrade, rotate, back up
 
 - **Upgrade:** `helm upgrade` runs the migration job first (forward-only; each release upgrades from the previous
-  minor). If the job fails, the upgrade stops before any pod changes; read `kubectl logs job/attestra-migrate` (release `attestra`).
+  minor). If the job fails, the upgrade stops before any pod changes; read `kubectl logs job/fortproof-migrate` (release `fortproof`).
 - **Rotate database passwords:** change the `database-url-*` values in the Secret, `helm upgrade` (the job sets the new
   passwords), then `kubectl rollout restart deploy` (processes read the URL at start-up).
 - **Back up:** PostgreSQL with your provider's point-in-time recovery; the evidence bucket is write-once and keeps

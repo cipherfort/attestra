@@ -195,7 +195,7 @@ def gitlab_include(host: str, project: str, sha: str) -> str:
     if not SHA.match(sha):
         raise PipelineError("sha must be a full commit SHA")
     lines = [
-        "# Attestra security components (approved commit; do not override their jobs)",
+        "# FortProof security components (approved commit; do not override their jobs)",
         "include:",
     ]
     lines += [f"  - component: {host}/{project}/{name}@{sha}" for name in sorted(GITLAB_SHIPPED)]
@@ -295,7 +295,7 @@ def caller(repository: str, sha: str, release: str) -> str:
 
 README = """# security-workflows
 
-The approved security pipelines for Attestra, rendered by `aap pipelines export`.
+The approved security pipelines for FortProof, rendered by `aap pipelines export`.
 Application repositories call these workflows with one small file (`aap pipelines caller`); each workflow scans,
 writes an evidence manifest, signs it, and uploads it as an `aap-evidence-*` artifact the platform pulls and verifies.
 
@@ -321,7 +321,7 @@ outside these workflows is rejected (`UNTRUSTED_PRODUCER`).
 
 GITLAB_README = """# security-components
 
-The approved GitLab CI/CD components of Attestra, rendered by
+The approved GitLab CI/CD components of FortProof, rendered by
 `aap pipelines export --provider gitlab`. Application projects include them pinned to an approved commit SHA
 (`aap pipelines caller --provider gitlab ...`). Do not override the included jobs in a project's .gitlab-ci.yml: the
 platform compares the merged job with this repository at the approved commit and rejects evidence from a job that

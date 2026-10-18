@@ -63,7 +63,7 @@ resource "aws_iam_role" "reader" {
   name                 = var.role_name
   assume_role_policy   = data.aws_iam_policy_document.trust.json
   max_session_duration = 3600
-  description          = "Attestra: read Security Hub findings (Entra workload identity, no keys)"
+  description          = "FortProof: read Security Hub findings (Entra workload identity, no keys)"
 }
 
 resource "aws_iam_role_policy_attachment" "securityhub_read" {

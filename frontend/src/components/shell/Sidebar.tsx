@@ -8,7 +8,7 @@ import { BRAND } from "../../brand";
 import { Logo, LogoMark } from "./Logo";
 import { isActive, NAV, visible } from "./nav";
 
-const DOCS_URL = "https://cipherfort.github.io/attestra/";
+const DOCS_URL = "https://fortproof.dev/";
 
 function readCollapsed(): boolean {
   try {

@@ -1,6 +1,6 @@
 # SPDX-License-Identifier: Apache-2.0
 output "helm_values" {
-  description = "Values for charts/attestra (merge with your settings)"
+  description = "Values for charts/fortproof (merge with your settings)"
   value = {
     serviceAccount = { annotations = { "eks.amazonaws.com/role-arn" = aws_iam_role.platform.arn } }
     settings = {

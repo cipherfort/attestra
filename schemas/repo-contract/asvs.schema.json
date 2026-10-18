@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://cipherfort.github.io/attestra/schemas/repo-contract/asvs.schema.json",
+  "$id": "https://fortproof.dev/schemas/repo-contract/asvs.schema.json",
   "title": ".security/asvs.yaml",
   "description": "Status: DESIGNED. Declares the ASVS version, target level and capability profile that scopes applicable requirements (catalogue/frameworks/asvs-applicability.yaml). N/A requests take effect only when approved in the platform.",
   "type": "object",

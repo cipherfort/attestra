@@ -1,6 +1,6 @@
 openapi: 3.1.0
 info:
-  title: Attestra API
+  title: FortProof API
   version: 1.0.0-draft
   summary: Application registry, controls, evidence, findings, risk, exceptions, SBOM and maturity.
   description: |
