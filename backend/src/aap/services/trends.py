@@ -205,23 +205,23 @@ def activity(conn: Connection, app_id: str | None, limit: int) -> list[dict[str,
     """Recent events across evidence, rejections, findings and exceptions, newest first. Never the audit log."""
     rows = conn.execute(
         text("""SELECT * FROM (
-                  SELECT e.observed_at AS at, 'evidence_accepted' AS kind,
-                         e.evidence_type || ' evidence (' || e.confidence || ')' AS title,
-                         a.app_key, a.name AS application_name, e.evidence_id::text AS ref, a.id AS app_id
+                  SELECT e.observed_at AS at, 'evidence_accepted' AS kind, e.evidence_type AS title,
+                         a.app_key, a.name AS application_name, e.evidence_id::text AS ref, a.id AS app_id,
+                         e.evidence_type, e.confidence::text AS confidence
                   FROM evidence e JOIN applications a ON a.id = e.application_id
                   UNION ALL
                   SELECT fe.at, CASE WHEN fe.event_type = 'detected' THEN 'finding_opened' ELSE 'finding_closed' END,
-                         f.title, a.app_key, a.name, f.id::text, a.id
+                         f.title, a.app_key, a.name, f.id::text, a.id, NULL, NULL
                   FROM finding_events fe JOIN findings f ON f.id = fe.finding_id JOIN applications a ON a.id = f.application_id
                   WHERE fe.event_type = 'detected' OR fe.to_status = 'closed'
                   UNION ALL
                   SELECT xe.at, 'exception_' || xe.event_type, x.exception_key || ': ' || x.target_ref,
-                         a.app_key, a.name, x.exception_key, a.id
+                         a.app_key, a.name, x.exception_key, a.id, NULL, NULL
                   FROM exception_events xe JOIN exceptions x ON x.id = xe.exception_id JOIN applications a ON a.id = x.application_id
                   WHERE xe.event_type IN ('approved', 'rejected', 'expired')
                   UNION ALL
                   SELECT er.received_at, 'evidence_rejected', 'Evidence rejected: ' || er.reason_code,
-                         a.app_key, a.name, er.id::text, a.id
+                         a.app_key, a.name, er.id::text, a.id, NULL, NULL
                   FROM evidence_rejections er
                   JOIN repositories r ON r.provider = er.repository_provider AND r.external_id = er.repository_external_id
                   JOIN application_repositories ar ON ar.repository_id = r.id

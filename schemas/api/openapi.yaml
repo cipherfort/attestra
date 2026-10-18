@@ -2422,6 +2422,8 @@ components:
         app_key: { type: [string, "null"] }
         application_name: { type: [string, "null"] }
         ref: { type: [string, "null"], description: "Id of the evidence, finding or exception" }
+        evidence_type: { type: [string, "null"], description: "For evidence events" }
+        confidence: { type: [string, "null"], description: "For accepted evidence: C0–C3, M1, M2" }
     Job:
       type: object
       required: [id, status]

@@ -36,7 +36,7 @@ export function StateBadge({ state }: { state: ControlStateValue }) {
   );
 }
 
-const PRIORITY: Record<Priority, { color: string; days: number }> = {
+export const PRIORITY: Record<Priority, { color: string; days: number }> = {
   P1: { color: "var(--critical)", days: 7 },
   P2: { color: "var(--serious)", days: 30 },
   P3: { color: "var(--warning)", days: 90 },

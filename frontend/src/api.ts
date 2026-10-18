@@ -95,6 +95,12 @@ export type ExceptionEvent = SecurityException["events"][number];
 export type Assessment = Schemas["Assessment"];
 export type Registered = Schemas["Registered"];
 export type RegisterRequest = Schemas["RegisterApplication"];
+export type PostureTrend = Schemas["PostureTrend"];
+export type EvidenceListItem = Schemas["EvidenceListItem"];
+export type EvidenceRejection = Schemas["EvidenceRejection"];
+export type ActivityItem = Schemas["ActivityItem"];
+export type MaturityRollup = Schemas["MaturityRollup"];
+export type OrgUnitRow = Schemas["OrgUnit"];
 export interface ExceptionRow {
   id: string; exception_key: string; target_type: string; target_ref: string; residual_priority: Priority; status: string;
   expires_at: string | null; created_at: string; app_key: string; application_name: string; requested_by: string;
@@ -196,6 +202,8 @@ export const api = {
   maturity: (id: string) => request<Maturity>(`/applications/${id}/maturity`).then((r) => r.data),
   findings: (appId: string) =>
     request<{ items: Finding[] }>(`/findings?application=${encodeURIComponent(appId)}&status=open`).then((r) => r.data.items),
+  openFindings: (priority = "P1,P2") =>
+    request<{ items: Finding[] }>(`/findings?status=open&priority=${priority}`).then((r) => r.data.items),
   finding: (id: string) => request<FindingDetail>(`/findings/${id}`),
   findingEvents: (id: string) => request<{ items: FindingEvent[] }>(`/findings/${id}/events`).then((r) => r.data.items),
   transition: (id: string, etag: string, action: string, comment?: string) =>
@@ -240,6 +248,21 @@ export const api = {
     post<{ id: string }>("/admin/role-assignments", body),
   revokeGrant: (id: string) => request(`/admin/role-assignments/${id}`, { method: "DELETE" }).then((r) => r.data),
   download: (report: "findings" | "controls") => download(`/reports/${report}.csv`, `aap-${report}.csv`),
+  visibleUnits: () => request<{ items: OrgUnitRow[] }>("/org-units").then((r) => r.data.items),
+  appTrend: (id: string, months = 12) => request<PostureTrend>(`/applications/${id}/trend?months=${months}`).then((r) => r.data),
+  unitTrend: (id: string, months = 12) => request<PostureTrend>(`/org-units/${id}/trend?months=${months}`).then((r) => r.data),
+  unitMaturity: (id: string) => request<MaturityRollup>(`/org-units/${id}/maturity`).then((r) => r.data),
+  activity: (application?: string, limit = 30) =>
+    request<{ items: ActivityItem[] }>(`/activity?limit=${limit}${application ? `&application=${encodeURIComponent(application)}` : ""}`).then((r) => r.data.items),
+  allEvidence: (q: { application?: string; type?: string; confidence?: string; limit?: number } = {}) => {
+    const p = new URLSearchParams({ limit: String(q.limit ?? 100) });
+    if (q.application) p.set("application", q.application);
+    if (q.type) p.set("filter[type]", q.type);
+    if (q.confidence) p.set("filter[confidence]", q.confidence);
+    return request<{ items: EvidenceListItem[] }>(`/evidence?${p}`).then((r) => r.data.items);
+  },
+  rejections: (application?: string, limit = 100) =>
+    request<{ items: EvidenceRejection[] }>(`/evidence-rejections?limit=${limit}${application ? `&application=${encodeURIComponent(application)}` : ""}`).then((r) => r.data.items),
 };
 
 function post<T = unknown>(path: string, body?: unknown): Promise<T> {

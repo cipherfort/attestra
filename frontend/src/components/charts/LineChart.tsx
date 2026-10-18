@@ -17,6 +17,7 @@ export function LineChart({
   yMax,
   format = (v) => String(v),
   height = 220,
+  integer = false,
 }: {
   label: string;
   dates: string[];
@@ -24,13 +25,16 @@ export function LineChart({
   yMax?: number;
   format?: (v: number) => string;
   height?: number;
+  /** counts: only whole-number ticks */
+  integer?: boolean;
 }) {
   const ref = useRef<SVGSVGElement>(null);
   const [hover, setHover] = useState<number | null>(null);
   const [tip, setTip] = useState<Tip | null>(null);
   const W = 720, H = height, m = { top: 12, right: 16, bottom: 26, left: 44 };
   const xs = useMemo(() => dates.map((d) => new Date(d)), [dates]);
-  const max = yMax ?? Math.max(1, ...series.flatMap((s) => s.values.filter((v): v is number => v !== null))) * 1.1;
+  const peak = Math.max(1, ...series.flatMap((s) => s.values.filter((v): v is number => v !== null)));
+  const max = yMax ?? (integer ? Math.max(4, Math.ceil(peak * 1.1)) : peak * 1.1);
   const x = scaleTime().domain([xs[0] ?? new Date(), xs[xs.length - 1] ?? new Date()]).range([m.left, W - m.right]);
   const y = scaleLinear().domain([0, max]).nice(4).range([H - m.bottom, m.top]);
   const path = (vals: (number | null)[]) =>
@@ -52,7 +56,7 @@ export function LineChart({
       rows: series.map((s) => ({ key: s.label, color: s.color, value: s.values[i] === null ? "–" : format(s.values[i]!) })),
     });
   };
-  const ticks = y.ticks(4);
+  const ticks = integer ? y.ticks(4).filter((v) => Number.isInteger(v)) : y.ticks(4);
   const xTicks = xs.filter((_, i) => i % Math.max(1, Math.ceil(xs.length / 6)) === 0 || i === xs.length - 1);
   const table = { columns: ["Month", ...series.map((s) => s.label)], rows: xs.map((d, i) => [fmtMonth(d), ...series.map((s) => (s.values[i] === null ? "–" : format(s.values[i]!)))]) };
   return (
