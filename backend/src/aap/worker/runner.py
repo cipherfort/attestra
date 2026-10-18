@@ -55,6 +55,7 @@ class Worker:
             "ingest": self.ingest,
             "evaluate": self.evaluate,
             "scheduler": self.scheduler,
+            "snapshot": self.snapshot,
             "connector": self.connector,
             "onboarding": self.onboarding,
             "assessment": self.assessment,
@@ -184,11 +185,20 @@ class Worker:
                 text("SELECT id FROM applications WHERE tier_rank IS NOT NULL AND lifecycle <> 'retired'")
             ):
                 jobs.enqueue(conn, "evaluate", {"application_id": str(row.id)}, dedup_key=f"evaluate:{row.id}")
+            jobs.enqueue(conn, "snapshot", {}, dedup_key="snapshot")  # refreshes at most every few hours
             checked, broken = evidence_store.verify_month(conn, datetime.now(UTC))
             if broken is not None:
                 # P1 platform incident + SIEM event `evidence.integrity_failure` (runbook: evidence-integrity-mismatch)
                 siem_export.integrity_failure(conn, self.bundle.doc("siem_events"), datetime.now(UTC), broken, checked)
                 log.critical("evidence hash chain broken at index %d of %d", broken, checked)
+
+    def snapshot(self, _: Mapping[str, Any]) -> None:
+        from aap.services import snapshots
+
+        with transaction(self.engine, "aap_worker") as conn:
+            result = snapshots.tick(conn, self.bundle, datetime.now(UTC))
+        if result is not None:
+            log.info("snapshot %s: %d applications, %d org units", result.period, result.applications, result.org_units)
 
     # ---------------------------------------------------------------------------------------- loop
 
@@ -200,6 +210,7 @@ class Worker:
             "assessment",
             "evaluate",
             "scheduler",
+            "snapshot",
             "connector",
             "github-sync",
         ),

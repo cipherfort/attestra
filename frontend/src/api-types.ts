@@ -292,6 +292,91 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/applications/{appId}/trend": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Monthly posture and SAMM maturity for one application (from the monthly snapshots) */
+        get: operations["getApplicationTrend"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/org-units/{orgUnitId}/trend": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Monthly posture and SAMM maturity for an org unit and everything below it (aggregates only) */
+        get: operations["getOrgUnitTrend"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/evidence": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Evidence across every application in scope, newest first */
+        get: operations["listAllEvidence"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/evidence-rejections": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Evidence the platform refused (forged, unapproved or tampered), newest first */
+        get: operations["listEvidenceRejections"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/activity": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** What happened recently (evidence accepted or rejected, findings opened or closed, exceptions decided) */
+        get: operations["listActivity"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/evidence/{evidenceId}": {
         parameters: {
             query?: never;
@@ -1803,6 +1888,68 @@ export interface components {
                 value?: number;
             }[];
         };
+        PostureTrend: {
+            scope: {
+                /** @enum {string} */
+                type: "application" | "organisation";
+                /** Format: uuid */
+                id: string;
+                name: string;
+            };
+            periods: string[];
+            /** @description The current month, recomputed until it is over */
+            provisional: string | null;
+            /** @description Metric → one value per period (null where the scope had no snapshot): mandatory_total, mandatory_satisfied, findings_open_p1..p4, findings_past_sla, evidence_accepted, evidence_rejected, samm_overall, applications (org units) */
+            metrics: {
+                [key: string]: (number | null)[];
+            };
+            samm_functions: {
+                item: string;
+                name: string;
+                values: (number | null)[];
+            }[];
+        };
+        EvidenceListItem: {
+            /** Format: uuid */
+            id: string;
+            type: string;
+            confidence: components["schemas"]["Confidence"];
+            result: string;
+            /** Format: date-time */
+            observed_at: string;
+            state: string;
+            tool?: string | null;
+            app_key?: string | null;
+            application_name?: string | null;
+            repository?: string | null;
+            commit_sha?: string | null;
+        };
+        EvidenceRejection: {
+            /** Format: uuid */
+            id: string;
+            /** Format: date-time */
+            received_at: string;
+            /** @enum {string} */
+            reason_code: "UNTRUSTED_PRODUCER" | "UNAPPROVED_WORKFLOW_REF" | "ATTESTATION_INVALID" | "DIGEST_MISMATCH" | "BINDING_MISMATCH" | "REJECTED_SIZE" | "SCHEMA_INVALID" | "OTHER";
+            repository?: string | null;
+            run_id?: number | null;
+            app_key?: string | null;
+            application_name?: string | null;
+            details?: {
+                [key: string]: unknown;
+            };
+        };
+        ActivityItem: {
+            /** Format: date-time */
+            at: string;
+            /** @enum {string} */
+            kind: "evidence_accepted" | "evidence_rejected" | "finding_opened" | "finding_closed" | "exception_approved" | "exception_rejected" | "exception_expired";
+            title: string;
+            app_key?: string | null;
+            application_name?: string | null;
+            /** @description Id of the evidence, finding or exception */
+            ref?: string | null;
+        };
         Job: {
             id: string;
             /** @enum {string} */
@@ -2475,6 +2622,157 @@ export interface operations {
                     "application/json": {
                         items: components["schemas"]["Evidence"][];
                         page: components["schemas"]["Page"];
+                    };
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            404: components["responses"]["NotFound"];
+            422: components["responses"]["Unprocessable"];
+        };
+    };
+    getApplicationTrend: {
+        parameters: {
+            query?: {
+                months?: number;
+            };
+            header?: never;
+            path: {
+                /** @description UUID or app key (APP-nnnnn) */
+                appId: components["parameters"]["AppId"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description One value per month; the current month is provisional */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PostureTrend"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            404: components["responses"]["NotFound"];
+            422: components["responses"]["Unprocessable"];
+        };
+    };
+    getOrgUnitTrend: {
+        parameters: {
+            query?: {
+                months?: number;
+            };
+            header?: never;
+            path: {
+                orgUnitId: components["parameters"]["OrgUnitId"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description One value per month; the current month is provisional */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PostureTrend"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            404: components["responses"]["NotFound"];
+            422: components["responses"]["Unprocessable"];
+        };
+    };
+    listAllEvidence: {
+        parameters: {
+            query?: {
+                limit?: components["parameters"]["Limit"];
+                application?: string;
+                "filter[type]"?: string;
+                "filter[confidence]"?: components["schemas"]["Confidence"];
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Evidence records */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        items: components["schemas"]["EvidenceListItem"][];
+                    };
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            404: components["responses"]["NotFound"];
+            422: components["responses"]["Unprocessable"];
+        };
+    };
+    listEvidenceRejections: {
+        parameters: {
+            query?: {
+                limit?: components["parameters"]["Limit"];
+                application?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Rejected submissions with the reason */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        items: components["schemas"]["EvidenceRejection"][];
+                    };
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            404: components["responses"]["NotFound"];
+            422: components["responses"]["Unprocessable"];
+        };
+    };
+    listActivity: {
+        parameters: {
+            query?: {
+                limit?: components["parameters"]["Limit"];
+                application?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Newest first */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        items: components["schemas"]["ActivityItem"][];
                     };
                 };
             };

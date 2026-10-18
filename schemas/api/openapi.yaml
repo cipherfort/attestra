@@ -436,6 +436,120 @@ paths:
         "403": { $ref: "#/components/responses/Forbidden" }
         "422": { $ref: "#/components/responses/Unprocessable" }
         "400": { $ref: "#/components/responses/BadRequest" }
+  /applications/{appId}/trend:
+    get:
+      tags: [Maturity]
+      operationId: getApplicationTrend
+      summary: Monthly posture and SAMM maturity for one application (from the monthly snapshots)
+      x-permission: application.read
+      parameters:
+        - $ref: "#/components/parameters/AppId"
+        - { name: months, in: query, schema: { type: integer, minimum: 1, maximum: 36, default: 12 } }
+      responses:
+        "200":
+          description: One value per month; the current month is provisional
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/PostureTrend" }
+        "404": { $ref: "#/components/responses/NotFound" }
+        "400": { $ref: "#/components/responses/BadRequest" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+        "422": { $ref: "#/components/responses/Unprocessable" }
+  /org-units/{orgUnitId}/trend:
+    get:
+      tags: [Maturity]
+      operationId: getOrgUnitTrend
+      summary: Monthly posture and SAMM maturity for an org unit and everything below it (aggregates only)
+      x-permission: maturity.rollup.read
+      parameters:
+        - $ref: "#/components/parameters/OrgUnitId"
+        - { name: months, in: query, schema: { type: integer, minimum: 1, maximum: 36, default: 12 } }
+      responses:
+        "200":
+          description: One value per month; the current month is provisional
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/PostureTrend" }
+        "404": { $ref: "#/components/responses/NotFound" }
+        "400": { $ref: "#/components/responses/BadRequest" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+        "422": { $ref: "#/components/responses/Unprocessable" }
+  /evidence:
+    get:
+      tags: [Evidence]
+      operationId: listAllEvidence
+      summary: Evidence across every application in scope, newest first
+      x-permission: evidence.read
+      parameters:
+        - $ref: "#/components/parameters/Limit"
+        - { name: application, in: query, schema: { type: string, maxLength: 64 } }
+        - { name: "filter[type]", in: query, schema: { type: string, maxLength: 64 } }
+        - { name: "filter[confidence]", in: query, schema: { $ref: "#/components/schemas/Confidence" } }
+      responses:
+        "200":
+          description: Evidence records
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [items]
+                properties:
+                  items: { type: array, items: { $ref: "#/components/schemas/EvidenceListItem" } }
+        "404": { $ref: "#/components/responses/NotFound" }   # the application filter is unknown or out of scope
+        "400": { $ref: "#/components/responses/BadRequest" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+        "422": { $ref: "#/components/responses/Unprocessable" }
+  /evidence-rejections:
+    get:
+      tags: [Evidence]
+      operationId: listEvidenceRejections
+      summary: Evidence the platform refused (forged, unapproved or tampered), newest first
+      x-permission: evidence.read
+      parameters:
+        - $ref: "#/components/parameters/Limit"
+        - { name: application, in: query, schema: { type: string, maxLength: 64 } }
+      responses:
+        "200":
+          description: Rejected submissions with the reason
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [items]
+                properties:
+                  items: { type: array, items: { $ref: "#/components/schemas/EvidenceRejection" } }
+        "404": { $ref: "#/components/responses/NotFound" }   # the application filter is unknown or out of scope
+        "400": { $ref: "#/components/responses/BadRequest" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+        "422": { $ref: "#/components/responses/Unprocessable" }
+  /activity:
+    get:
+      tags: [Platform]
+      operationId: listActivity
+      summary: What happened recently (evidence accepted or rejected, findings opened or closed, exceptions decided)
+      x-permission: application.read
+      parameters:
+        - $ref: "#/components/parameters/Limit"
+        - { name: application, in: query, schema: { type: string, maxLength: 64 } }
+      responses:
+        "200":
+          description: Newest first
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [items]
+                properties:
+                  items: { type: array, items: { $ref: "#/components/schemas/ActivityItem" } }
+        "404": { $ref: "#/components/responses/NotFound" }   # the application filter is unknown or out of scope
+        "400": { $ref: "#/components/responses/BadRequest" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+        "422": { $ref: "#/components/responses/Unprocessable" }
   /evidence/{evidenceId}:
     get:
       tags: [Evidence]
@@ -1041,7 +1155,6 @@ paths:
     get:
       tags: [Maturity]
       operationId: getOrgUnitMaturity
-      x-status: designed   # in the contract, not implemented yet (the API returns 404)
       summary: Distribution of application maturity (not a league table) plus org-level Governance practices
       x-permission: maturity.rollup.read
       parameters:
@@ -1060,7 +1173,6 @@ paths:
     get:
       tags: [Maturity]
       operationId: listMaturitySnapshots
-      x-status: designed   # in the contract, not implemented yet (the API returns 404)
       x-permission: maturity.rollup.read
       responses:
         "200":
@@ -2247,6 +2359,69 @@ components:
         dark_apps_pct: { type: number }
         tier1_meeting_maturity_target_pct: { type: number }
         trend: { type: array, items: { type: object, properties: { period: { type: string }, metric: { type: string }, value: { type: number } } } }
+    PostureTrend:
+      type: object
+      required: [scope, periods, provisional, metrics, samm_functions]
+      properties:
+        scope:
+          type: object
+          required: [type, id, name]
+          properties:
+            type: { type: string, enum: [application, organisation] }
+            id: { type: string, format: uuid }
+            name: { type: string }
+        periods: { type: array, items: { type: string, pattern: "^[0-9]{4}-[0-9]{2}$" } }
+        provisional: { type: [string, "null"], description: "The current month, recomputed until it is over" }
+        metrics:
+          type: object
+          description: "Metric → one value per period (null where the scope had no snapshot): mandatory_total, mandatory_satisfied, findings_open_p1..p4, findings_past_sla, evidence_accepted, evidence_rejected, samm_overall, applications (org units)"
+          additionalProperties: { type: array, items: { type: [number, "null"] } }
+        samm_functions:
+          type: array
+          items:
+            type: object
+            required: [item, name, values]
+            properties:
+              item: { type: string }
+              name: { type: string }
+              values: { type: array, items: { type: [number, "null"] } }
+    EvidenceListItem:
+      type: object
+      required: [id, type, confidence, result, observed_at, state]
+      properties:
+        id: { type: string, format: uuid }
+        type: { type: string }
+        confidence: { $ref: "#/components/schemas/Confidence" }
+        result: { type: string }
+        observed_at: { type: string, format: date-time }
+        state: { type: string }
+        tool: { type: [string, "null"] }
+        app_key: { type: [string, "null"] }
+        application_name: { type: [string, "null"] }
+        repository: { type: [string, "null"] }
+        commit_sha: { type: [string, "null"] }
+    EvidenceRejection:
+      type: object
+      required: [id, received_at, reason_code]
+      properties:
+        id: { type: string, format: uuid }
+        received_at: { type: string, format: date-time }
+        reason_code: { type: string, enum: [UNTRUSTED_PRODUCER, UNAPPROVED_WORKFLOW_REF, ATTESTATION_INVALID, DIGEST_MISMATCH, BINDING_MISMATCH, REJECTED_SIZE, SCHEMA_INVALID, OTHER] }
+        repository: { type: [string, "null"] }
+        run_id: { type: [integer, "null"] }
+        app_key: { type: [string, "null"] }
+        application_name: { type: [string, "null"] }
+        details: { type: object, additionalProperties: true }
+    ActivityItem:
+      type: object
+      required: [at, kind, title]
+      properties:
+        at: { type: string, format: date-time }
+        kind: { type: string, enum: [evidence_accepted, evidence_rejected, finding_opened, finding_closed, exception_approved, exception_rejected, exception_expired] }
+        title: { type: string }
+        app_key: { type: [string, "null"] }
+        application_name: { type: [string, "null"] }
+        ref: { type: [string, "null"], description: "Id of the evidence, finding or exception" }
     Job:
       type: object
       required: [id, status]

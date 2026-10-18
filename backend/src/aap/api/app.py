@@ -11,7 +11,7 @@ from collections.abc import Callable
 from datetime import date
 from typing import Any
 
-from fastapi import APIRouter, Depends, FastAPI, Header, HTTPException, Request
+from fastapi import APIRouter, Depends, FastAPI, Header, HTTPException, Query, Request
 from fastapi.encoders import jsonable_encoder
 from fastapi.responses import JSONResponse, Response
 from pydantic import BaseModel, Field
@@ -22,7 +22,7 @@ from aap.api.auth import auth_mode, authenticate, scope_for
 from aap.api.policy import Principal
 from aap.config import ConfigBundle
 from aap.db import get_engine, transaction
-from aap.services import maturity_service
+from aap.services import maturity_service, trends
 from aap.services.evaluation import STATE_RANK
 from aap.store import audit, control_store, findings_store, supply_chain
 
@@ -355,6 +355,42 @@ def list_evidence(
             params["t"] = type
         rows = _rows(conn.execute(text(sql + " ORDER BY e.observed_at DESC LIMIT 200"), params))
     return {"items": rows, "page": {"next_cursor": None}}
+
+
+def _limit(limit: int) -> int:
+    return max(1, min(int(limit), 200))
+
+
+@r.op("GET", "/evidence", "listAllEvidence", "evidence.read")
+def all_evidence(
+    request: Request,
+    application: str | None = None,
+    limit: int = 50,
+    filter_type: str | None = Query(None, alias="filter[type]", max_length=64),
+    filter_confidence: str | None = Query(None, alias="filter[confidence]", pattern="^(C[0-3]|M[12])$"),
+    p: Principal = Depends(principal),
+) -> dict[str, Any]:
+    with transaction(db(request), "aap_api", scope_for(p)) as conn:
+        aid = _app_id(conn, application) if application else None
+        return {"items": trends.evidence(conn, aid, filter_type, filter_confidence, _limit(limit))}
+
+
+@r.op("GET", "/evidence-rejections", "listEvidenceRejections", "evidence.read")
+def evidence_rejections(
+    request: Request, application: str | None = None, limit: int = 50, p: Principal = Depends(principal)
+) -> dict[str, Any]:
+    with transaction(db(request), "aap_api", scope_for(p)) as conn:
+        aid = _app_id(conn, application) if application else None
+        return {"items": trends.rejections(conn, aid, p.org_wide, _limit(limit))}
+
+
+@r.op("GET", "/activity", "listActivity", "application.read")
+def activity(
+    request: Request, application: str | None = None, limit: int = 30, p: Principal = Depends(principal)
+) -> dict[str, Any]:
+    with transaction(db(request), "aap_api", scope_for(p)) as conn:
+        aid = _app_id(conn, application) if application else None
+        return {"items": trends.activity(conn, aid, _limit(limit))}
 
 
 @r.op("GET", "/evidence/{evidenceId}", "getEvidence", "evidence.read")
@@ -1355,6 +1391,64 @@ def app_maturity(appId: str, request: Request, p: Principal = Depends(principal)
         "functions": [{"item": k, "name": v.name, "score": v.score} for k, v in report.functions.items()],
         "streams": [{"item": k, "name": v.name, "score": v.score} for k, v in report.streams.items()],
     }
+
+
+def _unit(conn: Connection, p: Principal, ref: str) -> dict[str, Any]:
+    """An org unit the caller may see (org-wide roles: all; others: their expanded units). Otherwise 404."""
+    try:
+        ref = str(uuid.UUID(ref))
+    except ValueError:
+        raise HTTPException(404, "org unit not found") from None
+    row = (
+        conn.execute(
+            text("SELECT id, parent_id, unit_type AS type, name, slug FROM org_units WHERE id = :u"), {"u": ref}
+        )
+        .mappings()
+        .first()
+    )
+    if row is None or (not p.org_wide and ref not in p.org_units):
+        raise HTTPException(404, "org unit not found")
+    return dict(row)
+
+
+@r.op("GET", "/applications/{appId}/trend", "getApplicationTrend", "application.read")
+def app_trend(
+    appId: str, request: Request, months: int = Query(12, ge=1, le=36), p: Principal = Depends(principal)
+) -> dict[str, Any]:
+    with transaction(db(request), "aap_api", scope_for(p)) as conn:
+        aid = _app_id(conn, appId)
+        name = conn.execute(text("SELECT name FROM applications WHERE id = :a"), {"a": aid}).scalar_one()
+        return trends.trend(conn, bundle(request), "application", aid, name, months)
+
+
+@r.op("GET", "/org-units/{orgUnitId}/trend", "getOrgUnitTrend", "maturity.rollup.read")
+def unit_trend(
+    orgUnitId: str, request: Request, months: int = Query(12, ge=1, le=36), p: Principal = Depends(principal)
+) -> dict[str, Any]:
+    with transaction(db(request), "aap_api", scope_for(p)) as conn:
+        unit = _unit(conn, p, orgUnitId)
+        return trends.trend(conn, bundle(request), "organisation", str(unit["id"]), unit["name"], months)
+
+
+@r.op("GET", "/org-units/{orgUnitId}/maturity", "getOrgUnitMaturity", "maturity.rollup.read")
+def unit_maturity(
+    orgUnitId: str,
+    request: Request,
+    snapshot: str | None = Query(None, pattern="^[0-9]{4}-[0-9]{2}$"),
+    p: Principal = Depends(principal),
+) -> dict[str, Any]:
+    with transaction(db(request), "aap_api", scope_for(p)) as conn:
+        unit = _unit(conn, p, orgUnitId)
+        out = trends.rollup(conn, bundle(request), unit, snapshot)
+    if out is None:
+        raise HTTPException(404, "no snapshot for that period")
+    return out
+
+
+@r.op("GET", "/maturity/snapshots", "listMaturitySnapshots", "maturity.rollup.read")
+def maturity_snapshots(request: Request, p: Principal = Depends(principal)) -> dict[str, Any]:
+    with transaction(db(request), "aap_api", scope_for(p)) as conn:
+        return {"items": trends.snapshots(conn)}
 
 
 EXPORTS = {

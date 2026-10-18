@@ -125,12 +125,19 @@ def observe(conn: Connection, f: NewFinding, evidence_id: str | None, seen_at: d
 
 
 def close_absent(
-    conn: Connection, *, scope_ref: str, finding_type: str, source_system: str, seen: Iterable[str], evidence_id: str
+    conn: Connection,
+    *,
+    scope_ref: str,
+    finding_type: str,
+    source_system: str,
+    seen: Iterable[str],
+    evidence_id: str,
+    at: datetime | None = None,
 ) -> list[str]:
-    """A re-scan of the same scope that no longer reports a finding verifies the fix and closes it.
-    The closing scan is recorded as the closure evidence (schema test T4)."""
+    """A re-scan of the same scope that no longer reports a finding verifies the fix and closes it, as of the time
+    that scan ran (`at`; the database clock when not given). The closing scan is the closure evidence (schema test T4)."""
     rows = conn.execute(
-        text("""UPDATE findings SET status = 'closed', closed_at = now(), closure_evidence_id = :ev
+        text("""UPDATE findings SET status = 'closed', closed_at = coalesce(CAST(:at AS timestamptz), now()), closure_evidence_id = :ev
                 WHERE scope_ref = :sr AND finding_type = :ft AND source_system = :src
                   AND status = ANY(:open) AND NOT (fingerprint = ANY(:seen))
                 RETURNING id"""),
@@ -141,6 +148,7 @@ def close_absent(
             "src": source_system,
             "open": list(OPEN_STATUSES),
             "seen": list(seen),
+            "at": at,
         },
     ).all()
     for r in rows:

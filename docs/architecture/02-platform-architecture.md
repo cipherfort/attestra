@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Status | IMPLEMENTED (C1–C12); C13 snapshots in progress |
+| Status | IMPLEMENTED (C1–C13) |
 | Related ADRs | 001, 004–008, 014, 018–020, 022–025, 027 |
 
 ## 1. Architectural stance
@@ -97,7 +97,7 @@ flowchart LR
 | C10 | **Ticketing integration** | Jira, GitHub Issues or GitLab Issues: create, update and transition with deterministic dedup keys. | IMPLEMENTED |
 | C11 | **Event export** | Curated security events to one SIEM (Sentinel, HTTPS/Splunk HEC or syslog); notifications through chat webhooks (Slack, Teams). | IMPLEMENTED |
 | C12 | **Scheduler** | Freshness expiry, exception expiry, SLA breach detection, feed refresh. | IMPLEMENTED |
-| C13 | **Reporting / snapshots** | Monthly immutable snapshots for trend reporting. | DESIGNED (in progress) |
+| C13 | **Reporting / snapshots** | Monthly snapshots for trend reporting: SAMM maturity and posture metrics per application and org unit. The current month is provisional (refreshed by the scheduler); finished months are published and immutable. `aap snapshots backfill` computes earlier months as of each month end from the evidence on record. | IMPLEMENTED |
 
 The components are **logical**. Physically, they ship as **three deployables** to keep operational load proportionate ([ADR-025](../../adr/ADR-025-deployment-model.md)):
 

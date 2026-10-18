@@ -89,6 +89,22 @@ def cmd_demo_seed(_: argparse.Namespace) -> None:
     )
 
 
+def cmd_snapshots_backfill(args: argparse.Namespace) -> None:
+    from datetime import UTC, datetime
+
+    from aap.config import ConfigBundle
+    from aap.db import transaction
+    from aap.services import snapshots
+
+    with transaction(_engine(), "aap_worker") as conn:
+        done = snapshots.backfill(conn, ConfigBundle.load(), max(1, args.months), datetime.now(UTC))
+    for r in done:
+        print(
+            f"{r.period:%Y-%m}: {r.applications} applications, {r.org_units} org units{' (published)' if r.published else ''}"
+        )
+    print(f"{len(done)} snapshots written; published months were left unchanged")
+
+
 def cmd_demo_report(_: argparse.Namespace) -> None:
     from aap.config import ConfigBundle
     from aap.db import Scope, transaction
@@ -496,6 +512,12 @@ def main(argv: list[str] | None = None) -> None:
         sp.set_defaults(fn=cmd_pipelines)
     d = sub.add_parser("demo", help="demo world").add_subparsers(dest="sub", required=True)
     d.add_parser("seed").set_defaults(fn=cmd_demo_seed)
+    sn = sub.add_parser("snapshots", help="monthly posture snapshots for trends").add_subparsers(
+        dest="sub", required=True
+    )
+    bf = sn.add_parser("backfill", help="compute earlier months as of each month end from the evidence on record")
+    bf.add_argument("--months", type=int, default=12)
+    bf.set_defaults(fn=cmd_snapshots_backfill)
     d.add_parser("report").set_defaults(fn=cmd_demo_report)
     args = p.parse_args(argv)
     args.fn(args)
