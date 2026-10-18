@@ -1949,6 +1949,10 @@ export interface components {
             application_name?: string | null;
             /** @description Id of the evidence, finding or exception */
             ref?: string | null;
+            /** @description For evidence events */
+            evidence_type?: string | null;
+            /** @description For accepted evidence: C0–C3, M1, M2 */
+            confidence?: string | null;
         };
         Job: {
             id: string;

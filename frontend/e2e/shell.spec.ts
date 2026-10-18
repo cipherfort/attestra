@@ -2,6 +2,7 @@
 import { expect, test, visit } from "./fixtures";
 
 const PAGES: [string, string][] = [
+  ["/", "Overview"],
   ["/apps", "Applications"],
   ["/apps/APP-00001", "Claims API"],
   ["/cve", "Are we affected?"],
@@ -85,4 +86,21 @@ test("the applications table searches, filters by tier and sorts", async ({ page
   await page.keyboard.press("Escape");
   await expect(rows).toHaveCount(1);
   await expect(rows.first()).toContainText("Claims API");
+});
+
+test("application tabs live in the URL and a control opens in a drawer", async ({ page, problems }) => {
+  void problems;
+  await visit(page, "/apps/APP-00001");
+  await page.getByRole("tab", { name: /Controls/ }).click();
+  await expect(page).toHaveURL(/\/apps\/APP-00001\/controls/);
+  await page.getByRole("button", { name: /Dependency review gates/ }).click();
+  const drawer = page.getByRole("dialog");
+  await expect(drawer).toBeVisible();
+  await expect(drawer).toContainText("How it is proven");
+  await page.keyboard.press("Escape");
+  await expect(drawer).toBeHidden();
+  await page.getByRole("tab", { name: "Evidence" }).click();
+  await expect(page.locator("main tbody tr").first()).toBeVisible();
+  await page.reload();
+  await expect(page.getByRole("tab", { name: "Evidence" })).toHaveAttribute("aria-selected", "true");
 });

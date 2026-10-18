@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: Apache-2.0
 import { lazy } from "react";
-import { createBrowserRouter, Navigate, useParams } from "react-router";
+import { createBrowserRouter, useParams } from "react-router";
 import { AppShell } from "./components/shell/AppShell";
 
 // Each page is its own chunk, so the first load carries only the shell.
@@ -15,6 +15,7 @@ const CvePage = lazy(() => import("./pages/Org").then((m) => ({ default: m.CvePa
 const Leadership = lazy(() => import("./pages/Org").then((m) => ({ default: m.Leadership })));
 const Portfolio = lazy(() => import("./pages/Portfolio").then((m) => ({ default: m.Portfolio })));
 const Register = lazy(() => import("./pages/Register").then((m) => ({ default: m.Register })));
+const Overview = lazy(() => import("./pages/Overview").then((m) => ({ default: m.Overview })));
 
 function useId(): string {
   return useParams().id ?? "";
@@ -40,9 +41,10 @@ export const router = createBrowserRouter([
     path: "/",
     element: <AppShell />,
     children: [
-      { index: true, element: <Navigate to="/apps" replace /> },
+      { index: true, element: <Overview /> },
       { path: "apps", element: <Portfolio /> },
       { path: "apps/:id", element: <AppRoute /> },
+      { path: "apps/:id/:tab", element: <AppRoute /> },
       { path: "register", element: <Register /> },
       { path: "findings/:id", element: <FindingRoute /> },
       { path: "evidence/:id", element: <EvidenceRoute /> },

@@ -53,7 +53,7 @@ export function BulletBars({ label, items, max = 3, valueLabel = "Score" }: { la
         })}
         <line x1={labelW} x2={labelW} y1={top} y2={H - 20} stroke="var(--axis)" strokeWidth={1} />
       </svg>
-      <Legend items={[{ label: valueLabel, color: "var(--series-1)", shape: "square" }, { label: "Target", color: "var(--ink)", shape: "tick" }]} />
+      <Legend items={[{ label: valueLabel, color: "var(--series-1)", shape: "square" }, ...(items.some((b) => b.target !== null) ? [{ label: "Target", color: "var(--ink)", shape: "tick" as const }] : [])]} />
       <ChartTooltip tip={tip} />
     </ChartFrame>
   );
