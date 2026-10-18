@@ -4,6 +4,7 @@ import { BookOpen, PanelLeftClose, PanelLeftOpen } from "lucide-react";
 import { useState } from "react";
 import { Link, useLocation } from "react-router";
 import type { Me } from "../../api";
+import { BRAND } from "../../brand";
 import { Logo, LogoMark } from "./Logo";
 import { isActive, NAV, visible } from "./nav";
 
@@ -63,7 +64,7 @@ export function Sidebar({ me }: { me: Me | undefined }) {
       className={`sticky top-0 flex h-screen shrink-0 flex-col border-r border-line bg-sidebar transition-[width] ${collapsed ? "w-16" : "w-60"}`}
     >
       <div className={`flex h-12 items-center border-b border-line ${collapsed ? "justify-center" : "px-4"}`}>
-        <Link to="/" className="text-ink hover:no-underline" aria-label="Home">
+        <Link to="/" className="text-ink hover:no-underline" aria-label={`${BRAND.name} home`}>
           {collapsed ? <LogoMark /> : <Logo />}
         </Link>
       </div>

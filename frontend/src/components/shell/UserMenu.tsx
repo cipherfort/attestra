@@ -20,11 +20,9 @@ export function UserMenu({ me }: { me: Me | undefined }) {
   const pickTheme = (t: ThemePref) => { applyTheme(t); setTheme(t); };
   return (
     <Menu.Root modal={false}>
-      <Menu.Trigger
-        aria-label={`Account: ${name}`}
-        className="flex size-8 items-center justify-center rounded-full border border-line-strong bg-surface-2 p-0 text-xs font-semibold text-ink hover:bg-surface-3"
-      >
-        {initials(name)}
+      <Menu.Trigger className="flex size-8 items-center justify-center rounded-full border border-line-strong bg-surface-2 p-0 text-xs font-semibold text-ink hover:bg-surface-3">
+        <span aria-hidden="true">{initials(name)}</span>
+        <span className="sr-only">Account: {name}</span>
       </Menu.Trigger>
       <Menu.Portal>
         <Menu.Content align="end" sideOffset={8} className="z-50 w-80 rounded-lg border border-line bg-surface p-1.5 shadow-card">

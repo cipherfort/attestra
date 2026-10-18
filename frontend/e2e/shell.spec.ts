@@ -69,3 +69,20 @@ test("the theme switches and is remembered", async ({ page, problems }) => {
   await page.reload();
   await expect(page.locator("html")).toHaveAttribute("data-theme", "light");
 });
+
+test("the applications table searches, filters by tier and sorts", async ({ page, problems }) => {
+  void problems;
+  await visit(page, "/apps");
+  const rows = page.locator("main tbody tr");
+  await expect(rows.first()).toBeVisible();
+  const all = await rows.count();
+  await page.getByRole("textbox", { name: "Search applications" }).fill("Payments");
+  await expect(rows).toHaveCount(1);
+  await page.getByRole("button", { name: "Clear" }).click();
+  await expect(rows).toHaveCount(all);
+  await page.getByRole("button", { name: "Tier" }).first().click();
+  await page.getByRole("menuitemcheckbox", { name: /Tier 1/ }).click();
+  await page.keyboard.press("Escape");
+  await expect(rows).toHaveCount(1);
+  await expect(rows.first()).toContainText("Claims API");
+});
