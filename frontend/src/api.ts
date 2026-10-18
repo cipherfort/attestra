@@ -101,6 +101,11 @@ export type EvidenceRejection = Schemas["EvidenceRejection"];
 export type ActivityItem = Schemas["ActivityItem"];
 export type MaturityRollup = Schemas["MaturityRollup"];
 export type OrgUnitRow = Schemas["OrgUnit"];
+export type CatalogueControl = Schemas["CatalogueControl"];
+export type MaturitySnapshot = Schemas["MaturitySnapshot"];
+export type Sbom = Schemas["Sbom"];
+export type SbomComponent = Schemas["SbomComponent"];
+export interface ComponentHit { purl: string; ecosystem: string; name: string; version: string; licence: string | null; application_count: number; known_vulnerabilities: number }
 export interface ExceptionRow {
   id: string; exception_key: string; target_type: string; target_ref: string; residual_priority: Priority; status: string;
   expires_at: string | null; created_at: string; app_key: string; application_name: string; requested_by: string;
@@ -253,7 +258,24 @@ export const api = {
   visibleUnits: () => request<{ items: OrgUnitRow[] }>("/org-units").then((r) => r.data.items),
   appTrend: (id: string, months = 12) => request<PostureTrend>(`/applications/${id}/trend?months=${months}`).then((r) => r.data),
   unitTrend: (id: string, months = 12) => request<PostureTrend>(`/org-units/${id}/trend?months=${months}`).then((r) => r.data),
-  unitMaturity: (id: string) => request<MaturityRollup>(`/org-units/${id}/maturity`).then((r) => r.data),
+  unitMaturity: (id: string, snapshot?: string) =>
+    request<MaturityRollup>(`/org-units/${id}/maturity${snapshot ? `?snapshot=${snapshot}` : ""}`).then((r) => r.data),
+  snapshots: () => request<{ items: MaturitySnapshot[] }>("/maturity/snapshots").then((r) => r.data.items),
+  catalogue: () => request<{ catalogue_version: string; git_sha: string; items: CatalogueControl[] }>("/catalogue/controls").then((r) => r.data),
+  sboms: (appId: string) => request<{ items: Sbom[] }>(`/applications/${appId}/sboms`).then((r) => r.data.items),
+  /** every component of one SBOM (the API pages by purl, 200 at a time) */
+  sbomComponents: async (sbomId: string) => {
+    const out: SbomComponent[] = [];
+    let cursor: string | null | undefined;
+    do {
+      const r = await request<{ items: SbomComponent[]; page: { next_cursor?: string | null } }>(
+        `/sboms/${sbomId}/components?limit=200${cursor ? `&cursor=${encodeURIComponent(cursor)}` : ""}`);
+      out.push(...r.data.items);
+      cursor = r.data.page.next_cursor;
+    } while (cursor && out.length < 5000);
+    return out;
+  },
+  components: (name: string) => request<{ items: ComponentHit[] }>(`/components?name=${encodeURIComponent(name)}`).then((r) => r.data.items),
   activity: (application?: string, limit = 30) =>
     request<{ items: ActivityItem[] }>(`/activity?limit=${limit}${application ? `&application=${encodeURIComponent(application)}` : ""}`).then((r) => r.data.items),
   allEvidence: (q: { application?: string; type?: string; confidence?: string; limit?: number } = {}) => {

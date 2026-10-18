@@ -142,7 +142,7 @@ Errors are `application/problem+json`. Out-of-scope objects return 404, never 40
 |---|---|---|---|
 | `listApplicationSboms` | `GET /applications/{appId}/sboms` | `application.read` |  |
 | `searchComponents` | `GET /components` | `component.read` | Search the component inventory (e.g. before a CVE is published) |
-| `listSbomComponents` *(designed)* | `GET /sboms/{sbomId}/components` | `application.read` |  |
+| `listSbomComponents` | `GET /sboms/{sbomId}/components` | `application.read` |  |
 
 ## Threat models
 

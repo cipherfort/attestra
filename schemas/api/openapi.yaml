@@ -841,7 +841,6 @@ paths:
     get:
       tags: [SBOM]
       operationId: listSbomComponents
-      x-status: designed   # in the contract, not implemented yet (the API returns 404)
       x-permission: application.read
       parameters:
         - { name: sbomId, in: path, required: true, schema: { type: string, format: uuid } }
@@ -2089,6 +2088,10 @@ components:
         is_current: {type: boolean}
         evidence_id: {type: string, format: uuid}
         generated_at: {type: string, format: date-time}
+        freshness:
+          description: State of the SBOM's evidence. Only an active or expiring SBOM can show an application is not affected.
+          allOf: [{ $ref: "#/components/schemas/EvidenceState" }]
+        vulnerable_components: {type: integer, description: Components with at least one known vulnerability}
     SbomComponent:
       type: object
       required: [purl]
@@ -2290,6 +2293,7 @@ components:
             type: object
             properties:
               practice: { type: string }
+              name: { type: string }
               median: { type: number }
               p25: { type: number }
               p75: { type: number }

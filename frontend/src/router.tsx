@@ -13,7 +13,10 @@ const FindingPage = lazy(() => import("./pages/Findings").then((m) => ({ default
 const FindingsList = lazy(() => import("./pages/Findings").then((m) => ({ default: m.FindingsList })));
 const Exceptions = lazy(() => import("./pages/Exceptions").then((m) => ({ default: m.Exceptions })));
 const Integrations = lazy(() => import("./pages/Integrations").then((m) => ({ default: m.Integrations })));
-const CvePage = lazy(() => import("./pages/Org").then((m) => ({ default: m.CvePage })));
+const CvePage = lazy(() => import("./pages/SupplyChain").then((m) => ({ default: m.CvePage })));
+const SupplyChain = lazy(() => import("./pages/SupplyChain").then((m) => ({ default: m.SupplyChain })));
+const Controls = lazy(() => import("./pages/Controls").then((m) => ({ default: m.Controls })));
+const Maturity = lazy(() => import("./pages/Maturity").then((m) => ({ default: m.Maturity })));
 const Leadership = lazy(() => import("./pages/Org").then((m) => ({ default: m.Leadership })));
 const Portfolio = lazy(() => import("./pages/Portfolio").then((m) => ({ default: m.Portfolio })));
 const Register = lazy(() => import("./pages/Register").then((m) => ({ default: m.Register })));
@@ -26,6 +29,7 @@ const AppRoute = () => { const id = useId(); return <Application key={id} id={id
 const FindingRoute = () => { const id = useId(); return <FindingPage key={id} id={id} />; };
 const EvidenceRoute = () => { const id = useId(); return <EvidencePage key={id} id={id} />; };
 const CveRoute = () => { const id = useParams().id; return <CvePage key={id ?? ""} initial={id} />; };
+const ControlsRoute = () => <Controls id={useParams().id} />;
 const ExceptionsRoute = () => { const id = useParams().id; return <Exceptions key={id ?? ""} id={id} />; };
 const AssessmentsRoute = () => { const id = useParams().id; return <Assessments key={id ?? ""} id={id} />; };
 
@@ -53,8 +57,13 @@ export const router = createBrowserRouter([
       { path: "evidence", element: <EvidenceExplorer /> },
       { path: "evidence/view/:tab", element: <EvidenceExplorer /> },
       { path: "evidence/:id", element: <EvidenceRoute /> },
+      { path: "supply-chain", element: <SupplyChain /> },
+      { path: "supply-chain/:tab", element: <SupplyChain /> },
       { path: "cve", element: <CveRoute /> },
       { path: "cve/:id", element: <CveRoute /> },
+      { path: "controls", element: <ControlsRoute /> },
+      { path: "controls/:id", element: <ControlsRoute /> },
+      { path: "maturity", element: <Maturity /> },
       { path: "leadership", element: <Leadership /> },
       { path: "exceptions", element: <ExceptionsRoute /> },
       { path: "exceptions/:id", element: <ExceptionsRoute /> },

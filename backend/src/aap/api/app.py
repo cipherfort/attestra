@@ -4,6 +4,7 @@
 
 from __future__ import annotations
 
+import base64
 import hashlib
 import json
 import uuid
@@ -1357,9 +1358,14 @@ def sboms(appId: str, request: Request, p: Principal = Depends(principal)) -> di
         rows = _rows(
             conn.execute(
                 text(
-                    "SELECT id, scope_key, commit_sha, format, spec_version, component_count, "
-                    "purl_coverage_pct, is_current, evidence_id, generated_at FROM sboms "
-                    "WHERE application_id = :a ORDER BY generated_at DESC"
+                    """SELECT s.id, s.scope_key, s.commit_sha, s.format, s.spec_version, s.component_count,
+                       s.purl_coverage_pct, s.is_current, s.evidence_id, s.generated_at,
+                       coalesce(es.state::text, 'expired') AS freshness,
+                       (SELECT count(*) FROM sbom_components sc WHERE sc.sbom_id = s.id AND EXISTS
+                          (SELECT 1 FROM component_vulnerabilities cv WHERE cv.component_id = sc.component_id))
+                         AS vulnerable_components
+                       FROM sboms s LEFT JOIN evidence_current_state es ON es.evidence_id = s.evidence_id
+                       WHERE s.application_id = :a ORDER BY s.generated_at DESC"""
                 ),
                 {"a": aid},
             )
@@ -1368,6 +1374,46 @@ def sboms(appId: str, request: Request, p: Principal = Depends(principal)) -> di
         if row.get("purl_coverage_pct") is not None:
             row["purl_coverage_pct"] = float(row["purl_coverage_pct"])
     return {"items": rows}
+
+
+@r.op("GET", "/sboms/{sbomId}/components", "listSbomComponents", "application.read")
+def sbom_components(
+    sbomId: str, request: Request, cursor: str | None = None, limit: int = 50, p: Principal = Depends(principal)
+) -> dict[str, Any]:
+    """Components of one SBOM in purl order, with the vulnerabilities matched to each. The cursor is the last purl
+    of the previous page; an SBOM the caller cannot see (row-level security on sboms) is a 404."""
+    try:
+        sid = str(uuid.UUID(sbomId))
+    except ValueError:
+        raise HTTPException(404, "SBOM not found") from None
+    after = None
+    if cursor:
+        try:
+            after = base64.b64decode(cursor.encode(), altchars=b"-_", validate=True).decode()
+        except ValueError:  # bad base64 or not UTF-8
+            raise HTTPException(400, "invalid cursor") from None
+        if not after or "\x00" in after:
+            raise HTTPException(400, "invalid cursor")
+    n = _limit(limit)
+    with transaction(db(request), "aap_api", scope_for(p)) as conn:
+        if conn.execute(text("SELECT 1 FROM sboms WHERE id = :s"), {"s": sid}).first() is None:
+            raise HTTPException(404, "SBOM not found")
+        rows = _rows(
+            conn.execute(
+                text("""SELECT c.purl, sc.is_direct AS direct, sc.scope::text AS scope, c.licence_expression AS licence,
+                   coalesce((SELECT array_agg(v.vuln_key ORDER BY v.vuln_key) FROM component_vulnerabilities cv
+                             JOIN vulnerabilities v ON v.id = cv.vulnerability_id WHERE cv.component_id = c.id),
+                            '{}') AS vulnerabilities
+                   FROM sbom_components sc JOIN components c ON c.id = sc.component_id
+                   WHERE sc.sbom_id = :s AND (CAST(:after AS text) IS NULL OR c.purl > :after)
+                   ORDER BY c.purl LIMIT :n"""),
+                {"s": sid, "after": after, "n": n + 1},
+            )
+        )
+    more = len(rows) > n
+    rows = rows[:n]
+    nxt = base64.urlsafe_b64encode(rows[-1]["purl"].encode()).decode() if more else None
+    return {"items": rows, "page": {"next_cursor": nxt}}
 
 
 # ------------------------------------------------------------------------------------------ maturity & reporting
