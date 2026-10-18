@@ -108,6 +108,7 @@ jobs:
       - run: npm audit --omit=dev --audit-level=high
       - run: npm run types:check   # src/api-types.ts is generated from schemas/api/openapi.yaml
       - run: npm run build
+      - run: npm run budget   # gzip budget: initial JS, CSS, largest page chunk
 
   infra:
     name: Terraform (fmt, validate every root, Checkov)

@@ -23,3 +23,11 @@ export async function visit(page: Page, path: string, as = "cpatel"): Promise<vo
   await page.goto(`${path}${sep}as=${as}`);
   await expect(page.getByRole("navigation", { name: "Main navigation" })).toBeVisible();
 }
+
+/** Screenshot mode (no dev banner), settled: for the launch assets. */
+export async function open(page: Page, path: string, as = "cpatel"): Promise<void> {
+  await page.goto(`${path}${path.includes("?") ? "&" : "?"}as=${as}&shot=1`);
+  await expect(page.locator("main h1").first()).toBeVisible();
+  await page.waitForLoadState("networkidle");
+  await page.waitForTimeout(400); // charts settle
+}
