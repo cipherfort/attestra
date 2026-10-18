@@ -49,7 +49,7 @@ export const NAV: { label: string; items: NavItem[] }[] = [
       { to: "/assessments", label: "Assessments", icon: ClipboardCheck, perm: "assessment.read" },
     ],
   },
-  { label: "Reports", items: [{ to: "/leadership", label: "Leadership", icon: BarChart3 }] },
+  { label: "Reports", items: [{ to: "/leadership", label: "Leadership", icon: BarChart3, perm: "report.org.read" }] },
   {
     label: "Settings",
     items: [

@@ -25,7 +25,7 @@ export function DevBanner({ me }: { me: Me | undefined }) {
     setHidden(true);
   };
   return (
-    <div className="flex items-center gap-2 border-b border-line bg-banner px-6 py-1.5 text-xs text-ink-2">
+    <div className="print:hidden flex items-center gap-2 border-b border-line bg-banner px-6 py-1.5 text-xs text-ink-2">
       <span className="flex-1">
         Demo data with development sign-in. Switch person from the account menu (top right) to see what each role sees;
         in production people sign in through your identity provider.

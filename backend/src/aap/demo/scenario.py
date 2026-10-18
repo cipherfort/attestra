@@ -28,7 +28,7 @@ from aap.demo import bundles
 from aap.demo.seed import AppSpec, RepoSpec, connector_evidence, demo_trusted, good_repo_settings, register
 from aap.domain.evidence import RunInfo
 from aap.ingest.pipeline import ingest_workflow_run
-from aap.services import evaluation, risk_service, snapshots, vuln_service
+from aap.services import assessments, evaluation, exceptions, risk_service, snapshots, vuln_service
 from aap.store import config_store, findings_store, registry, supply_chain
 
 LOG4SHELL = {
@@ -786,6 +786,99 @@ def seed(conn: Connection, bundle: ConfigBundle, blobs: EvidenceBlobStore, now: 
     vuln_id = supply_chain.upsert_vulnerability(conn, LOG4SHELL)
     supply_chain.match_advisory(conn, LOG4SHELL, vuln_id)
     vuln_service.raise_dependency_findings(conn, vuln_id, now)
+
+    # ---------------------------------------------------------------- exceptions and assessments, through their workflows
+    # Each one goes through the same service calls the API makes, so segregation of duties and the approval matrix
+    # apply: the requester never decides, Tier 1/2 needs the business owner's co-signature, the approver's role must
+    # be high enough for the residual risk.
+    hr = apps["HR Leave Tracker"]
+    accepted = exceptions.create(
+        conn,
+        bundle,
+        application_id=hr,
+        target_type="control",
+        target_ref="ASC-SRC-02",
+        justification="The repository is maintained by one engineer until the team grows next quarter; there is nobody to own reviews.",
+        risk_description="Changes to security-sensitive paths are merged without a second reviewer.",
+        compensating_controls="Branch protection requires a pull request; AppSec reviews releases monthly.",
+        residual_priority="P3",
+        remediation_plan="Add CODEOWNERS for the auth and data-access modules when the second engineer joins.",
+        requested_by=users["gokafor"],
+    )
+    exceptions.submit(conn, bundle, accepted, users["gokafor"])
+    exceptions.decide(
+        conn,
+        bundle,
+        accepted,
+        approver=users["dlee"],
+        approver_roles=["unit_lead"],
+        outcome="approve",
+        comment="Accepted for one quarter with the monthly release review in place.",
+    )
+    log4j = conn.execute(
+        text("""SELECT id FROM findings WHERE application_id = :a AND finding_type = 'dependency'
+                AND title ILIKE '%log4j%' ORDER BY first_seen_at LIMIT 1"""),
+        {"a": apps["Claims API"]},
+    ).first()
+    if log4j is not None:
+        waiting = exceptions.create(
+            conn,
+            bundle,
+            application_id=apps["Claims API"],
+            target_type="finding",
+            target_ref=str(log4j.id),
+            justification="The upgrade to log4j 2.17 needs a framework upgrade that is scheduled for the next release train.",
+            risk_description="Remote code execution through JNDI lookups in logged user input.",
+            compensating_controls="log4j2.formatMsgNoLookups=true is set and the WAF blocks JNDI patterns.",
+            residual_priority="P2",
+            remediation_plan="Upgrade the framework and log4j in release 4.2, due within 30 days.",
+            requested_by=users["bsmith"],
+        )
+        exceptions.submit(conn, bundle, waiting, users["bsmith"])  # waits for the business owner's co-signature
+    exceptions.create(
+        conn,
+        bundle,
+        application_id=apps["Payments Portal"],
+        target_type="control",
+        target_ref="ASC-SRC-01",
+        justification="The team has two engineers; requiring two approvals would block every change.",
+        risk_description="A single reviewer can approve a change to the default branch.",
+        residual_priority="P3",
+        remediation_plan="Require two approvals once the team has three engineers.",
+        requested_by=users["ekim"],
+    )
+
+    review = assessments.create(
+        conn, bundle, kind="architecture_review", application_id=apps["Claims API"], lead_assessor=users["ajones"]
+    )
+    assessments.record(
+        conn,
+        bundle,
+        review,
+        users["ajones"],
+        {
+            "outcome": "approved_with_conditions",
+            "findings_summary": "Move session storage out of the API pods before the next major release.",
+        },
+    )
+    assessments.submit(conn, bundle, review, users["ajones"])
+    assessments.decide(
+        conn,
+        review,
+        approver=users["cpatel"],
+        outcome="approve",
+        comment="Reviewed the design and the data flows with the team.",
+    )
+    assessments.write_evidence(conn, review, now)  # what the worker does on approval
+    tm = assessments.create(conn, bundle, kind="threat_model_review", application_id=hr, lead_assessor=users["gokafor"])
+    assessments.record(conn, bundle, tm, users["gokafor"], {"model_commit": sha("leave@main"), "outcome": "approved"})
+    assessments.submit(conn, bundle, tm, users["gokafor"])  # waits for someone else to review it
+    samm = assessments.create(
+        conn, bundle, kind="samm_application", application_id=apps["Payments Portal"], lead_assessor=users["ekim"]
+    )
+    assessments.record(
+        conn, bundle, samm, users["ekim"], {"answers": {"D-TA-A:1": 0.5, "D-SR-A:1": 0.25, "V-ST-A:1": 0.5}}
+    )
 
     # ---------------------------------------------------------------- score, publish posture, evaluate
     for app_id in apps.values():

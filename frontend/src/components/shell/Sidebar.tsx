@@ -61,7 +61,7 @@ export function Sidebar({ me }: { me: Me | undefined }) {
   };
   return (
     <aside
-      className={`sticky top-0 flex h-screen shrink-0 flex-col border-r border-line bg-sidebar transition-[width] ${collapsed ? "w-16" : "w-60"}`}
+      className={`print:hidden sticky top-0 flex h-screen shrink-0 flex-col border-r border-line bg-sidebar transition-[width] ${collapsed ? "w-16" : "w-60"}`}
     >
       <div className={`flex h-12 items-center border-b border-line ${collapsed ? "justify-center" : "px-4"}`}>
         <Link to="/" className="text-ink hover:no-underline" aria-label={`${BRAND.name} home`}>

@@ -166,3 +166,44 @@ test("supply chain: an application without an SBOM is never reported as unaffect
   await expect(page.getByRole("heading", { name: "Are we affected?" })).toBeVisible();
   await expect(page.locator("main")).toContainText("Possibly affected");
 });
+
+test("an exception shows where its approval stands and links to what it covers", async ({ page, problems }) => {
+  void problems;
+  await visit(page, "/exceptions");
+  await expect(page.locator("main tbody tr")).toHaveCount(3);
+  await page.getByRole("link", { name: "EX-000002" }).click();
+  const progress = page.getByRole("list", { name: "Approval progress" });
+  await expect(progress).toContainText("Business owner co-signs");
+  await expect(progress).toContainText("Head of AppSec or above");
+  await page.getByRole("link", { name: /^Finding / }).click();
+  await expect(page).toHaveURL(/\/findings\//);
+});
+
+test("a submitted assessment can be decided by a reviewer but not by its lead assessor", async ({ page, problems }) => {
+  void problems;
+  await visit(page, "/assessments");
+  await page.getByRole("link", { name: "Threat model review" }).click();
+  await expect(page.getByRole("heading", { name: "Decide" })).toBeVisible();
+  const url = page.url();
+  await visit(page, new URL(url).pathname, "gokafor");
+  await expect(page.getByRole("heading", { name: "Threat model review" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Decide" })).toHaveCount(0);
+});
+
+test("an integration's setup guide opens in a drawer and never asks for a secret", async ({ page, problems }) => {
+  void problems;
+  await visit(page, "/integrations", "padmin");
+  await page.getByRole("button", { name: "Set up: GitHub App" }).click();
+  await expect(page).toHaveURL(/\/integrations\/github$/);
+  const steps = page.getByRole("list", { name: "Setup steps" });
+  await expect(steps).toContainText("AAP_GITHUB_ORG");
+  await expect(page.getByRole("dialog").locator("input, textarea")).toHaveCount(0);
+});
+
+test("a platform administrator starts from the setup checklist and manages roles", async ({ page, problems }) => {
+  void problems;
+  await visit(page, "/", "padmin");
+  await expect(page.getByRole("list", { name: "Getting started steps" })).toContainText("Connect source control");
+  await visit(page, "/admin/roles", "padmin");
+  await expect(page.locator("main tbody")).toContainText("Chandra Patel");
+});

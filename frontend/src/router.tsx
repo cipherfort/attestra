@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: Apache-2.0
 import { lazy } from "react";
-import { createBrowserRouter, useParams } from "react-router";
+import { Link, createBrowserRouter, useParams } from "react-router";
 import { AppShell } from "./components/shell/AppShell";
 
 // Each page is its own chunk, so the first load carries only the shell.
@@ -36,8 +36,8 @@ const AssessmentsRoute = () => { const id = useParams().id; return <Assessments 
 function NotFound() {
   return (
     <div className="py-16 text-center">
-      <h1>Page not found</h1>
-      <p className="muted">There is nothing at this address. <a href="/apps">Go to applications</a>.</p>
+      <h1 className="m-0">Page not found</h1>
+      <p className="m-0 mt-2 text-muted">There is nothing at this address. <Link to="/">Go to the overview</Link>.</p>
     </div>
   );
 }
@@ -70,7 +70,9 @@ export const router = createBrowserRouter([
       { path: "assessments", element: <AssessmentsRoute /> },
       { path: "assessments/:id", element: <AssessmentsRoute /> },
       { path: "integrations", element: <Integrations /> },
+      { path: "integrations/:key", element: <Integrations /> },
       { path: "admin", element: <Admin /> },
+      { path: "admin/:tab", element: <Admin /> },
       { path: "*", element: <NotFound /> },
     ],
   },
