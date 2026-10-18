@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: Apache-2.0
 variable "display_prefix" {
   type    = string
-  default = "Attestra"
+  default = "FortProof"
 }
 
 variable "public_url" {

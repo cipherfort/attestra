@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://cipherfort.github.io/attestra/schemas/catalogue/controls.schema.json",
+  "$id": "https://fortproof.dev/schemas/catalogue/controls.schema.json",
   "title": "AppSec control catalogue",
   "type": "object",
   "required": ["catalogue_version", "defaults", "controls"],

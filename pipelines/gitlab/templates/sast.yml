@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: Apache-2.0
-# Attestra shipped GitLab CI/CD component: static analysis (Semgrep).
+# FortProof shipped GitLab CI/CD component: static analysis (Semgrep).
 # Source: pipelines/gitlab/ in the platform repository; rendered by `aap pipelines export --provider gitlab`.
 # The platform accepts this job's evidence only if the merged job equals this file at an approved commit (ADR-033):
 # do not override its keys in your .gitlab-ci.yml. Only `stage` may be changed (input).

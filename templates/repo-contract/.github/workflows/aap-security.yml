@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: Apache-2.0
-# Attestra: security pipeline caller. The only security workflow file an application repository
+# FortProof: security pipeline caller. The only security workflow file an application repository
 # needs. Render it with your organization's values: `aap pipelines caller --repository <org>/security-workflows
 # --sha <approved SHA> --release <tag>`. Dependabot keeps the SHA current. No secrets: the platform pulls the
 # evidence artifacts through its read-only GitHub App.

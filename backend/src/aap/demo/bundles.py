@@ -57,7 +57,7 @@ def build(
     """`tamper` simulates attacks for tests/demo: 'digest' alters a file after hashing."""
     manifest: dict[str, Any] = {
         "schema_version": "1.0",
-        "predicate_type": "https://cipherfort.github.io/attestra/attestation/evidence/v1",
+        "predicate_type": "https://fortproof.dev/attestation/evidence/v1",
         "evidence_type": evidence_type,
         "repository": {"full_name": repo_full_name, "id": repo_id, "visibility": "private"},
         "commit_sha": commit_sha,

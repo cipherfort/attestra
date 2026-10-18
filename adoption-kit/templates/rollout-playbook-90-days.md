@@ -10,7 +10,7 @@ From nothing to every Tier 1 application evidenced, in three 30-day steps. Each 
 | 1 | Name the sponsor, the platform owner and the AppSec lead; agree the decisions in [`../governance/decision-log.md`](../governance/decision-log.md) (tiers, deadlines, approvers) | — | {{SPONSOR}} |
 | 1 | Evaluate the platform with the demo | `deploy/compose/setup.sh` | {{PLATFORM_OWNER}} |
 | 2 | Encode your decisions as rules and review them as a pull request | `config/organization.yaml`, `config/profiles/`, `config/exception-policy.yaml`, `catalogue/` | {{APPSEC_LEAD}} |
-| 2 | Install for real | Helm chart (`charts/attestra`), your IdP, PostgreSQL, write-once bucket | {{PLATFORM_OWNER}} |
+| 2 | Install for real | Helm chart (`charts/fortproof`), your IdP, PostgreSQL, write-once bucket | {{PLATFORM_OWNER}} |
 | 3 | Connect source control (read-only) and publish the pipelines | `aap bootstrap github-app` / `aap bootstrap gitlab`; `aap pipelines export` → review → `aap pipelines approve` | {{PLATFORM_OWNER}} |
 | 4 | Thin slice: one real repository end to end | Register it, add the caller workflow, see verified evidence change control states | {{PILOT_TEAM}} |
 

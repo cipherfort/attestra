@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: Apache-2.0
-# Attestra shipped pipeline: Container image (Trivy).
+# FortProof shipped pipeline: Container image (Trivy).
 # Source: pipelines/github/ in the platform repository. Do not edit the copy in your security-workflows repository by
 # hand: change the source, re-run `aap pipelines export`, review, release, and approve the new commit SHA
 # (`aap pipelines approve`). Evidence from any other commit is rejected (UNAPPROVED_WORKFLOW_REF).
@@ -64,7 +64,7 @@ jobs:
         uses: actions/attest@1e69f48acb82d1966a394da916b4c1698aa569d6 # v4.2.2
         with:
           subject-path: ${{ runner.temp }}/aap-evidence/evidence-manifest.json
-          predicate-type: https://cipherfort.github.io/attestra/attestation/evidence/v1
+          predicate-type: https://fortproof.dev/attestation/evidence/v1
           predicate-path: ${{ runner.temp }}/aap-evidence/evidence-manifest.json
       - name: Upload the evidence bundle
         if: ${{ !cancelled() && steps.manifest.outcome == 'success' }}

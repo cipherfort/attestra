@@ -29,7 +29,7 @@ variable "org_rulesets_available" {
 
 resource "github_team" "appsec" {
   name        = "appsec-platform"
-  description = "Owns Attestra, its reusable workflows and trusted-producer approvals"
+  description = "Owns FortProof, its reusable workflows and trusted-producer approvals"
   privacy     = "closed"
 }
 

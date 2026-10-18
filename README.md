@@ -1,11 +1,11 @@
-# Attestra
+# FortProof
 
-> A [CipherFort](https://github.com/cipherfort) open-source project. The command line, settings (`AAP_*`) and database roles keep the technical prefix `aap`.
+> **FortProof by [CipherFort Security](https://cipherfortsecurity.com)**, open source under Apache-2.0. The command line, settings (`AAP_*`) and database roles keep the technical prefix `aap`.
 
 [![Licence: Apache-2.0](https://img.shields.io/badge/licence-Apache--2.0-blue)](LICENSE)
 [![OpenSSF Best Practices](https://www.bestpractices.dev/projects/15625/badge)](https://www.bestpractices.dev/projects/15625)
 [![OpenSSF Baseline](https://www.bestpractices.dev/projects/15625/baseline)](https://www.bestpractices.dev/en/projects/15625/baseline-1)
-[![OpenSSF Scorecard](https://api.securityscorecards.dev/projects/github.com/cipherfort/attestra/badge)](https://scorecard.dev/viewer/?uri=github.com/cipherfort/attestra)
+[![OpenSSF Scorecard](https://api.securityscorecards.dev/projects/github.com/cipherfort/fortproof/badge)](https://scorecard.dev/viewer/?uri=github.com/cipherfort/fortproof)
 
 Status: **pre-release (0.x)**, not yet production-ready · [Roadmap to 1.0](ROADMAP.md)
 
@@ -56,7 +56,7 @@ AAP_AUTH_MODE=dev AAP_ENV=development uv run aap api --port 8765   # open http:/
 
 Switch between people with **Viewing as** (top right) to see what each role sees. Every integration on one machine,
 including GitLab CE and the scanners: [`deploy/local/`](deploy/local/README.md). Production: the
-[Helm chart](charts/attestra/README.md).
+[Helm chart](charts/fortproof/README.md).
 
 ## What works today, and what doesn't
 
@@ -72,7 +72,7 @@ including GitLab CE and the scanners: [`deploy/local/`](deploy/local/README.md).
 
 | If you want to… | Read |
 |---|---|
-| Read it all online | [cipherfort.github.io/attestra](https://cipherfort.github.io/attestra/) |
+| Read it all online | [fortproof.dev](https://fortproof.dev/) |
 | Understand how it works | [Platform architecture](docs/architecture/02-platform-architecture.md) · [Evidence model](docs/architecture/04-evidence-model.md) · [Control framework](docs/standards/control-framework.md) |
 | See every control | [Control catalogue](docs/standards/control-catalogue.md) (rendered from [`catalogue/controls/controls.yaml`](catalogue/controls/controls.yaml)) |
 | Run it with real integrations | [Local integration stack](deploy/local/README.md) · [Integration bootstrap runbook](docs/operations/integration-bootstrap.md) · [Infrastructure](examples/terraform/azure/README.md) |
@@ -91,7 +91,7 @@ schemas/        database schema, OpenAPI 3.1 spec, evidence manifest, repository
 templates/      the files a team adds to its repository to onboard
 pipelines/      the shipped security pipelines and the aap-evidence manifest tool (see pipelines/README.md)
 deploy/local/   every integration on one machine (Docker Compose + bootstrap script)
-charts/attestra/      Helm chart (production on any Kubernetes)
+charts/fortproof/      Helm chart (production on any Kubernetes)
 deploy/compose/  evaluation stack (Docker Compose)
 examples/       reference Terraform (Azure, AWS) and deployment workflows
 docs/           architecture, standards, guides, operations, runbooks, roadmap backlog
@@ -104,7 +104,7 @@ tools/          validators: catalogue, config, metrics, links, licences
 
 Contributions are welcome: plugins for systems we don't support yet are a good place to start. See [CONTRIBUTING.md](CONTRIBUTING.md) (DCO sign-off, no CLA), [GOVERNANCE.md](GOVERNANCE.md) and the [Code of Conduct](CODE_OF_CONDUCT.md).
 
-Questions and ideas: [Discussions](https://github.com/cipherfort/attestra/discussions). Bugs and feature requests: [Issues](https://github.com/cipherfort/attestra/issues).
+Questions and ideas: [Discussions](https://github.com/cipherfort/fortproof/discussions). Bugs and feature requests: [Issues](https://github.com/cipherfort/fortproof/issues).
 
 Found a vulnerability? Please report it privately: [SECURITY.md](SECURITY.md).
 

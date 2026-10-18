@@ -1,6 +1,6 @@
 # aap-plugin-jsonl (example plugin)
 
-A complete, working plugin for Attestra, kept small on purpose: it sends the platform's curated
+A complete, working plugin for FortProof, kept small on purpose: it sends the platform's curated
 security events to a JSON Lines file that a log shipper collects. Read [the plugin developer guide](../../../docs/develop/plugins.md)
 first; this package is its worked example.
 

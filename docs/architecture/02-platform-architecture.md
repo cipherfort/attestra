@@ -39,7 +39,7 @@ flowchart LR
     GHAS[GHAS: CodeQL,<br/>secret scanning, Dependabot]
     ATT[Artifact attestations<br/>Sigstore]
   end
-  subgraph Plat[Attestra]
+  subgraph Plat[FortProof]
     HOOK[Webhook receiver<br/>internet-facing, write-only]
     API[API + BFF]
     UI[Web UI]

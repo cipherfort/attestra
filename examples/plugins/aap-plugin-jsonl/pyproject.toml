@@ -1,7 +1,7 @@
 [project]
 name = "aap-plugin-jsonl"
 version = "0.1.0"
-description = "Example plugin for Attestra: curated security events as JSON Lines for a log shipper"
+description = "Example plugin for FortProof: curated security events as JSON Lines for a log shipper"
 license = "Apache-2.0"
 requires-python = ">=3.12"
 dependencies = []   # the platform (package `aap`) is the host; plugins must not pin it

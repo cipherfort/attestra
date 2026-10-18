@@ -11,7 +11,7 @@
 
 ### E07-F01-S02: `emit-evidence` composite action · M · Phase 1
 - **Story:** As every capability workflow, I need a shared step that writes the manifest, attests it and uploads the artifact, so that evidence is uniform and verifiable.
-- **Technical:** Builds `evidence-manifest.json` (schema-validated in the action), computes SHA-256 of outputs, `actions/attest` with predicate type `https://cipherfort.github.io/attestra/attestation/evidence/v1`, uploads artifact `aap-evidence-<capability>` (retention 3 days, 1 day if public).
+- **Technical:** Builds `evidence-manifest.json` (schema-validated in the action), computes SHA-256 of outputs, `actions/attest` with predicate type `https://fortproof.dev/attestation/evidence/v1`, uploads artifact `aap-evidence-<capability>` (retention 3 days, 1 day if public).
 - **AC:** The manifest validates against `schemas/evidence/evidence-manifest.schema.json`. The attestation verifies with `gh attestation verify --signer-workflow`. Public-repo mode prints counts only.
 - **Tests:** Canary run. A schema-invalid manifest fails the step.
 

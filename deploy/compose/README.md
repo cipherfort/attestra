@@ -23,5 +23,5 @@ Users with only the `engineer` role see nothing until a platform admin puts them
 a scoped role. The demo applications belong to the demo teams (`claims-team`, ...).
 
 Evaluation, not production: `env: development`, HTTP on localhost, one PostgreSQL container without backups. For
-production use the [Helm chart](../../charts/attestra/README.md) with managed PostgreSQL and S3 (or Azure Blob) with
+production use the [Helm chart](../../charts/fortproof/README.md) with managed PostgreSQL and S3 (or Azure Blob) with
 immutability.

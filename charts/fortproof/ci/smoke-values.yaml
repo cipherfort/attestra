@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: Apache-2.0
-# Values for charts/attestra/ci/smoke.sh (kind): a locally built image, development sign-in, evidence on the pod's /tmp.
+# Values for charts/fortproof/ci/smoke.sh (kind): a locally built image, development sign-in, evidence on the pod's /tmp.
 # Never use these settings outside a throwaway cluster.
 image: { repository: aap, tag: smoke, pullPolicy: Never }
 settings:

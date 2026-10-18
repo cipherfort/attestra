@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "title": "Attestra Helm values",
+  "title": "FortProof Helm values",
   "type": "object",
   "additionalProperties": false,
   "required": ["image", "settings", "secrets"],

@@ -2,7 +2,7 @@
 
 A complete Azure deployment (Container Apps, PostgreSQL, Blob with WORM, Key Vault, Entra ID, Sentinel) plus the AWS
 Security Hub reader role and the GitHub organization settings. Copy and adapt it; the supported, cloud-neutral path is
-the [Helm chart](../../../charts/attestra/README.md).
+the [Helm chart](../../../charts/fortproof/README.md).
 
 Everything the platform runs on, and every external system it integrates with, created from nothing ([ADR-031](../../../adr/ADR-031-integrations-owned-and-bootstrapped-by-the-project.md)). Step-by-step order and human actions: [integration bootstrap runbook](../../../docs/operations/integration-bootstrap.md).
 

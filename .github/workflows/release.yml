@@ -26,7 +26,7 @@ jobs:
         with:
           persist-credentials: false
       - id: name
-        run: echo "image=ghcr.io/${GITHUB_REPOSITORY_OWNER,,}/attestra" >> "$GITHUB_OUTPUT"
+        run: echo "image=ghcr.io/${GITHUB_REPOSITORY_OWNER,,}/fortproof" >> "$GITHUB_OUTPUT"
       - uses: docker/setup-qemu-action@99012661954931238ded8c8b007157a8430204e1 # v4.4.0
       - uses: docker/setup-buildx-action@f87e5991a6d7451dcb8d9637bfbc97413f497069 # v4.4.1
       - name: Build amd64 locally for scanning (nothing is pushed before the scan passes)
@@ -94,15 +94,15 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           version="${TAG#v}"
-          sed -i "s|^version: .*|version: ${version}|; s|^appVersion: .*|appVersion: \"${version}\"|" charts/attestra/Chart.yaml
-          sed -i "s|^  digest: .*|  digest: \"${DIGEST}\"|; s|^  repository: .*|  repository: ${IMAGE}|" charts/attestra/values.yaml
-          cp LICENSE NOTICE charts/attestra/   # the licence travels with the released chart (OSPS-LE-03.02)
-          helm package charts/attestra
+          sed -i "s|^version: .*|version: ${version}|; s|^appVersion: .*|appVersion: \"${version}\"|" charts/fortproof/Chart.yaml
+          sed -i "s|^  digest: .*|  digest: \"${DIGEST}\"|; s|^  repository: .*|  repository: ${IMAGE}|" charts/fortproof/values.yaml
+          cp LICENSE NOTICE charts/fortproof/   # the licence travels with the released chart (OSPS-LE-03.02)
+          helm package charts/fortproof
           echo "$GH_TOKEN" | helm registry login ghcr.io --username "$GITHUB_ACTOR" --password-stdin
-          out=$(helm push "attestra-${version}.tgz" "oci://ghcr.io/${GITHUB_REPOSITORY_OWNER,,}/charts" 2>&1)
+          out=$(helm push "fortproof-${version}.tgz" "oci://ghcr.io/${GITHUB_REPOSITORY_OWNER,,}/charts" 2>&1)
           echo "$out"
           chart_digest=$(echo "$out" | sed -n 's/^Digest: //p')
-          cosign sign --yes "ghcr.io/${GITHUB_REPOSITORY_OWNER,,}/charts/attestra@${chart_digest}"
+          cosign sign --yes "ghcr.io/${GITHUB_REPOSITORY_OWNER,,}/charts/fortproof@${chart_digest}"
       - name: GitHub release with verification instructions
         env:
           TAG: ${{ github.ref_name }}
@@ -120,6 +120,6 @@ jobs:
             --certificate-identity-regexp "^https://github.com/${GITHUB_REPOSITORY}/.github/workflows/release.yml@" \\
             --certificate-oidc-issuer https://token.actions.githubusercontent.com
           \`\`\`
-          Helm: \`helm install attestra oci://ghcr.io/${GITHUB_REPOSITORY_OWNER,,}/charts/attestra --version ${TAG#v}\` (see docs/install/helm.md).
+          Helm: \`helm install fortproof oci://ghcr.io/${GITHUB_REPOSITORY_OWNER,,}/charts/fortproof --version ${TAG#v}\` (see docs/install/helm.md).
           NOTES
-          gh release create "$TAG" attestra-*.tgz --title "$TAG" --notes-file notes.md --verify-tag
+          gh release create "$TAG" fortproof-*.tgz --title "$TAG" --notes-file notes.md --verify-tag

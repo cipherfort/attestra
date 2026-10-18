@@ -1,7 +1,7 @@
 [project]
 name = "aap"
 version = "0.1.0"
-description = "Attestra: control, evidence, risk and maturity engine"
+description = "FortProof: control, evidence, risk and maturity engine"
 readme = "README.md"
 requires-python = ">=3.12,<3.13"
 license = { text = "Apache-2.0" }
@@ -40,7 +40,7 @@ dev = [
 
 [project.scripts]
 aap = "aap.cli:main"
-attestra = "aap.cli:main"   # the product name; `aap` stays the technical prefix
+fortproof = "aap.cli:main"   # the product name; `aap` stays the technical prefix
 
 # Integrations are plugins (ADR-032). Third-party packages add their own entry points to this group.
 [project.entry-points."aap.plugins"]

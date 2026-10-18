@@ -1,6 +1,6 @@
 # Reference Terraform (examples)
 
-Examples to copy and adapt, not the supported install path (that is the [Helm chart](../../charts/attestra/README.md)).
+Examples to copy and adapt, not the supported install path (that is the [Helm chart](../../charts/fortproof/README.md)).
 Both are validated against the real provider schemas and scanned by Checkov in CI. Neither has been applied by this
 project to a real account: expect first-apply adjustments.
 

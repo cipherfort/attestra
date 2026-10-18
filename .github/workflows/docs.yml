@@ -1,5 +1,5 @@
-# Publish the documentation site to GitHub Pages (https://cipherfort.github.io/attestra/), with the JSON schemas
-# served at their $id URLs (…/attestra/schemas/…). The pull-request build check stays in ci.yml (docs-site).
+# Publish the documentation site to GitHub Pages (https://fortproof.dev/), with the JSON schemas
+# served at their $id URLs (https://fortproof.dev/schemas/…). The pull-request build check stays in ci.yml (docs-site).
 name: docs
 on:
   push:

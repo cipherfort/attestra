@@ -30,7 +30,7 @@ module "platform" {
 
 module "entra" {
   source                    = "../../modules/entra"
-  display_prefix            = var.production ? "Attestra" : "Attestra (${var.name})"
+  display_prefix            = var.production ? "FortProof" : "FortProof (${var.name})"
   public_url                = module.platform.public_url
   api_identifier            = "${var.name}-api"
   api_identity_principal_id = module.platform.identities.api.principal_id

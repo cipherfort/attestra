@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://cipherfort.github.io/attestra/schemas/repo-contract/threat-model.schema.json",
+  "$id": "https://fortproof.dev/schemas/repo-contract/threat-model.schema.json",
   "title": ".security/threat-model/*.yaml",
   "description": "Status: DESIGNED. One schema per structured threat-model file, selected via $defs: assets.yaml → #/$defs/assetsFile, threats.yaml → #/$defs/threatsFile, mitigations.yaml → #/$defs/mitigationsFile, residual-risk.yaml → #/$defs/residualRiskFile. IDs are stable across versions (never renumber). Narrative files (system-context.md, data-flow.md, trust-boundaries.md) are free-form Markdown with Mermaid diagrams.",
   "$defs": {

@@ -9,14 +9,14 @@
 
 | Repository | Purpose | Why separate |
 |---|---|---|
-| **`attestra`** (this repository) | Platform code, catalogue, config, docs, packaging (Helm, Compose) and example infrastructure | |
+| **`fortproof`** (this repository) | Platform code, catalogue, config, docs, packaging (Helm, Compose) and example infrastructure | |
 | **`security-workflows`** (yours, created at adoption) | Reusable GitHub Actions workflows consumed by every application repo, released by tag and pinned by SHA | Consumers reference `org/security-workflows/.github/workflows/x.yml@<sha>`. A separate repo gives (a) its own stricter CODEOWNERS and release process, because write access here is effectively write access to every pipeline; (b) a release cadence independent of the platform; (c) a small, auditable trusted-producer surface. |
 | **`.github`** (org) | Org-default `SECURITY.md`, issue templates, workflow templates (starter `aap-security.yml`) | GitHub convention |
 
 ### A.1 This repository
 
 ```text
-attestra/
+fortproof/
 ├── README.md, ROADMAP.md, SECURITY.md, CONTRIBUTING.md, GOVERNANCE.md
 ├── adr/                          architecture decision records (ADR-001 onwards, with an index)
 ├── docs/
@@ -36,7 +36,7 @@ attestra/
 ├── frontend/                     React + TypeScript UI (types generated from the OpenAPI document)
 ├── pipelines/                    shipped GitHub workflows and GitLab CI components, plus the aap-evidence tool
 ├── templates/repo-contract/      files an application repository adds to onboard
-├── charts/attestra/              Helm chart
+├── charts/fortproof/              Helm chart
 ├── deploy/                       compose/ (evaluation stack) and local/ (every integration on one machine)
 ├── examples/                     Terraform (Azure, AWS), deployment workflows, an example plugin
 ├── tests/database/               database security-property tests

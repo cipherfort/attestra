@@ -43,7 +43,7 @@ terraform output                            # public_url, webhook_url, registry,
 This creates everything in [ADR-031 section 1](../../adr/ADR-031-integrations-owned-and-bootstrapped-by-the-project.md#decision) except the GitHub, AWS and Jira items. Verify:
 - Key Vault, PostgreSQL and evidence storage have no public network access (the Key Vault is open only to `operator_ip_ranges`).
 - The evidence storage account shows a version-level immutability policy in state **Unlocked**.
-- The `aap-role-*` groups exist and are assigned to the `Attestra (web)` enterprise application, with "assignment required" on.
+- The `aap-role-*` groups exist and are assigned to the `FortProof (web)` enterprise application, with "assignment required" on.
 
 ## 3. First image and database (platform engineer)
 

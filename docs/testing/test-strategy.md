@@ -1,4 +1,4 @@
-# Test Strategy: Attestra
+# Test Strategy: FortProof
 
 | | |
 |---|---|

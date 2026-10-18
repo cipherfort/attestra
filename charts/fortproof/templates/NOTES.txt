@@ -1,4 +1,4 @@
-Attestra {{ .Chart.AppVersion }} installed as {{ include "aap.fullname" . }}.
+FortProof {{ .Chart.AppVersion }} installed as {{ include "aap.fullname" . }}.
 
 Image: {{ include "aap.image" . }}
 {{- if not .Values.image.digest }}

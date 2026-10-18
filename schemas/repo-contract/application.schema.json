@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://cipherfort.github.io/attestra/schemas/repo-contract/application.schema.json",
+  "$id": "https://fortproof.dev/schemas/repo-contract/application.schema.json",
   "title": ".security/application.yaml",
   "description": "Status: DESIGNED. Declared application metadata (confidence C0 until verified by the platform). Classification values are labels from config/profiles/<profile>/classification.yaml; the platform rejects labels the active model does not define.",
   "type": "object",

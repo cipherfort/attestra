@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://cipherfort.github.io/attestra/schemas/evidence/evidence-manifest.schema.json",
+  "$id": "https://fortproof.dev/schemas/evidence/evidence-manifest.schema.json",
   "title": "Evidence manifest (produced inside an approved reusable security workflow)",
   "description": "Status: DESIGNED. Written by the reusable workflow as evidence-manifest.json, attested with actions/attest (predicate type below), uploaded as artifact 'aap-evidence-<tool>'. The platform treats every field as UNTRUSTED until verified against the GitHub API (run, referenced_workflows, head_sha) and the attestation.",
   "type": "object",
@@ -23,7 +23,7 @@
       "const": "1.0"
     },
     "predicate_type": {
-      "const": "https://cipherfort.github.io/attestra/attestation/evidence/v1"
+      "const": "https://fortproof.dev/attestation/evidence/v1"
     },
     "evidence_type": {
       "enum": [

@@ -122,8 +122,8 @@ resource "aws_s3_bucket_policy" "evidence" {
 }
 
 locals {
-  # the chart's naming: the release name if it already contains "attestra", else <release>-attestra
-  service_account = strcontains(var.release, "attestra") ? var.release : "${var.release}-attestra"
+  # the chart's naming: the release name if it already contains "fortproof", else <release>-fortproof
+  service_account = strcontains(var.release, "fortproof") ? var.release : "${var.release}-fortproof"
 }
 
 # The platform's service account (IRSA): read and add evidence, nothing else. No delete, no lock changes.

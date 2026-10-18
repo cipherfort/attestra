@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: Apache-2.0
-# Attestra: one image, three processes (aap api | aap hook | aap worker), plus jobs.
+# FortProof: one image, three processes (aap api | aap hook | aap worker), plus jobs.
 # Base images pinned by digest; gh pinned by version + sha256 (attestation verification backend for private repos).
 # Built, scanned and attested by .github/workflows/release.yml; runs as an unprivileged user with a read-only root.
 
@@ -47,7 +47,7 @@ COPY pipelines /app/pipelines
 # the licence travels with the released image (OpenSSF Baseline OSPS-LE-03.02)
 COPY LICENSE NOTICE /app/
 LABEL org.opencontainers.image.licenses="Apache-2.0" \
-      org.opencontainers.image.source="https://github.com/cipherfort/attestra"
+      org.opencontainers.image.source="https://github.com/cipherfort/fortproof"
 ENV PATH=/app/backend/.venv/bin:$PATH AAP_REPO_ROOT=/app AAP_STATIC_DIR=/app/frontend/dist \
     PYTHONUNBUFFERED=1 PYTHONDONTWRITEBYTECODE=1
 USER 10001

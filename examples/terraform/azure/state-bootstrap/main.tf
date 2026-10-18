@@ -57,7 +57,7 @@ resource "azurerm_management_lock" "state" {
   name       = "do-not-delete"
   scope      = azurerm_storage_account.state.id
   lock_level = "CanNotDelete"
-  notes      = "Terraform state for Attestra"
+  notes      = "Terraform state for FortProof"
 }
 
 output "backend_config" {
