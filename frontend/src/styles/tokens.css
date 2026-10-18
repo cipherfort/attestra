@@ -19,8 +19,17 @@
   --accent: #3987e5;
   --accent-ink: #86b6ef;
   --accent-soft: rgba(57, 135, 229, 0.16);
+  --accent-solid: #256abf; /* filled controls with white text: 5.4:1 */
   --ring: #3987e5;
   --series-1: #3987e5;
+  --series-2: #d95926;
+  --series-3: #199e70;
+  /* sequential (one hue, blue): low values recede toward the surface */
+  --seq-1: #184f95;
+  --seq-2: #1c5cab;
+  --seq-3: #2a78d6;
+  --seq-4: #5598e7;
+  --seq-5: #9ec5f4;
   --good: #0ca30c;
   --warning: #fab219;
   --serious: #ec835a;
@@ -49,8 +58,16 @@
   --accent: #2a78d6;
   --accent-ink: #1c5cab;
   --accent-soft: rgba(42, 120, 214, 0.12);
+  --accent-solid: #256abf;
   --ring: #2a78d6;
   --series-1: #2a78d6;
+  --series-2: #eb6834;
+  --series-3: #1baf7a;
+  --seq-1: #cde2fb;
+  --seq-2: #9ec5f4;
+  --seq-3: #5598e7;
+  --seq-4: #2a78d6;
+  --seq-5: #184f95;
   --unevaluated: #c3c2b7;
   --good-ink: #006300;
   --critical-ink: #b42828;

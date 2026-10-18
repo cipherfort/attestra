@@ -1,15 +1,20 @@
 // SPDX-License-Identifier: Apache-2.0
+import { lazy } from "react";
 import { createBrowserRouter, Navigate, useParams } from "react-router";
 import { AppShell } from "./components/shell/AppShell";
-import { Admin } from "./pages/Admin";
-import { Application } from "./pages/Application";
-import { Assessments } from "./pages/Assessments";
-import { EvidencePage, FindingPage } from "./pages/Detail";
-import { Exceptions } from "./pages/Exceptions";
-import { Integrations } from "./pages/Integrations";
-import { CvePage, Leadership } from "./pages/Org";
-import { Portfolio } from "./pages/Portfolio";
-import { Register } from "./pages/Register";
+
+// Each page is its own chunk, so the first load carries only the shell.
+const Admin = lazy(() => import("./pages/Admin").then((m) => ({ default: m.Admin })));
+const Application = lazy(() => import("./pages/Application").then((m) => ({ default: m.Application })));
+const Assessments = lazy(() => import("./pages/Assessments").then((m) => ({ default: m.Assessments })));
+const EvidencePage = lazy(() => import("./pages/Detail").then((m) => ({ default: m.EvidencePage })));
+const FindingPage = lazy(() => import("./pages/Detail").then((m) => ({ default: m.FindingPage })));
+const Exceptions = lazy(() => import("./pages/Exceptions").then((m) => ({ default: m.Exceptions })));
+const Integrations = lazy(() => import("./pages/Integrations").then((m) => ({ default: m.Integrations })));
+const CvePage = lazy(() => import("./pages/Org").then((m) => ({ default: m.CvePage })));
+const Leadership = lazy(() => import("./pages/Org").then((m) => ({ default: m.Leadership })));
+const Portfolio = lazy(() => import("./pages/Portfolio").then((m) => ({ default: m.Portfolio })));
+const Register = lazy(() => import("./pages/Register").then((m) => ({ default: m.Register })));
 
 function useId(): string {
   return useParams().id ?? "";

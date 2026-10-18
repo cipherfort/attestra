@@ -1,8 +1,9 @@
 // SPDX-License-Identifier: Apache-2.0
 import * as Tooltip from "@radix-ui/react-tooltip";
-import { useEffect, useState, type MouseEvent } from "react";
+import { Suspense, useEffect, useState, type MouseEvent } from "react";
 import { Outlet, useNavigate } from "react-router";
 import { useMe } from "../../hooks/useMe";
+import { SkeletonRows } from "../ui/States";
 import { CommandPalette } from "./CommandPalette";
 import { DevBanner } from "./DevBanner";
 import { Sidebar } from "./Sidebar";
@@ -35,7 +36,7 @@ export function AppShell() {
   return (
     <Tooltip.Provider delayDuration={300}>
       <div className="flex min-h-screen bg-page text-ink" onClick={onClick}>
-        <a href="#main" className="sr-only focus:not-sr-only focus:fixed focus:left-3 focus:top-3 focus:z-50 focus:rounded focus:bg-accent focus:px-3 focus:py-2 focus:text-white">
+        <a href="#main" className="sr-only focus:not-sr-only focus:fixed focus:left-3 focus:top-3 focus:z-50 focus:rounded focus:bg-accent-solid focus:px-3 focus:py-2 focus:text-white">
           Skip to content
         </a>
         <Sidebar me={me.data} />
@@ -43,7 +44,9 @@ export function AppShell() {
           <DevBanner me={me.data} />
           <TopBar me={me.data} onSearch={() => setPalette(true)} />
           <main id="main" className="mx-auto w-full max-w-[1400px] px-8 py-6">
-            <Outlet />
+            <Suspense fallback={<SkeletonRows rows={8} />}>
+              <Outlet />
+            </Suspense>
           </main>
         </div>
         <CommandPalette open={palette} onClose={() => setPalette(false)} me={me.data} />
