@@ -5,6 +5,14 @@ messages (`feat:`, `fix:`, `docs:` ...); see [RELEASING.md](RELEASING.md).
 
 ## 0.1.0 (2026-10-20)
 
+First public preview: the evidence engine, all 48 control evaluators, GitHub and GitLab, shipped security pipelines
+and components, built-in vulnerability intelligence, exceptions, assessments, administration, the web UI, the Helm
+chart and the Compose evaluation stack. Tested end to end on a real GitHub organization
+([guide](docs/guides/github-e2e.md)). See [ROADMAP.md](ROADMAP.md) for what 1.0 adds.
+
+The project was called Attestra before its first release; it was renamed FortProof to avoid a clash with an existing
+security product of that name.
+
 
 ### ⚠ BREAKING CHANGES
 
@@ -27,12 +35,3 @@ messages (`feat:`, `fix:`, `docs:` ...); see [RELEASING.md](RELEASING.md).
 * **findings:** close dependency findings when the next SBOM drops the component ([#47](https://github.com/cipherfort/fortproof/issues/47)) ([37e8958](https://github.com/cipherfort/fortproof/commit/37e8958357f31175af9e3e64f6db87c432d30349))
 * **gitlab-issues:** create labels before the issue so deduplication cannot break ([#30](https://github.com/cipherfort/fortproof/issues/30)) ([372adb5](https://github.com/cipherfort/fortproof/commit/372adb5b0faae0f7aa525a29e68c571e4f4b0f8c))
 * **worker:** keep the scheduler sweep running ([#43](https://github.com/cipherfort/fortproof/issues/43)) ([bd734c0](https://github.com/cipherfort/fortproof/commit/bd734c0f654c031b152dfc10f1aa8e7545605e4e))
-
-## 0.1.0 (unreleased)
-
-The project was called Attestra before its first release; it was renamed FortProof to avoid a clash with an existing
-security product of that name.
-
-First public preview: the evidence engine, all 48 control evaluators, GitHub and GitLab, shipped security pipelines
-and components, built-in vulnerability intelligence, exceptions, assessments, administration, the Helm chart and the
-Compose evaluation stack. See [ROADMAP.md](ROADMAP.md) for what 1.0 adds.
