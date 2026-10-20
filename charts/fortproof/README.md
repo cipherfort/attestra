@@ -39,8 +39,14 @@ kubectl -n aap create secret generic aap-secrets \
 helm install fortproof oci://ghcr.io/cipherfort/charts/fortproof --version <version> -n fortproof -f my-values.yaml
 ```
 
+The commands for the latest release, with its version filled in: [docs/install/helm.md](../../docs/install/helm.md).
+
 `settings` is the platform's `aap.yaml` (`schemas/settings/aap.schema.json`): public URL, OIDC issuer and client, the
-evidence store and plugin settings. It must not contain secrets. Production (`env: production`) refuses development
+evidence store and plugin settings. It must not contain secrets.
+
+The image carries the default rules (`config/`, `catalogue/`). To run with your own (needed before your security
+workflows' evidence is accepted), build an image on top of the release with your rules copied in and set
+`image.repository` and `image.digest` to it ([how](../../docs/guide/connect-your-organization.md#2-your-rules)). Production (`env: production`) refuses development
 sign-in and the file secret store, and requires write-once evidence storage.
 
 For S3 on EKS, annotate the service account for IRSA (`serviceAccount.annotations`); on AKS use Azure workload identity.

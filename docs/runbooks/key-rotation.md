@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Related | [ADR-015](../../adr/ADR-015-secrets-management.md) · [ADR-005](../../adr/ADR-005-github-primary-source-integration.md) · [Integration bootstrap](../operations/integration-bootstrap.md) |
+| Related | [ADR-015](../../adr/ADR-015-secrets-management.md) · [ADR-005](../../adr/ADR-005-github-primary-source-integration.md) · [Reference deployment on Azure](../operations/integration-bootstrap.md) |
 | Principle | Where the upstream system allows two credentials at once, make the new one live before revoking the old. Record every rotation as a change. |
 
 Secrets are stored with `aap secrets put <name>` (value from a hidden prompt or standard input) in the deployment's

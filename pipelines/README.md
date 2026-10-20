@@ -15,8 +15,9 @@ repository, so you control and approve exactly which code is trusted to produce 
 | `test-evidence.yml` | `test.security` | your tests (JUnit) | Tag tests with `asvs` / `threat` properties; see below |
 | `deploy-evidence.yml` | `deploy.record` | `gh attestation verify` | Call from CD before deploying; records verified + image age |
 
-Status: IMPLEMENTED and linted (actionlint, shellcheck, zizmor) in CI. REQUIRES EXTERNAL CONFIGURATION: they have not
-run end to end until you publish them to a GitHub organization (step 2 below).
+Status: IMPLEMENTED, linted in CI (actionlint, shellcheck, zizmor), and run on a real GitHub organization, where the
+platform accepted their evidence at C3 ([GitHub end to end](../docs/guides/github-e2e.md)). They produce evidence for
+you once you publish them in your organization (below).
 
 ## How evidence stays trustworthy
 
@@ -36,18 +37,20 @@ and container images (every one pinned to a commit SHA or image digest).
 
 ## Set up (once per organization)
 
+Run from `fortproof/backend` in a checkout of the release you deploy. The full walk-through, from installing the
+platform to the first application: [Connect your organization](../docs/guide/connect-your-organization.md).
+
 ```bash
-# 1. Create <org>/security-workflows (internal or public), allow access from the organization's repositories:
-#    Settings → Actions → General → Access → "Accessible from repositories in the organization".
-git clone https://github.com/<org>/security-workflows && cd backend
-# 2. Render the workflows into it, review, commit, push, tag
+# 1. Create <org>/security-workflows (internal or public), allow access from the organization's repositories
+#    (Settings → Actions → General → Access → "Accessible from repositories in the organization"), clone it next to fortproof/.
+# 2. Render the workflows into it; review, commit, tag and push there
 uv run aap pipelines export --to ../../security-workflows
-#    (in security-workflows) git add . && git commit -s -m "aap pipelines v1.0.0" && git push && git tag v1.0.0 && git push --tags
-# 3. Trust that commit (edits config/trusted-producers.yaml; merge it through review)
+#    cd ../../security-workflows && git add . && git commit -s -m "security workflows v1.0.0" && git tag v1.0.0 && git push && git push --tags
+# 3. Trust that commit (edits config/trusted-producers.yaml; merge it through review into the rules you deploy)
 uv run aap pipelines approve --repository <org>/security-workflows --sha <full commit SHA> --release v1.0.0
-# 4. Give application repositories their caller workflow
+# 4. Give each application repository its caller workflow
 uv run aap pipelines caller --repository <org>/security-workflows --sha <full commit SHA> --release v1.0.0 \
-  > .github/workflows/aap-security.yml   # in each application repository
+  > .github/workflows/aap-security.yml   # written into the application repository
 ```
 
 Upgrades follow the same path: change `pipelines/github/`, export, review, tag, approve. The previous release stays
@@ -82,5 +85,6 @@ the tests were written, which is why ASVS coverage also counts manual verificati
 
 ## GitLab
 
-GitLab CI components arrive with M3 (see `pipelines/gitlab/` and ADR-033). `aap_evidence.py` already reads GitLab CI's
-variables.
+The GitLab CI/CD components are in `pipelines/gitlab/`, set up the same way with `--provider gitlab`:
+[GitLab guide](../docs/guides/gitlab-guide.md). GitLab evidence is capped at C2
+([ADR-033](../adr/ADR-033-gitlab-evidence-trust.md)).

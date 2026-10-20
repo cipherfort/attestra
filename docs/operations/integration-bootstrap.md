@@ -1,4 +1,8 @@
-# Integration Bootstrap Runbook
+# Reference deployment on Azure
+
+One complete, worked deployment: Azure Container Apps, Entra ID, Key Vault and Sentinel, with GitHub, Jira and the
+scanners, built from [examples/terraform/azure](../../examples/terraform/azure/README.md). On any other Kubernetes, use
+[Helm](../install/helm.md) and [Connect your organization](../guide/connect-your-organization.md) instead.
 
 | | |
 |---|---|
@@ -16,7 +20,7 @@ These are the only things that cannot be created as code. The project sponsor ap
 | Account | Why | Notes |
 |---|---|---|
 | Entra tenant + Azure subscription | Hosts the platform, identities, Sentinel | Use the organization's tenant if one exists and the project is given its own subscription. Otherwise a new tenant. |
-| GitHub organization | Source of truth for repositories and evidence | **Plan matters** (decision D-018): Enterprise Cloud is needed for attestations on private repositories (otherwise C2 at most) and for organization rulesets. |
+| GitHub organization | Source of truth for repositories and evidence | **Plan matters**: Enterprise Cloud is needed for attestations on private repositories (otherwise C2 at most) and for organization rulesets. |
 | Jira Cloud site (or an existing site with a project the platform owns) | Remediation tickets | A service account (a licensed user) owns the API token. |
 | AWS account for Security Hub aggregation (only if AWS is in scope) | Cloud posture | Delegated administrator for Security Hub in the AWS organization. |
 
@@ -45,9 +49,11 @@ This creates everything in [ADR-031 section 1](../../adr/ADR-031-integrations-ow
 - The evidence storage account shows a version-level immutability policy in state **Unlocked**.
 - The `aap-role-*` groups exist and are assigned to the `FortProof (web)` enterprise application, with "assignment required" on.
 
-## 3. First image and database (platform engineer)
+## 3. Image and database (platform engineer)
 
-Before the release workflow exists in the GitHub organization, build the first image in Azure:
+Container Apps pull from the registry Terraform created. Build your image there: the platform with your rules, from
+your fork of this repository (as below), or a two-line Dockerfile on top of a release
+([your rules](../guide/connect-your-organization.md#2-your-rules)):
 
 ```bash
 az acr build -r <registry> -t aap:$(git rev-parse --short HEAD) .
@@ -70,7 +76,7 @@ Then add an NVD API key to Dependency-Track (free; request it at nvd.nist.gov/de
 ## 5. Sign-in (people with Entra Groups Administrator)
 
 1. Add people to the `aap-role-*` groups: `aap-role-appsec-engineer`, `aap-role-security-leadership`, and so on. Make `platform_admin` PIM-eligible only.
-2. Scoped roles (champion, business unit lead): add people to the `aap-<scoped group>` groups. A platform admin then maps each group to a scoped role assignment (`role_assignments`, `principal_type = entra_group`). There is no admin UI yet: backlog E13-F01-S03.
+2. Scoped roles (champion, business unit lead): grant them to people on the **Admin** page, or to an Entra group through the API (`POST /api/v1/admin/role-assignments` with `principal_type: idp_group`). A unit can also take its members from an Entra group (`idp_group_id`).
 
 Verify: sign in at `public_url`. `/api/v1/users/me` lists the expected roles. A user in no group is refused by Entra ("assignment required").
 
@@ -82,7 +88,7 @@ GITHUB_TOKEN=$(gh auth token) terraform apply -var org=<org> -var 'appsec_mainta
   -var org_rulesets_available=<true on Team/Enterprise>
 ```
 
-Creates `security-workflows` with protection, immutable release tags, the `appsec-platform` team, and an allowlist-only Actions policy. Set `workflow_repository` in `config/trusted-producers.yaml` to the output (by PR). The first release of the workflows populates `approved_shas` (E07-F03-S01).
+Creates `security-workflows` with protection, immutable release tags, the `appsec-platform` team, and an allowlist-only Actions policy. Set `workflow_repository` in `config/trusted-producers.yaml` to the output (by PR). `aap pipelines approve` adds each released commit of the workflows ([shipped pipelines](../../pipelines/README.md)).
 
 ## 7. GitHub App (GitHub organization owner, at a workstation)
 
@@ -101,7 +107,7 @@ Verify: `aap integrations run github` ends `ok` or `partial`. Partial lists repo
 
 ## 8. Cloud posture
 
-- **Azure:** `defender_scopes` in step 2 already granted Reader + Security Reader. Choosing the scopes is decision D-015.
+- **Azure:** `defender_scopes` in step 2 already granted Reader + Security Reader. Which scopes to cover is your decision (below).
 - **AWS (AWS administrator of the aggregation account):**
 
   ```bash
@@ -139,10 +145,10 @@ Verify: within 24 hours a `checkpoint.daily` row arrives. The rule "no evidence 
 
 | Decision | Default until decided |
 |---|---|
-| D-015 Defender / AWS coverage scopes | Only the scopes listed in tfvars |
-| D-016 Lock the evidence WORM policy (irreversible) | `Unlocked` (evaluation) |
-| D-017 Jira projects per business unit | One `SEC` project |
-| D-018 GitHub plan (Enterprise for private-repo attestations and org rulesets) | Repository rulesets; private-repo evidence capped at C2 |
+| Defender / AWS coverage scopes | Only the scopes listed in tfvars |
+| Lock the evidence WORM policy (irreversible) | `Unlocked` (evaluation) |
+| Jira projects per business unit | One `SEC` project |
+| GitHub plan (Enterprise Cloud for private-repo attestations and org rulesets) | Repository rulesets; private-repo evidence capped at C2 |
 | Records-management approval of retention (ADR-017) | 7-year WORM period, unlocked |
 
 ## 12. Local equivalent (developers, CI)

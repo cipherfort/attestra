@@ -15,6 +15,7 @@ It judges each security control from verified evidence (what your pipelines and 
 | [Getting started](getting-started.md) | The platform and its demo running on your machine in about 15 minutes, with Docker only |
 | [Install with Helm](install/helm.md) | Production on Kubernetes, with managed PostgreSQL and object storage |
 | [Evaluate with Docker Compose](install/compose.md) | A complete evaluation stack, including sign-in through Keycloak |
+| [Connect your organization](guide/connect-your-organization.md) | Your GitHub or GitLab, your rules, and your first application with verified evidence |
 | [Configure](configure/index.md) | Settings, integrations and the rules you can change |
 | [User guide](guide/user-guide.md) | Daily use, role by role |
 
@@ -34,7 +35,8 @@ repository → security pipeline → evidence (verified) → controls → findin
 
 Every integration is optional and starts unconfigured; until one is set up, the controls that depend on it show *No evidence*, never a pass.
 
-- [Integration bootstrap](operations/integration-bootstrap.md): source control, sign-in, ticketing, vulnerability data, cloud posture, SIEM and storage
+- [Connect your organization](guide/connect-your-organization.md): from an installed platform to your first application with verified evidence
+- [Reference deployment on Azure](operations/integration-bootstrap.md): Container Apps, Entra ID, Key Vault and Sentinel, with GitHub, Jira and the scanners
 - Guides: [GitHub end to end](guides/github-e2e.md) · [GitLab](guides/gitlab-guide.md) · [Jira](guides/jira-integration-guide.md) · [SIEM and SOC](guides/soc-integration-guide.md) · [Cloud security](guides/cloud-security-integration-guide.md) · [ASVS](guides/asvs-implementation-guide.md)
 - [Writing a plugin](develop/plugins.md)
 

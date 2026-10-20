@@ -33,6 +33,7 @@ nav:
   - Install:
       - Kubernetes (Helm): install/helm.md
       - Evaluate (Docker Compose): install/compose.md
+  - Connect your organization: guide/connect-your-organization.md
   - Configure: configure/index.md
   - User guide: guide/user-guide.md
   - Security model: security/security-model.md
@@ -73,7 +74,7 @@ nav:
       - Jira: guides/jira-integration-guide.md
       - SOC: guides/soc-integration-guide.md
   - Operations:
-      - Integration bootstrap: operations/integration-bootstrap.md
+      - Reference deployment on Azure: operations/integration-bootstrap.md
       - Operations runbook: operations/platform-operations-runbook.md
       - Disaster recovery: operations/disaster-recovery-plan.md
       - Backup and restore: operations/backup-and-restore-plan.md

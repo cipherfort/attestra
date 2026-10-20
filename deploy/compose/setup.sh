@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
 # SPDX-License-Identifier: Apache-2.0
 # Evaluate the platform with Docker Compose: generate every secret, start the stack, load the demo world.
-#   deploy/compose/setup.sh             # uses the published image (AAP_IMAGE) or builds one from this checkout
+#   AAP_IMAGE=ghcr.io/cipherfort/fortproof:vX.Y.Z deploy/compose/setup.sh   # a released image
+#   deploy/compose/setup.sh             # without AAP_IMAGE: builds one from this checkout
 #   deploy/compose/setup.sh --build     # always build from this checkout
 # Then sign in at http://localhost:8000 as appsec / lead / admin / dev (password printed at the end).
 set -euo pipefail
