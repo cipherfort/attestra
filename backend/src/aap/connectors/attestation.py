@@ -1,7 +1,8 @@
 # SPDX-License-Identifier: Apache-2.0
 """Sigstore verification of GitHub artifact attestations (ADR-030, evidence model section 4 step 3).
 
-A security-workflows release attests the evidence manifest with `actions/attest-build-provenance`. The platform:
+A security-workflows release signs the evidence manifest with `actions/attest`, predicate type
+`https://fortproof.dev/attestation/evidence/v1` (SLSA provenance v1 over the manifest is accepted too). The platform:
 
 1. lists attestations for the manifest's sha256 (`GET /repos/{repo}/attestations/sha256:{digest}`), reading an inline
    `bundle` or the snappy-compressed `bundle_url` GitHub now serves;
@@ -39,6 +40,10 @@ from aap.domain.evidence import AttestationCheck
 
 GITHUB_ACTIONS_ISSUER = "https://token.actions.githubusercontent.com"
 PROVENANCE_V1 = "https://slsa.dev/provenance/v1"
+EVIDENCE_V1 = "https://fortproof.dev/attestation/evidence/v1"  # what the shipped workflows attest
+# The predicate type only labels the statement; what makes it trustworthy is the certificate (signer workflow,
+# repository, commit), checked the same way for both.
+ACCEPTED_PREDICATES = (EVIDENCE_V1, PROVENANCE_V1)
 MAX_BUNDLE_BYTES = 256 * 1024  # a provenance bundle is ~5 KB; anything near this is hostile
 
 # Fulcio certificate extensions (https://github.com/sigstore/fulcio/blob/main/docs/oid-info.md)
@@ -129,6 +134,9 @@ class GhCliBackend:
     timeout: float = 30.0
 
     def verify(self, bundle_json: bytes, subject: bytes, source_repository: str) -> dict[str, Any]:
+        predicate = predicate_type_of(bundle_json)  # gh filters by predicate type; ask for the one the bundle declares
+        if predicate not in ACCEPTED_PREDICATES:
+            raise ValueError(f"predicate {predicate} is neither FortProof evidence nor SLSA provenance")
         with tempfile.TemporaryDirectory() as d:
             art, bun, cfg = Path(d) / "subject", Path(d) / "bundle.json", Path(d) / "gh"
             art.write_bytes(subject)
@@ -147,7 +155,7 @@ class GhCliBackend:
                     "--repo",
                     source_repository,
                     "--predicate-type",
-                    PROVENANCE_V1,
+                    predicate,
                     "--format",
                     "json",
                 ],
@@ -279,9 +287,11 @@ class AttestationVerifier:
             subjects = {s["digest"]["sha256"] for s in statement["subject"] if "sha256" in s.get("digest", {})}
         except (ValueError, KeyError, TypeError):
             return AttestationCheck(False, None, "in-toto statement unparseable")
-        if statement.get("predicateType") != PROVENANCE_V1:
+        if statement.get("predicateType") not in ACCEPTED_PREDICATES:
             return AttestationCheck(
-                False, None, f"predicate {statement.get('predicateType')} is not SLSA provenance v1"
+                False,
+                None,
+                f"predicate {statement.get('predicateType')} is neither FortProof evidence nor SLSA provenance",
             )
         if subject_sha256 not in subjects:
             return AttestationCheck(False, None, "attestation subject does not include the manifest digest")
@@ -314,6 +324,12 @@ def bundles_from_listing(listing: dict[str, object], fetch: Callable[[str], byte
         elif isinstance(att.get("bundle_url"), str) and att["bundle_url"].startswith("https://"):
             out.append(decode_bundle(fetch(att["bundle_url"])))
     return out
+
+
+def predicate_type_of(bundle_json: bytes) -> str:
+    """The predicate type a bundle's in-toto statement declares (unverified; used only to choose what to verify)."""
+    env = json.loads(bundle_json)["dsseEnvelope"]
+    return str(json.loads(base64.b64decode(env["payload"])).get("predicateType", ""))
 
 
 def subject_of(bundle_json: bytes) -> list[str]:
