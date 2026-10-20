@@ -51,12 +51,20 @@ def ingest_cyclonedx(
     generated_at: Any,
 ) -> SbomStats:
     count, pct, problems = assess_quality(bom)
-    conn.execute(text("UPDATE sboms SET is_current = false WHERE scope_key = :k AND is_current"), {"k": scope_key})
+    # The newest SBOM of a scope is the current one, whatever order runs are ingested in (a late webhook, or the
+    # reconciliation catching up): an older one is kept as history and never displaces a newer one.
+    newer = conn.execute(
+        text("SELECT 1 FROM sboms WHERE scope_key = :k AND is_current AND generated_at > :gen"),
+        {"k": scope_key, "gen": generated_at},
+    ).first()
+    current = newer is None
+    if current:
+        conn.execute(text("UPDATE sboms SET is_current = false WHERE scope_key = :k AND is_current"), {"k": scope_key})
     sbom_id = str(uuid7())
     conn.execute(
         text("""INSERT INTO sboms (id, application_id, repository_id, scope_key, commit_sha, format, spec_version,
                   serial_number, component_count, purl_coverage_pct, evidence_id, is_current, generated_at)
-                VALUES (:id, :a, :r, :k, :sha, 'cyclonedx', :spec, :serial, :n, :pct, :ev, true, :gen)"""),
+                VALUES (:id, :a, :r, :k, :sha, 'cyclonedx', :spec, :serial, :n, :pct, :ev, :cur, :gen)"""),
         {
             "id": sbom_id,
             "a": application_id,
@@ -68,6 +76,7 @@ def ingest_cyclonedx(
             "n": count,
             "pct": pct,
             "ev": evidence_id,
+            "cur": current,
             "gen": generated_at,
         },
     )
@@ -99,6 +108,12 @@ def ingest_cyclonedx(
                 "INSERT INTO sbom_components (sbom_id, component_id, scope) VALUES (:s, :c, :scope) ON CONFLICT DO NOTHING"
             ),
             {"s": sbom_id, "c": comp.id, "scope": scope},
+        )
+    if current and not problems and count > 0:  # an empty or broken SBOM proves nothing: unknown is never closed
+        from aap.store import findings_store
+
+        findings_store.close_dependencies_absent(
+            conn, scope_ref=scope_key, sbom_id=sbom_id, evidence_id=evidence_id, at=generated_at
         )
     return SbomStats(sbom_id, count, pct, not problems, tuple(problems))
 
