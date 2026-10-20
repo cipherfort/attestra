@@ -97,3 +97,43 @@ def test_an_empty_sbom_closes_nothing(engine, fresh_app):
         vuln_service.raise_dependency_findings(conn, vid, datetime.now(UTC))
         _sbom(conn, app_id, scope, _bom())  # a scan that saw nothing is not proof of a fix
         assert _finding(conn, scope).status == "new"
+
+
+def test_an_older_sbom_ingested_late_never_becomes_current_or_reopens(engine, fresh_app):
+    """Runs can be ingested out of order (a late webhook, or the reconciliation catching up): the newest SBOM stays
+    current, and the stale one neither displaces it nor brings the vulnerable component back."""
+    from datetime import timedelta
+
+    app_id, scope = fresh_app("Dependency Late Sbom", "990303"), f"repo:test-{uuid.uuid4().hex[:8]}"
+    now = datetime.now(UTC)
+    with transaction(engine, "aap_worker") as conn:
+        repo = conn.execute(
+            text("""SELECT r.id FROM repositories r JOIN application_repositories ar ON ar.repository_id = r.id
+                    WHERE ar.application_id = :a LIMIT 1"""),
+            {"a": app_id},
+        ).scalar_one()
+
+        def ingest(purl: str, at: datetime) -> None:
+            supply_chain.ingest_cyclonedx(
+                conn,
+                application_id=app_id,
+                repository_id=str(repo),
+                scope_key=scope,
+                commit_sha=None,
+                bom=_bom(purl),
+                evidence_id=str(uuid.uuid4()),
+                generated_at=at,
+            )
+
+        ingest("pkg:pypi/pyyaml@6.0.2", now)  # the newer run arrives first
+        ingest("pkg:pypi/pyyaml@5.3", now - timedelta(hours=1))  # then the older one
+        current = (
+            conn.execute(
+                text("""SELECT c.purl FROM sboms s JOIN sbom_components sc ON sc.sbom_id = s.id
+                    JOIN components c ON c.id = sc.component_id WHERE s.scope_key = :k AND s.is_current"""),
+                {"k": scope},
+            )
+            .scalars()
+            .all()
+        )
+        assert current == ["pkg:pypi/pyyaml@6.0.2"]
