@@ -37,6 +37,7 @@ MAPPING: dict[str, str] = {
     "secrets.backend": "AAP_SECRETS_BACKEND",
     "secrets.dir": "AAP_SECRETS_DIR",
     "secrets.keyvault_url": "AAP_KEYVAULT_URL",
+    "worker.scheduler_interval": "AAP_SCHEDULER_INTERVAL",
     "evidence_store.kind": "AAP_BLOB_KIND",
     "evidence_store.root": "AAP_BLOB_ROOT",
     "evidence_store.container": "AAP_BLOB_CONTAINER",

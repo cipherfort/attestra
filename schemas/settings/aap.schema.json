@@ -38,6 +38,15 @@
         "keyvault_url": { "type": "string", "pattern": "^https://" }
       }
     },
+    "worker": {
+      "type": "object", "additionalProperties": false,
+      "properties": {
+        "scheduler_interval": {
+          "type": "integer", "minimum": 60, "maximum": 86400,
+          "description": "Seconds between scheduler sweeps: integration syncs that are due, deadline breaches, exception expiry, re-evaluation, snapshot refresh and evidence chain verification (default 300)"
+        }
+      }
+    },
     "evidence_store": {
       "type": "object", "additionalProperties": false,
       "properties": {
