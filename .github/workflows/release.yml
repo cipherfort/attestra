@@ -111,6 +111,8 @@ jobs:
           cp LICENSE NOTICE charts/fortproof/   # the licence travels with the released chart (OSPS-LE-03.02)
           helm package charts/fortproof
           echo "$GH_TOKEN" | helm registry login ghcr.io --username "$GITHUB_ACTOR" --password-stdin
+          # cosign reads the Docker credential store, not helm's
+          echo "$GH_TOKEN" | docker login ghcr.io --username "$GITHUB_ACTOR" --password-stdin
           out=$(helm push "fortproof-${version}.tgz" "oci://ghcr.io/${GITHUB_REPOSITORY_OWNER,,}/charts" 2>&1)
           echo "$out"
           chart_digest=$(echo "$out" | sed -n 's/^Digest: //p')
