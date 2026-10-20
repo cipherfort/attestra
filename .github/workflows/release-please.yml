@@ -1,6 +1,7 @@
 # SPDX-License-Identifier: Apache-2.0
 # Keeps a release pull request open with the changelog (from Conventional Commit messages) and the version bump.
-# Merging it creates the tag, which runs release.yml (signed images and chart). Tags are protected (ruleset).
+# Merging it creates the tag and the GitHub release, then calls release.yml (signed images and chart). Tags are
+# protected (ruleset).
 name: release-please
 
 on:
@@ -15,8 +16,25 @@ jobs:
     permissions:
       contents: write
       pull-requests: write
+    outputs:
+      release_created: ${{ steps.release.outputs.release_created }}
+      tag: ${{ steps.release.outputs.tag_name }}
     steps:
-      - uses: googleapis/release-please-action@45996ed1f6d02564a971a2fa1b5860e934307cf7 # v5.0.0
+      - id: release
+        uses: googleapis/release-please-action@45996ed1f6d02564a971a2fa1b5860e934307cf7 # v5.0.0
         with:
           config-file: release-please-config.json
           manifest-file: .release-please-manifest.json
+
+  # A tag created with the workflow token triggers no workflow, so the release build is called directly.
+  release:
+    needs: release-please
+    if: needs.release-please.outputs.release_created == 'true'
+    permissions:
+      contents: write
+      packages: write
+      id-token: write
+      attestations: write
+    uses: ./.github/workflows/release.yml  # zizmor: ignore[self-repository] -- the documented local reusable-workflow form
+    with:
+      tag: ${{ needs.release-please.outputs.tag }}

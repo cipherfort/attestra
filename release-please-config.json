@@ -10,8 +10,7 @@
       "extra-files": [
         { "type": "toml", "path": "backend/pyproject.toml", "jsonpath": "$.project.version" },
         { "type": "json", "path": "frontend/package.json", "jsonpath": "$.version" },
-        { "type": "yaml", "path": "charts/fortproof/Chart.yaml", "jsonpath": "$.version" },
-        { "type": "yaml", "path": "charts/fortproof/Chart.yaml", "jsonpath": "$.appVersion" }
+        { "type": "generic", "path": "charts/fortproof/Chart.yaml" }
       ]
     }
   }
