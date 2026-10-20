@@ -108,6 +108,10 @@ adr/               architecture decision records
 tools/             validators: catalogue, config, metrics, links, licences
 ```
 
+## In the news
+
+- [Configuration isn't proof: an open-source way to show your applications are built securely](https://medium.com/@ciphermichael/configuration-isnt-proof-an-open-source-way-to-show-your-applications-are-built-securely-190d192fa4b8) (Medium, October 2026): the problem FortProof solves, a tour in screenshots, and how to try it.
+
 ## Contributing and security
 
 Contributions are welcome: plugins for systems we don't support yet are a good place to start. See [CONTRIBUTING.md](CONTRIBUTING.md) (DCO sign-off, no CLA), [GOVERNANCE.md](GOVERNANCE.md) and the [Code of Conduct](CODE_OF_CONDUCT.md).
