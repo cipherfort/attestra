@@ -17,6 +17,7 @@ from aap.connectors.attestation import (
     bundles_from_listing,
     decode_bundle,
     load_trusted_roots,
+    predicate_type_of,
     signer_claims,
 )
 from aap.domain.evidence import AttestationCheck, Limits, RunInfo, TrustedWorkflows, verify_bundle
@@ -183,3 +184,39 @@ def test_certificate_runner_overrides_manifest_claim():
     check = AttestationCheck(True, SIGNER, "ok", "self-hosted", run.head_sha)
     v = verify_bundle(manifest, files, run, check, TRUSTED, (), Limits())
     assert v.accepted and v.confidence == "C2" and "capped_C2_runner_self-hosted" in v.confidence_reasons
+
+
+# ---------------------------------------------------------------- the shipped workflows' own attestation (real run)
+
+E2E = "cipherfort/fortproof-e2e-app"
+E2E_BUNDLE = (FIX / "fortproof-e2e-sca-evidence.sigstore.json").read_bytes()
+E2E_MANIFEST = (FIX / "fortproof-e2e-sca-evidence-manifest.json").read_bytes()
+E2E_SIGNER = (
+    "cipherfort/fortproof-security-workflows/.github/workflows/sca.yml@fdfe5ba2e5c28b9bed2de0801e85e23f0f80365f"
+)
+
+
+def test_shipped_workflow_evidence_attestation_verifies(verifier):
+    """The shipped sca.yml signs the manifest with the FortProof evidence predicate; that must verify (it used to be
+    refused as "not SLSA provenance", turning every signed bundle into a rejection)."""
+    assert predicate_type_of(E2E_BUNDLE) == "https://fortproof.dev/attestation/evidence/v1"
+    check = verifier.verify(E2E_BUNDLE, hashlib.sha256(E2E_MANIFEST).hexdigest(), E2E)
+    assert check.verified, check.detail
+    assert check.signer_workflow == E2E_SIGNER
+    assert check.source_digest == json.loads(E2E_MANIFEST)["commit_sha"]
+
+
+def test_shipped_workflow_evidence_reaches_c3(verifier):
+    manifest = json.loads(E2E_MANIFEST)
+    files = {"osv.sarif": (FIX / "fortproof-e2e-sca-osv.sarif").read_bytes()}
+    run = RunInfo(
+        manifest["run"]["id"], 1, manifest["repository"]["id"], manifest["commit_sha"], "push", "success", (E2E_SIGNER,)
+    )
+    trusted = TrustedWorkflows(
+        "cipherfort/fortproof-security-workflows",
+        {".github/workflows/sca.yml": {"shas": {"fdfe5ba2e5c28b9bed2de0801e85e23f0f80365f"}, "types": {"scan.sca"}}},
+        {"github-hosted": "C3", "self-hosted": "C2"},
+    )
+    check = verifier.verify(E2E_BUNDLE, hashlib.sha256(E2E_MANIFEST).hexdigest(), E2E)
+    v = verify_bundle(manifest, files, run, check, trusted, (), Limits())
+    assert v.accepted and v.confidence == "C3" and "attestation_verified" in v.confidence_reasons, v
