@@ -3,6 +3,13 @@
 All notable changes, newest first. From 0.1.0 on this file is maintained by release-please from Conventional Commit
 messages (`feat:`, `fix:`, `docs:` ...); see [RELEASING.md](RELEASING.md).
 
+## [0.1.2](https://github.com/cipherfort/fortproof/compare/v0.1.1...v0.1.2) (2026-10-20)
+
+
+### Bug Fixes
+
+* **image:** build gh from its release tag so the binary carries its real version ([#56](https://github.com/cipherfort/fortproof/issues/56)) ([0e3a89b](https://github.com/cipherfort/fortproof/commit/0e3a89bd018ac24496c27ec9d0f8f101a0c982c7))
+
 ## [0.1.1](https://github.com/cipherfort/fortproof/compare/v0.1.0...v0.1.1) (2026-10-20)
 
 
