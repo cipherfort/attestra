@@ -7,13 +7,13 @@
 
 **R** Responsible (does the work) · **A** Accountable (one per row) · **C** Consulted · **I** Informed
 
-Role keys: **CISO** · **HAS** Head of Application Security · **PO** AppSec Platform Product Owner · **PE** Platform Engineers · **ASE** AppSec Engineers · **GOV** Security Governance / GRC analyst · **DSL** Business Unit Security Lead · **BO** Application Business Owner · **TO** Technical Owner · **SC** Security Champion · **CS** Cloud Security · **SOC** · **IAM** Identity administrator · **DPO** Data Protection Officer · **ENT** GitHub organization owner
+Role keys: **CISO** · **ASL** AppSec lead · **PO** AppSec Platform Product Owner · **PE** Platform Engineers · **ASE** AppSec Engineers · **GOV** Security Governance / GRC analyst · **USL** Business unit security lead · **BO** Application Business Owner · **TO** Technical Owner · **SC** Security Champion · **CS** Cloud Security · **SOC** · **IAM** Identity administrator · **DPO** Data Protection Officer · **ENT** GitHub organization owner
 
 Since [ADR-031](../../../adr/ADR-031-integrations-owned-and-bootstrapped-by-the-project.md), **CS, SOC, IAM and ENT are roles held by named people on this project** (during bootstrap, time-bound), not other teams. If the organization later has such teams, they take these roles over.
 
 ## Programme and governance
 
-| Activity | CISO | HAS | PO | PE | ASE | GOV | DSL | BO | TO | SC | CS | SOC | IAM | DPO | ENT |
+| Activity | CISO | ASL | PO | PE | ASE | GOV | USL | BO | TO | SC | CS | SOC | IAM | DPO | ENT |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
 | Programme sponsorship and funding | A | R | C | | | C | I | | | | | | | | |
 | Programme delivery and roadmap | I | A | R | C | C | C | I | | | | | | | | |
@@ -28,7 +28,7 @@ Since [ADR-031](../../../adr/ADR-031-integrations-owned-and-bootstrapped-by-the-
 
 ## Platform build and operations
 
-| Activity | CISO | HAS | PO | PE | ASE | GOV | DSL | BO | TO | SC | CS | SOC | IAM | DPO | ENT |
+| Activity | CISO | ASL | PO | PE | ASE | GOV | USL | BO | TO | SC | CS | SOC | IAM | DPO | ENT |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
 | Platform architecture and ADRs | | A | C | R | C | | | | | | C | C | C | | C |
 | Platform build (backend, frontend, IaC) | | I | A | R | C | | | | | | | | | | |
@@ -46,7 +46,7 @@ Since [ADR-031](../../../adr/ADR-031-integrations-owned-and-bootstrapped-by-the-
 
 ## Application security lifecycle
 
-| Activity | CISO | HAS | PO | PE | ASE | GOV | DSL | BO | TO | SC | CS | SOC | IAM | DPO | ENT |
+| Activity | CISO | ASL | PO | PE | ASE | GOV | USL | BO | TO | SC | CS | SOC | IAM | DPO | ENT |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
 | Application registration and ownership | | | I | | | | C | A | R | R | | | | | |
 | Classification (Tier 3/4) | | | | | C | | I | A | R | R | | | | | |
@@ -72,7 +72,7 @@ Since [ADR-031](../../../adr/ADR-031-integrations-owned-and-bootstrapped-by-the-
 
 ## Security Champions
 
-| Activity | CISO | HAS | PO | PE | ASE | GOV | DSL | BO | TO | SC | CS | SOC | IAM | DPO | ENT |
+| Activity | CISO | ASL | PO | PE | ASE | GOV | USL | BO | TO | SC | CS | SOC | IAM | DPO | ENT |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
 | Champion nomination | | I | | | | | A | | R | | | | | | |
 | Champion training curriculum | | A | | | R | | C | | | C | | | | | |

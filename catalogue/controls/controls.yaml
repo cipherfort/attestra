@@ -1,6 +1,6 @@
 # Internal Application Security Control Catalogue: SOURCE OF TRUTH.
-# Status: DESIGNED (v1 draft). Control content REQUIRES HUMAN APPROVAL by the Control Catalogue Owner
-# (AppSec lead) before it drives any reporting. Changes are made by PR only; the evaluator loads the
+# The default catalogue: review it with your control owner (usually the AppSec lead) and adapt it before it drives
+# reporting in your organization. Changes are made by PR only; the evaluator loads the
 # catalogue by git SHA, and every control evaluation records the catalogue version it used (ADR-016, T-12).
 #
 # Validate + render:   python3 tools/catalogue/validate.py   (renders docs/standards/control-catalogue.md)
@@ -52,7 +52,7 @@ controls:
       params: { owners_must_resolve: true, max_unlinked_repos: 0 }
     proof: >
       The GitHub connector reads application.yaml daily and on push, validates it against the schema, and
-      resolves owners against Entra ID and GitHub teams. Departed owners fail the control within 24h.
+      resolves owners against your identity provider and GitHub teams. Departed owners fail the control within 24h.
     implementation: Merge the onboarding PR raised by the platform; complete owner and classification fields.
     remediation: Update owners in application.yaml; the control re-evaluates on push.
     exception: { allowed: false }
@@ -120,7 +120,7 @@ controls:
       min_confidence: C3
       params: { threshold_pct: 90, contributor_window_days: 90 }
     proof: >
-      LMS completion export (connector) joined to GitHub contributors via the Entra/GitHub identity link. Reported
+      LMS completion export (connector) joined to GitHub contributors via the identity provider's link to GitHub accounts. Reported
       at TEAM level only, never per person (privacy, see platform security architecture section 6).
     implementation: Assign the secure-development course to all engineers via the LMS.
     remediation: Team lead schedules outstanding completions.
@@ -455,7 +455,7 @@ controls:
       min_confidence: C1
       params: { max_admin_users: 3, public_requires: open_source_approval_id }
     proof: Collaborator/team permissions API, visibility; public repos cross-checked against open-source approval records.
-    implementation: Manage access through GitHub teams synced from Entra.
+    implementation: Manage access through GitHub teams synced from your identity provider.
     remediation: Remove direct admin grants; request open-source approval or make private.
 
   - id: ASC-SRC-06

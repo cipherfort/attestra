@@ -1,7 +1,9 @@
 FortProof
 Copyright 2026 The FortProof contributors
 
-This product is licensed under the Apache License, Version 2.0 (see LICENSE).
+The code is licensed under the Apache License, Version 2.0 (see LICENSE). The documentation (docs/, adoption-kit/,
+adr/ and the Markdown files at the top of the repository) is licensed under Creative Commons Attribution-ShareAlike 4.0
+International (see LICENSE-docs); code samples within it remain under Apache-2.0.
 
 It builds on, and refers to, the following open standards and data sources, which are not
 part of this product and remain under their owners' terms:

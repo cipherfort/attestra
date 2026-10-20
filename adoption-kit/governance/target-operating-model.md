@@ -37,7 +37,7 @@
 
 | Role | Where it sits | Core responsibilities | Indicative FTE (pilot → steady state) |
 |---|---|---|---|
-| **Head of Application Security** | Security Engineering | Owns the programme, control catalogue, maturity targets. Approves Tier 1 exceptions up to a defined risk level. | 1 |
+| **AppSec lead** | Security Engineering | Owns the programme, control catalogue, maturity targets. Approves Tier 1 exceptions up to a defined risk level. | 1 |
 | **AppSec Platform Product Owner** | Security Engineering | Owns the platform roadmap, backlog and onboarding experience. | 1 |
 | **AppSec Platform Engineers** | Security Engineering | Build and run the platform, connectors and reusable workflows. | 3 → 4 |
 | **Application Security Engineers** | Security Engineering | Threat-model facilitation, architecture review, manual verification, triage escalation, champion support. | 2 → 1 per ~40 Tier 1/2 apps |

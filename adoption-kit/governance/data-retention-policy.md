@@ -3,7 +3,7 @@
 | | |
 |---|---|
 | Status | DRAFT. **REQUIRES HUMAN APPROVAL** (records management, DPO, internal audit). Not a statement of legal compliance. |
-| Owner | Head of Application Security (data owner); platform team (operator) |
+| Owner | AppSec lead (data owner); platform team (operator) |
 | Decision record | [ADR-017](../../adr/ADR-017-evidence-retention.md) |
 
 ## 1. Scope

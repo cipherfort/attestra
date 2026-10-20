@@ -3,7 +3,7 @@
 | | |
 |---|---|
 | ID | STD-14 · Status: DRAFT. REQUIRES HUMAN APPROVAL (Legal for licensing, CISO for security). |
-| Owner | Head of Application Security, with OSS governance / Legal |
+| Owner | AppSec lead, with OSS governance / Legal |
 | Related | [ADR-028](../../adr/ADR-028-supply-chain-security.md), [ADR-029](../../adr/ADR-029-open-source-dependency-governance.md), [`config/licence-policy.yaml`](../../config/licence-policy.yaml) |
 
 > **Core rule: PUBLIC SOURCE CODE ≠ PUBLIC SECURITY EVIDENCE.** Making source code public never makes its findings, SBOMs, threat models, scan results or exceptions public.

@@ -3,7 +3,7 @@
 | | |
 |---|---|
 | ID | STD-09 · Status: DRAFT, REQUIRES HUMAN APPROVAL |
-| Owner | Head of Application Security |
+| Owner | AppSec lead |
 | Related | [ADR-028](../../adr/ADR-028-supply-chain-security.md), [ADR-029](../../adr/ADR-029-open-source-dependency-governance.md), [ADR-030](../../adr/ADR-030-build-provenance-and-artifact-integrity.md), SLSA v1.x Build track, NIST SSDF PS/PW.4 |
 
 ## 1. Threats addressed

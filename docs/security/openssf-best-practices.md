@@ -17,7 +17,7 @@ Project details on the form: **name** FortProof; **description** "Evidence-drive
 | interact | Met | The README links to the documentation, issues, discussions and contribution guide. Docs: https://fortproof.dev/ |
 | contribution | Met | https://github.com/cipherfort/fortproof/blob/main/CONTRIBUTING.md |
 | contribution_requirements | Met | Coding standards, required checks and DCO sign-off: https://github.com/cipherfort/fortproof/blob/main/CONTRIBUTING.md |
-| floss_license | Met | Apache-2.0. |
+| floss_license | Met | Code Apache-2.0; documentation CC BY-SA 4.0 (LICENSE-docs). |
 | floss_license_osi | Met | Apache-2.0 is OSI-approved. |
 | license_location | Met | https://github.com/cipherfort/fortproof/blob/main/LICENSE |
 | documentation_basics | Met | Getting started, install (Helm, Compose), configuration and user guide: https://fortproof.dev/ |
@@ -127,9 +127,9 @@ when the answers were given (for example, two-factor authentication is required 
 | OSPS-DO-02.01 | Met | How to report a bug: https://github.com/cipherfort/fortproof/blob/main/CONTRIBUTING.md#reporting-a-bug |
 | OSPS-GV-02.01 | Met | GitHub Issues and Discussions: https://github.com/cipherfort/fortproof/issues and https://github.com/cipherfort/fortproof/discussions |
 | OSPS-GV-03.01 | Met | https://github.com/cipherfort/fortproof/blob/main/CONTRIBUTING.md |
-| OSPS-LE-02.01 | Met | Apache-2.0 (OSI-approved). |
+| OSPS-LE-02.01 | Met | Code Apache-2.0 (OSI-approved); documentation CC BY-SA 4.0. |
 | OSPS-LE-02.02 | Met | Released images and Helm charts are Apache-2.0. |
-| OSPS-LE-03.01 | Met | https://github.com/cipherfort/fortproof/blob/main/LICENSE |
+| OSPS-LE-03.01 | Met | https://github.com/cipherfort/fortproof/blob/main/LICENSE (code) and https://github.com/cipherfort/fortproof/blob/main/LICENSE-docs (documentation) |
 | OSPS-LE-03.02 | Met | The image ships /app/LICENSE and /app/NOTICE (label org.opencontainers.image.licenses=Apache-2.0); the release workflow packages LICENSE and NOTICE into the Helm chart. |
 | OSPS-QA-01.01 | Met | https://github.com/cipherfort/fortproof |
 | OSPS-QA-01.02 | Met | Git records every change, its author and date: https://github.com/cipherfort/fortproof/commits/main |

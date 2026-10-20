@@ -3,7 +3,7 @@
 | | |
 |---|---|
 | ID | STD-01 · Status: DRAFT, REQUIRES HUMAN APPROVAL (Governance Board) |
-| Owner | Head of Application Security |
+| Owner | AppSec lead |
 | Applies to | All applications built or maintained by the organisation (in-house or by suppliers in our repositories) |
 | Review | Annually, and on a major catalogue version |
 | Frameworks | NIST SSDF (SP 800-218 v1.1), OWASP SAMM 2.0 |

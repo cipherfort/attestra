@@ -3,7 +3,7 @@
 | | |
 |---|---|
 | ID | STD-05 · Status: DRAFT, REQUIRES HUMAN APPROVAL |
-| Owner | Head of Application Security, with Enterprise Architecture |
+| Owner | AppSec lead, with Enterprise Architecture |
 | Related | SAMM Secure Architecture (D-SA) and Architecture Assessment (V-AA) |
 
 ## 1. Purpose
