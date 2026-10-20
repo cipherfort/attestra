@@ -505,16 +505,18 @@ def seed(conn: Connection, bundle: ConfigBundle, blobs: EvidenceBlobStore, now: 
                     {"ecosystems": ecosystems, "ecosystems_detected": ecosystems},
                     produced=end - timedelta(days=3),
                 )
-                pipeline(
-                    repo,
-                    gid,
-                    "sbom",
-                    {"bom.json": bundles.cyclonedx(sboms[repo])},
-                    "syft",
-                    "1.14.0",
-                    produced=end - timedelta(days=3),
-                    result="pass",
-                )
+                # the HR team's SBOM job stopped 120 days ago (its last SBOM, below, is the stale one)
+                if not (repo == "example-org/leave-tracker" and end - timedelta(days=3) > now - timedelta(days=121)):
+                    pipeline(
+                        repo,
+                        gid,
+                        "sbom",
+                        {"bom.json": bundles.cyclonedx(sboms[repo])},
+                        "syft",
+                        "1.14.0",
+                        produced=end - timedelta(days=3),
+                        result="pass",
+                    )
             risk_service.score_application(conn, bundle, apps[name])  # findings are scored while they are open
             risk_service.publish_posture(conn, apps[name], synced)
 
