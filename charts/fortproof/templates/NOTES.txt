@@ -2,12 +2,13 @@ FortProof {{ .Chart.AppVersion }} installed as {{ include "aap.fullname" . }}.
 
 Image: {{ include "aap.image" . }}
 {{- if not .Values.image.digest }}
-WARNING: the image is not pinned by digest. Set image.digest in production (and verify it: docs/install/helm.md).
+WARNING: the image is not pinned by digest. Set image.digest in production (and verify it: https://fortproof.dev/install/helm/).
 {{- end }}
 
 Next:
   kubectl -n {{ .Release.Namespace }} logs job/{{ include "aap.fullname" . }}-migrate     # if it failed
   kubectl -n {{ .Release.Namespace }} port-forward svc/{{ include "aap.fullname" . }}-api 8000:80
   open http://localhost:8000 and sign in through your identity provider.
-Connect integrations: docs/operations/integration-bootstrap.md. Webhooks reach only the hook service
+Connect GitHub or GitLab and onboard an application: https://fortproof.dev/guide/connect-your-organization/
+Webhooks reach only the hook service
 {{- if .Values.ingress.hookHost }} at https://{{ .Values.ingress.hookHost }}{{ end }}.

@@ -3,12 +3,15 @@
 The whole platform on one machine in about 15 minutes, with real sign-in (OpenID Connect via Keycloak), S3 evidence
 storage with Object Lock (RustFS) and the demo world. Tested end to end (`setup.sh`).
 
+<!-- x-release-please-start-version -->
 ```bash
-deploy/compose/setup.sh            # generates secrets, builds the image (or set AAP_IMAGE), starts, loads the demo
+AAP_IMAGE=ghcr.io/cipherfort/fortproof:v0.1.3 deploy/compose/setup.sh   # a released image (match your checkout's tag)
+deploy/compose/setup.sh            # or build the image from this checkout; both generate secrets, start, load the demo
 # open http://localhost:8000 and sign in as appsec, lead, admin or dev (the script prints the password)
 docker compose -f deploy/compose/compose.yaml --profile full up -d   # + Dependency-Track
 docker compose -f deploy/compose/compose.yaml down -v                # stop and delete everything
 ```
+<!-- x-release-please-end -->
 
 | Service | Purpose |
 |---|---|

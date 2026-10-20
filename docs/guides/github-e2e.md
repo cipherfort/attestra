@@ -32,7 +32,9 @@ fixtures):
 
 ## Repeat it on your organization
 
-You need: a GitHub organization you administer, Docker, and the [development set-up](../../CONTRIBUTING.md).
+To connect a deployed platform for real use, follow [Connect your organization](../guide/connect-your-organization.md).
+This is the quicker test run, against a platform on your machine. You need: a GitHub organization you administer,
+Docker, and the [development set-up](../../CONTRIBUTING.md).
 
 1. **The security workflows.** Create `<org>/security-workflows`, render the shipped workflows into it and release them:
    ```bash

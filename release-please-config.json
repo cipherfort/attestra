@@ -10,7 +10,13 @@
         { "type": "toml", "path": "backend/pyproject.toml", "jsonpath": "$.project.version" },
         { "type": "toml", "path": "backend/uv.lock", "jsonpath": "$.package[0].version" },
         { "type": "json", "path": "frontend/package.json", "jsonpath": "$.version" },
-        { "type": "generic", "path": "charts/fortproof/Chart.yaml" }
+        { "type": "generic", "path": "charts/fortproof/Chart.yaml" },
+        { "type": "generic", "path": "README.md" },
+        { "type": "generic", "path": "deploy/compose/README.md" },
+        { "type": "generic", "path": "docs/getting-started.md" },
+        { "type": "generic", "path": "docs/guide/connect-your-organization.md" },
+        { "type": "generic", "path": "docs/install/compose.md" },
+        { "type": "generic", "path": "docs/install/helm.md" }
       ]
     }
   }

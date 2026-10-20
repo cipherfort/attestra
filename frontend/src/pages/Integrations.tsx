@@ -100,7 +100,7 @@ export function Integrations() {
               );
             })}
           </div>
-          <p className="mt-6 text-xs text-muted">From the command line: <code>aap integrations status</code>. Runbook: docs/operations/integration-bootstrap.md.</p>
+          <p className="mt-6 text-xs text-muted">From the command line: <code>aap integrations status</code>. Set-up guide: fortproof.dev/guide/connect-your-organization.</p>
         </>
       )}
       <Dialog open={!!open} onClose={() => void navigate("/integrations", { replace: true })} title={open ? `Set up ${open.name}` : ""} variant="drawer">

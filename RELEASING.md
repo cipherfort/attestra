@@ -11,12 +11,16 @@ minor also gets security fixes ([SECURITY.md](SECURITY.md)).
 
 1. Commits on `main` use Conventional Commit messages (`feat:`, `fix:`, `docs:`, `chore:`, `feat!:` for breaking).
 2. `release-please` keeps a release pull request open with `CHANGELOG.md` and the version bumped in
-   `backend/pyproject.toml`, `frontend/package.json` and `charts/fortproof/Chart.yaml`.
+   `backend/pyproject.toml`, `backend/uv.lock`, `frontend/package.json`, `charts/fortproof/Chart.yaml` and the
+   install commands in the docs (the blocks between `x-release-please-start-version` and `x-release-please-end`).
+   The workflow token opens that pull request, and GitHub starts no CI for it: a maintainer pushes once to its branch
+   (an empty signed commit is enough) so the required checks run.
 3. A maintainer reviews and merges it, first checking that the notes list every publicly known vulnerability the
    release fixes, with its CVE or GHSA identifier. release-please tags the merge commit (`vX.Y.Z`); tags matching `v*` are
    protected by a repository ruleset (only release-please and maintainers can create them, nobody can move or delete
    them).
-4. The tag runs [`release.yml`](.github/workflows/release.yml):
+4. release-please then calls [`release.yml`](.github/workflows/release.yml) for the new tag (a tag created with the
+   workflow token triggers no other workflow; a tag pushed by a maintainer runs it directly):
    - build the image for amd64 and arm64;
    - scan it, failing on fixable HIGH/CRITICAL findings, before anything is pushed;
    - push it to GHCR with an SBOM;
@@ -24,6 +28,11 @@ minor also gets security fixes ([SECURITY.md](SECURITY.md)).
    - package the chart pinned to the image digest, push it to GHCR (OCI) and sign it;
    - publish a GitHub release with the verification commands.
 5. A maintainer verifies the published artifacts (commands in the release notes) before announcing the release.
+
+If the release workflow fails, fix it on `main` and release the next patch version. Tags never move, and re-running
+the workflow for an existing tag would point the published image tag at a different digest. Add a note at the top of
+the failed release's notes saying what was or wasn't published and which version replaces it (v0.1.0 to v0.1.2 are
+examples).
 
 Git tags are created through the GitHub API and are not GPG-signed; the artifacts users run are signed and carry
 provenance, which is what installation verifies.

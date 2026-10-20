@@ -1,14 +1,18 @@
 # Getting started
 
-Goal: the platform running on your machine with the demo world, in about 15 minutes, with nothing but Docker.
+Goal: the platform running on your machine with the demo world, in a few minutes, with nothing but Docker. This
+runs the latest signed release:
 
+<!-- x-release-please-start-version -->
 ```bash
-git clone https://github.com/cipherfort/fortproof && cd fortproof
-deploy/compose/setup.sh
+git clone --branch v0.1.3 https://github.com/cipherfort/fortproof && cd fortproof
+AAP_IMAGE=ghcr.io/cipherfort/fortproof:v0.1.3 deploy/compose/setup.sh
 ```
+<!-- x-release-please-end -->
 
 Open http://localhost:8000. You are sent to the sign-in page (Keycloak, part of the evaluation stack). Sign in as
-**appsec** with the password the script printed.
+**appsec** with the password the script printed. Without `AAP_IMAGE`, the script builds the image from your checkout
+instead (for trying unreleased changes on `main`; it takes longer).
 
 ## A ten-minute tour
 
@@ -36,13 +40,15 @@ deployment runs. Press **⌘K** (Ctrl+K) at any time to jump to an application, 
 
 More screens, with what each one shows: the [tour](tour.md).
 
+When you are done: `docker compose -f deploy/compose/compose.yaml down -v` stops the stack and deletes its data.
+
 ## Next
 
 | You want to | Read |
 |---|---|
 | Understand the model (evidence, confidence, controls) | [Security model](security/security-model.md) |
 | Use it day to day | [User guide](guide/user-guide.md) |
-| Connect your GitHub or GitLab | [Integration bootstrap](operations/integration-bootstrap.md), [GitLab](guides/gitlab-guide.md), [pipelines](../pipelines/README.md) |
+| Connect your GitHub or GitLab and onboard an application | [Connect your organization](guide/connect-your-organization.md), [GitLab](guides/gitlab-guide.md) |
 | Fit it to your organization | [Configure](configure/index.md) |
 | Run it in production | [Install with Helm](install/helm.md) |
 | Run a security programme around it | [Adoption kit](../adoption-kit/README.md) |

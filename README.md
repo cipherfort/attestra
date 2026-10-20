@@ -8,7 +8,7 @@
 [![OpenSSF Baseline](https://www.bestpractices.dev/projects/15625/baseline)](https://www.bestpractices.dev/en/projects/15625/baseline-1)
 [![OpenSSF Scorecard](https://api.securityscorecards.dev/projects/github.com/cipherfort/fortproof/badge)](https://scorecard.dev/viewer/?uri=github.com/cipherfort/fortproof)
 
-Status: **pre-release (0.x)**, not yet production-ready · [Roadmap to 1.0](ROADMAP.md)
+Status: **0.x preview**, not yet production-ready · [Latest release](https://github.com/cipherfort/fortproof/releases/latest) (signed image and Helm chart) · [Roadmap to 1.0](ROADMAP.md)
 
 **An open-source engine that answers one question for every application your organization runs: is it built and run securely, and what is the proof?**
 
@@ -38,11 +38,15 @@ repository → security pipeline → evidence (verified) → controls → findin
 
 ## Try it in 15 minutes
 
-**With Docker only** (real sign-in through Keycloak, write-once evidence storage, the demo world):
+**With Docker only** (the released image, real sign-in through Keycloak, write-once evidence storage, the demo world):
 
+<!-- x-release-please-start-version -->
 ```bash
-deploy/compose/setup.sh       # then open http://localhost:8000; the script prints the demo users' password
+git clone --branch v0.1.3 https://github.com/cipherfort/fortproof && cd fortproof
+AAP_IMAGE=ghcr.io/cipherfort/fortproof:v0.1.3 deploy/compose/setup.sh
+# then open http://localhost:8000; the script prints the demo users' password
 ```
+<!-- x-release-please-end -->
 
 **For development** (Docker, [uv](https://docs.astral.sh/uv/), Node.js 22; a persona switcher instead of sign-in):
 
@@ -57,7 +61,7 @@ AAP_AUTH_MODE=dev AAP_ENV=development uv run aap api --port 8765   # open http:/
 
 Switch between people from the account menu (top right, **Viewing as**) to see what each role sees. Every integration on one machine,
 including GitLab CE and the scanners: [`deploy/local/`](deploy/local/README.md). Production: the
-[Helm chart](charts/fortproof/README.md).
+[Helm chart](docs/install/helm.md). Your own GitHub or GitLab: [connect your organization](docs/guide/connect-your-organization.md).
 
 ## What works today, and what doesn't
 
@@ -65,7 +69,8 @@ including GitLab CE and the scanners: [`deploy/local/`](deploy/local/README.md).
 |---|---|
 | Evidence verification, ledgers, all 48 control evaluators, risk scoring, maturity with monthly snapshots and an organization-wide roll-up, a role-scoped API; OIDC sign-in; application registration with AppSec approval; exceptions; manual assessments; admin screens; CSV export | Organization-specific dashboards and saved views |
 | A web UI with an overview dashboard, an evidence explorer that shows how each record was verified, global findings, supply chain and "Are we affected?", the control catalogue, maturity trends, a leadership report, keyboard navigation and a light and dark theme (WCAG 2.2 AA tested) | PDF and OSCAL exports; ASVS status per requirement |
-| Shipped GitHub security pipelines with a signed evidence manifest; built-in OSV, CISA KEV, EPSS and end-of-life feeds; integrations as plugins (GitHub, GitLab, Jira, GitHub and GitLab Issues, Dependency-Track, DefectDojo, Defender for Cloud, Security Hub, Sentinel, SIEM over HTTPS or syslog, chat webhooks); S3 (Object Lock), Azure Blob or disk evidence storage; one `aap.yaml`; per-process database logins | The first tagged release with signed images and chart (the release pipeline is built and tested; no release has been cut yet) |
+| Shipped GitHub security pipelines with a signed evidence manifest; built-in OSV, CISA KEV, EPSS and end-of-life feeds; integrations as plugins (GitHub, GitLab, Jira, GitHub and GitLab Issues, Dependency-Track, DefectDojo, Defender for Cloud, Security Hub, Sentinel, SIEM over HTTPS or syslog, chat webhooks); S3 (Object Lock), Azure Blob or disk evidence storage; one `aap.yaml`; per-process database logins | Supplying your own rules to the released chart without building an image (today: a two-line image on top of the release, [how](docs/guide/connect-your-organization.md#2-your-rules)) |
+| Signed releases: a multi-arch image with an SBOM, SLSA provenance and a cosign signature, and a signed Helm chart pinned to the image digest ([verify before you run it](docs/install/helm.md)) | |
 | An [end-to-end run on a real GitHub organization](docs/guides/github-e2e.md): signed evidence at C3, a vulnerable dependency found, and the fix closing it; GitLab (settings, CI components, issues; evidence capped at C2, [ADR-033](adr/ADR-033-gitlab-evidence-trust.md)); a Helm chart tested on kind; a Compose evaluation stack; AWS and Azure Terraform examples | An independent security review |
 
 Every change runs more than 360 backend tests (unit, PostgreSQL integration, database security properties and parser fuzzing) and more than 80 browser tests against the real API and its Content Security Policy (every page, every role, WCAG 2.2 AA in both themes, keyboard paths), plus an API contract fuzz test, a bundle-size budget and a Helm install and upgrade on kind. Opt-in tests run against real services, and GitLab CE runs end to end nightly. Details: [ROADMAP](ROADMAP.md).
@@ -77,7 +82,8 @@ Every change runs more than 360 backend tests (unit, PostgreSQL integration, dat
 | Read it all online | [fortproof.dev](https://fortproof.dev/), starting with the [tour](https://fortproof.dev/tour/) |
 | Understand how it works | [Platform architecture](docs/architecture/02-platform-architecture.md) · [Evidence model](docs/architecture/04-evidence-model.md) · [Control framework](docs/standards/control-framework.md) |
 | See every control | [Control catalogue](docs/standards/control-catalogue.md) (rendered from [`catalogue/controls/controls.yaml`](catalogue/controls/controls.yaml)) |
-| Run it with real integrations | [Local integration stack](deploy/local/README.md) · [Integration bootstrap runbook](docs/operations/integration-bootstrap.md) · [Infrastructure](examples/terraform/azure/README.md) |
+| Install it | [Helm (production)](docs/install/helm.md) · [Docker Compose (evaluation)](docs/install/compose.md) |
+| Connect your GitHub or GitLab and onboard an application | [Connect your organization](docs/guide/connect-your-organization.md) · [GitLab](docs/guides/gitlab-guide.md) · [Local integration stack](deploy/local/README.md) · [Reference deployment on Azure](docs/operations/integration-bootstrap.md) |
 | Run a security programme around it | [Adoption kit](adoption-kit/README.md): charter, business case, RACI, rollout, governance |
 | Understand a design choice | [Architecture decision records](adr/README.md) |
 | Everything else | [Documentation index](docs/README.md) |

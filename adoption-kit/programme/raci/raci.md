@@ -34,7 +34,7 @@ Since [ADR-031](../../../adr/ADR-031-integrations-owned-and-bootstrapped-by-the-
 | Platform build (backend, frontend, IaC) | | I | A | R | C | | | | | | | | | | |
 | `security-workflows` releases | | I | A | R | C | | | | | C | | | | | |
 | GitHub App install and org rulesets | | C | A | R | | | | | | | | | | | R |
-| Integration bootstrap ([runbook](../../../docs/operations/integration-bootstrap.md)) | | C | A | R | | | | | | | C | C | R | | R |
+| Integration bootstrap ([Azure reference deployment](../../../docs/operations/integration-bootstrap.md)) | | C | A | R | | | | | | | C | C | R | | R |
 | Entra app registration, groups, PIM | | C | A | R | | | | | | | | | R | | |
 | Platform operations and on-call | | I | A | R | | | | | | | | C | | | |
 | Platform security (threat model, pen test) | | A | C | R | R | | | | | | | C | | | |

@@ -7,6 +7,10 @@ Two kinds of configuration, deliberately separate:
 | **Settings** | URLs, sign-in, storage, which plugins are switched on | `aap.yaml` ([reference](../reference/settings.md)) or `AAP_*` variables; secrets in the secret store | Operators, per deployment |
 | **Rules** | Organization levels, classification, controls, risk model, exception policy, evidence types, trusted producers | `config/` and `catalogue/` in your fork | Pull request with review; every verdict records the rule version it used |
 
+The platform reads the rules from its image at start-up and loads them into the database on every install and
+upgrade. To deploy your rules with a released version, build an image on top of the release with them copied in:
+[Connect your organization, step 2](../guide/connect-your-organization.md#2-your-rules).
+
 ## Organization
 
 `config/organization.yaml` names your levels, for example `company → business unit → team` or `org → group`. Units and
