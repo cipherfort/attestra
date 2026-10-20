@@ -1,6 +1,6 @@
 # SPDX-License-Identifier: Apache-2.0
 # FortProof: one image, three processes (aap api | aap hook | aap worker), plus jobs.
-# Base images pinned by digest; gh pinned by version + sha256 (attestation verification backend for private repos).
+# Base images pinned by digest; gh (attestation verification backend for private repos) built from a pinned commit.
 # Built, scanned and attested by .github/workflows/release.yml; runs as an unprivileged user with a read-only root.
 
 FROM node:22-bookworm-slim@sha256:c3de60bf2f9dd0ac6370e6117950ff62d6e339527e7472301c9c78a017978392 AS ui
@@ -23,19 +23,27 @@ COPY backend/migrations ./migrations
 COPY backend/alembic.ini ./
 RUN uv sync --frozen --no-dev
 
-FROM python:3.12-slim-bookworm@sha256:34386ef0cb081344d7ec1c103ba398e6e9f64e9ab3a1509accc92a4e24a07258 AS gh
+# gh v2.102.0 (the latest release) is built from its tagged commit with golang.org/x/net raised to 0.60.0: the upstream
+# binary carries x/net 0.58.0, with fixable HIGH CVEs (CVE-2026-78669 and others) that fail the release scan. Go back to
+# the upstream binary once cli/cli ships a release with the fix. Go 1.27.2 (not the 1.27.1 the release used) fixes
+# twelve standard-library vulnerabilities in net/http, crypto/tls and html/template. Cross-compiled, static, no cgo.
+FROM --platform=$BUILDPLATFORM golang:1.27.2-bookworm@sha256:5cf287a799e6b94384bad13d16b14904c531f51ba65792237e122ce42b392f61 AS gh
 ARG GH_VERSION=2.102.0
-ARG GH_SHA256_AMD64=bb766f710eef8ede859c18578c72c327597cd4c8a85b06001b1f3843c6019386
-ARG GH_SHA256_ARM64=7862c86c72f43df3a2d93ddde6f473285b4e2af61b494849846827e513ef6484
+ARG GH_COMMIT=fc4b137cdef0a6bd28fd461b7cf9c84a5812a8cd
+ARG TARGETOS
 ARG TARGETARCH
-ADD https://github.com/cli/cli/releases/download/v${GH_VERSION}/gh_${GH_VERSION}_linux_${TARGETARCH}.tar.gz /tmp/gh.tgz
-RUN expected=$([ "$TARGETARCH" = "arm64" ] && echo "$GH_SHA256_ARM64" || echo "$GH_SHA256_AMD64") \
- && echo "${expected}  /tmp/gh.tgz" | sha256sum -c - \
- && tar -xzf /tmp/gh.tgz -C /tmp && mv /tmp/gh_${GH_VERSION}_linux_${TARGETARCH}/bin/gh /usr/local/bin/gh
+ENV CGO_ENABLED=0 GOTOOLCHAIN=local GOFLAGS=-trimpath
+WORKDIR /src
+RUN git init -q . && git remote add origin https://github.com/cli/cli.git \
+ && git fetch -q --depth 1 origin "$GH_COMMIT" && git checkout -q FETCH_HEAD \
+ && test "$(git rev-parse HEAD)" = "$GH_COMMIT" \
+ && go get golang.org/x/net@v0.60.0 && go mod tidy \
+ && GOOS="$TARGETOS" GOARCH="$TARGETARCH" go build \
+      -ldflags "-s -w -X github.com/cli/cli/v2/internal/build.Version=${GH_VERSION}" -o /out/gh ./cmd/gh
 
 FROM python:3.12-slim-bookworm@sha256:34386ef0cb081344d7ec1c103ba398e6e9f64e9ab3a1509accc92a4e24a07258
 RUN useradd --system --uid 10001 --home /nonexistent --shell /usr/sbin/nologin aap
-COPY --from=gh /usr/local/bin/gh /usr/local/bin/gh
+COPY --from=gh /out/gh /usr/local/bin/gh
 COPY --from=backend /app/backend /app/backend
 COPY --from=ui /src/frontend/dist /app/frontend/dist
 # governed configuration, catalogue and schemas are part of the release (config versions are content-addressed)
