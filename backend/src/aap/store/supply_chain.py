@@ -100,6 +100,12 @@ def ingest_cyclonedx(
             ),
             {"s": sbom_id, "c": comp.id, "scope": scope},
         )
+    if not problems and count > 0:  # an empty or broken SBOM proves nothing: unknown is never closed as fixed
+        from aap.store import findings_store
+
+        findings_store.close_dependencies_absent(
+            conn, scope_ref=scope_key, sbom_id=sbom_id, evidence_id=evidence_id, at=generated_at
+        )
     return SbomStats(sbom_id, count, pct, not problems, tuple(problems))
 
 

@@ -156,6 +156,33 @@ def close_absent(
     return [str(r.id) for r in rows]
 
 
+def close_dependencies_absent(
+    conn: Connection, *, scope_ref: str, sbom_id: str, evidence_id: str, at: datetime | None = None
+) -> list[str]:
+    """A new current SBOM for a scope verifies the fix of every open dependency finding in that scope whose component
+    (name and version) it no longer lists: upgraded or removed. The SBOM's evidence is the closure evidence."""
+    rows = conn.execute(
+        text("""UPDATE findings f SET status = 'closed', closed_at = coalesce(CAST(:at AS timestamptz), now()),
+                  closure_evidence_id = :ev
+                WHERE f.scope_ref = :sr AND f.finding_type = 'dependency' AND f.status = ANY(:open)
+                  AND f.component_id IS NOT NULL
+                  AND NOT EXISTS (SELECT 1 FROM sbom_components sc WHERE sc.sbom_id = :sb AND sc.component_id = f.component_id)
+                RETURNING f.id"""),
+        {"ev": evidence_id, "sr": scope_ref, "sb": sbom_id, "open": list(OPEN_STATUSES), "at": at},
+    ).all()
+    for r in rows:
+        _event(
+            conn,
+            str(r.id),
+            "verified",
+            None,
+            "closed",
+            evidence_id,
+            {"reason": "component absent from the current SBOM"},
+        )
+    return [str(r.id) for r in rows]
+
+
 def record_risk(
     conn: Connection,
     finding_id: str,
