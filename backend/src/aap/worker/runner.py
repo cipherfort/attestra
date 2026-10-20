@@ -5,7 +5,9 @@ Queues:
   ingest      workflow_run.completed → verified evidence ingestion (needs a GitHub client)
   evaluate    re-evaluate an application's controls, re-score its findings, publish posture
   scheduler   periodic sweeps: freshness/evaluation for every application, SLA breaches, chain verification,
-              and enqueueing every configured integration whose sync interval has elapsed
+              and enqueueing every configured integration whose sync interval has elapsed. One sweep job exists at
+              a time: when a sweep completes the worker queues the next one AAP_SCHEDULER_INTERVAL seconds later
+              (default 300), and every worker re-queues it at start-up and once per interval in case one died.
   connector   one integration sync (worker/connectors.py), recorded in connector_runs
   github-sync one repository's GitHub settings/alerts after a push or settings webhook
   assessment  an approved manual assessment becomes its evidence record (the API never writes evidence)
@@ -20,7 +22,7 @@ import os
 import socket
 import time
 from collections.abc import Callable, Mapping
-from datetime import UTC, datetime
+from datetime import UTC, datetime, timedelta
 from typing import Any
 
 from sqlalchemy import Engine, text
@@ -36,6 +38,15 @@ from aap.store import evidence_store, findings_store, jobs
 
 log = logging.getLogger("aap.worker")
 Handler = Callable[[Mapping[str, Any]], None]
+
+
+def scheduler_interval() -> timedelta:
+    """Seconds between scheduler sweeps (AAP_SCHEDULER_INTERVAL, default 300, at least 60)."""
+    try:
+        seconds = int(os.environ.get("AAP_SCHEDULER_INTERVAL", "300"))
+    except ValueError:
+        seconds = 300
+    return timedelta(seconds=max(60, seconds))
 
 
 class Worker:
@@ -202,6 +213,11 @@ class Worker:
 
     # ---------------------------------------------------------------------------------------- loop
 
+    def ensure_scheduled(self) -> None:
+        """Queue a scheduler sweep unless one is queued or running already (the dedup key makes it a no-op then)."""
+        with transaction(self.engine, "aap_worker") as conn:
+            jobs.enqueue(conn, "scheduler", {}, dedup_key="scheduler")
+
     def run_once(
         self,
         queues: tuple[str, ...] = (
@@ -228,6 +244,9 @@ class Worker:
         else:
             with transaction(self.engine, "aap_worker") as conn:
                 jobs.complete(conn, job.id)
+                # the next sweep, one interval from now (the finished one no longer blocks its dedup key)
+                if job.queue == "scheduler":
+                    jobs.enqueue(conn, "scheduler", {}, dedup_key="scheduler", delay=scheduler_interval())
         return True
 
     def drain(self, max_jobs: int = 1000) -> int:
@@ -237,6 +256,11 @@ class Worker:
         return n
 
     def forever(self, idle_sleep: float = 2.0) -> None:  # pragma: no cover - process loop
+        every = scheduler_interval().total_seconds()
+        last = 0.0
         while True:
+            if time.monotonic() - last >= every:
+                self.ensure_scheduled()
+                last = time.monotonic()
             if not self.run_once():
                 time.sleep(idle_sleep)
