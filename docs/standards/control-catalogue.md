@@ -1,7 +1,7 @@
 # Control Catalogue (rendered)
 
 > **Generated** from `catalogue/controls/controls.yaml` by `tools/catalogue/validate.py`. Do not edit by hand.  
-> Catalogue version **0.1.0**: status DESIGNED, REQUIRES HUMAN APPROVAL.  
+> Catalogue version **0.1.0**: the default catalogue: review and adapt it with your control owner.  
 > Tier columns: **M** mandatory · **R** recommended · **–** not applicable.  
 > Mappings are framework references. Control wording, thresholds and evidence rules are organisation-specific.
 
@@ -161,7 +161,7 @@ At least 90% of engineers contributing to the app's repositories in the last 90 
 - **Remediation:** Team lead schedules outstanding completions.
 - **Exceptions:** allowed, max days T1:90 / T2:180 / T3:365 / T4:365
 - **Mappings:** SAMM: G-EG-A L1, G-EG-A L2 · SSDF: PO.2.2 · CSF 2.0: PR.AT-01, PR.AT-02
-- **Notes:** LMS connector is PROPOSED; until it exists this control is evaluated from a quarterly HR export (M1).
+- **Notes:** A learning-platform connector is planned; until it exists this control is evaluated from a quarterly HR export (M1).
 
 ### ASC-GOV-05
 
@@ -837,7 +837,7 @@ Data stores listed in application.yaml match discovered cloud data resources; en
 - **Remediation:** Declare or remove undeclared stores; enable backups.
 - **Exceptions:** allowed, max days T1:90 / T2:180 / T3:365 / T4:365
 - **Mappings:** SAMM: O-OM-A L1, O-OM-A L2 · ASVS 5.0: V14 · CSF 2.0: ID.AM-07, PR.DS-01
-- **Notes:** PROPOSED for a later release; depends on reliable cloud-scope mapping.
+- **Notes:** Planned for a later release; depends on reliable cloud-scope mapping.
 
 ### ASC-OPS-06
 

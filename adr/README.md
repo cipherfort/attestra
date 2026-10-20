@@ -1,7 +1,7 @@
 # Architecture Decision Records
 
 Format for every ADR: Status · Context · Decision · Alternatives · Decision drivers · Consequences · Security implications · Operational implications.
-ADR-001 to ADR-031 were **Proposed** during the original design; ADR-032 is **Accepted**. Decisions that change an invariant need a new ADR (see GOVERNANCE.md). ADRs marked ★ are the decisions most worth challenging, because they shape everything else.
+ADR-001 to ADR-031 come from the original design and are **Accepted** where the code implements them; ADR-027 (observability) is still **Proposed**, and ADR-010 and ADR-017 note what is planned. Decisions that change an invariant need a new ADR (see GOVERNANCE.md). ADRs marked ★ are the decisions most worth challenging, because they shape everything else.
 
 | ADR | Title | Key decision in one line |
 |---|---|---|

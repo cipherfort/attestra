@@ -123,7 +123,7 @@ Tickets dedup separately (`tickets.dedup_key`). See [ADR-018](../../adr/ADR-018-
 
 ## 6. Retention strategy
 
-PROPOSED: requires records-management approval ([ADR-017](../../adr/ADR-017-evidence-retention.md)).
+Defaults: each adopting organization confirms the periods with its records, privacy and audit owners ([ADR-017](../../adr/ADR-017-evidence-retention.md)).
 
 | Data | Online (PostgreSQL) | Archive | Mechanism |
 |---|---|---|---|

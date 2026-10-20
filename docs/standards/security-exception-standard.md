@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| ID | STD-10 · Status: DRAFT, REQUIRES HUMAN APPROVAL (CISO) |
+| ID | STD-10 · Status: Template. Adapt it and have it approved in your organization (CISO). |
 | Owner | AppSec lead. Operated by Security Governance. |
 | Configuration | [`config/exception-policy.yaml`](../../config/exception-policy.yaml) |
 | Related | [ADR-021](../../adr/ADR-021-security-exceptions.md), [Governance model section 4](../../adoption-kit/governance/governance-model.md#4-risk-acceptance-exception-approval-thresholds) |

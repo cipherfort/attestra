@@ -1,6 +1,6 @@
 # ADR-018: Jira integration
 
-**Status:** Proposed (2026-10-07), amended by [ADR-031](ADR-031-integrations-owned-and-bootstrapped-by-the-project.md) (2026-10-08)  ·  **Related:** [Platform architecture section 5.3](../docs/architecture/02-platform-architecture.md#53-finding-lifecycle), [Data model section 4](../docs/architecture/03-data-model.md#4-deduplication-identities-fingerprints)
+**Status:** Accepted (2026-10-20), implemented; the Azure services named here are one deployment option since [ADR-032](ADR-032-open-source-product.md) made the product provider-neutral, amended by [ADR-031](ADR-031-integrations-owned-and-bootstrapped-by-the-project.md) (2026-10-08)  ·  **Related:** [Platform architecture section 5.3](../docs/architecture/02-platform-architecture.md#53-finding-lifecycle), [Data model section 4](../docs/architecture/03-data-model.md#4-deduplication-identities-fingerprints)
 
 ## Context
 

@@ -1,6 +1,6 @@
 # ADR-017: Evidence and data retention
 
-**Status:** Proposed (2026-10-07). **REQUIRES HUMAN APPROVAL** (records management, DPO, audit).  ·  **Related:** [Data model section 6](../docs/architecture/03-data-model.md#6-retention-strategy)
+**Status:** Accepted (2026-10-20) as defaults: each adopting organization confirms the periods with its records, privacy and audit owners. Pseudonymising leavers' personal data is planned.  ·  **Related:** [Data model section 6](../docs/architecture/03-data-model.md#6-retention-strategy)
 
 ## Context
 

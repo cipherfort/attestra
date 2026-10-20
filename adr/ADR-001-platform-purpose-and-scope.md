@@ -1,6 +1,6 @@
 # ADR-001: Platform purpose and scope
 
-**Status:** Proposed (2026-10-07)  ·  **Deciders:** AppSec lead, CISO  ·  **Related:** [Problem definition](../docs/architecture/01-problem-definition.md), the earlier prototype scaffold ADR-0001
+**Status:** Accepted (2026-10-20), implemented  ·  **Deciders:** AppSec lead, CISO  ·  **Related:** [Problem definition](../docs/architecture/01-problem-definition.md), the earlier prototype scaffold ADR-0001
 
 ## Context
 

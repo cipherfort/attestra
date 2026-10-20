@@ -1,6 +1,6 @@
 # ADR-021: Security exception management
 
-**Status:** Proposed (2026-10-07)  ·  **Related:** [Governance section 4](../adoption-kit/governance/governance-model.md#4-risk-acceptance-exception-approval-thresholds), schema tests T2–T3
+**Status:** Accepted (2026-10-20), implemented  ·  **Related:** [Governance section 4](../adoption-kit/governance/governance-model.md#4-risk-acceptance-exception-approval-thresholds), schema tests T2–T3
 
 ## Context
 

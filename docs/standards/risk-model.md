@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Status | DESIGNED. Weights, bands and SLAs PROPOSED, REQUIRES HUMAN APPROVAL (Governance Board, CISO for SLAs) |
+| Status | IMPLEMENTED. Weights, bands and SLAs are defaults: adapt them and have them approved (often by the CISO for SLAs) |
 | Configuration | [`config/risk-model.yaml`](../../config/risk-model.yaml) (authoritative, versioned) |
 | Decision records | [ADR-011](../../adr/ADR-011-vulnerability-risk-model.md), [ADR-012](../../adr/ADR-012-cvss-epss-usage.md) |
 
@@ -49,7 +49,7 @@ KEV-listed + internet-facing → **P1** · active secret → **P1** · malicious
 | EPSS | Probability of exploitation activity in the wild; strongly concentrates real-world risk | Global, not contextual; CVE-only; changes daily |
 | KEV | Ground truth of active exploitation | Lagging; absence ≠ safety |
 | Exposure | Internet-facing apps face continuous scanning | Declared exposure may be wrong (hence verification) |
-| Tier / data | Business and citizen impact | Classification quality (risk R-03) |
+| Tier / data | Business and customer impact | Classification quality (risk R-03) |
 | Reachability | Removes noise for unused code paths | Tool maturity varies; requires evidence |
 
 Factors **not** used and why: raw CVSS base score alone (context-free) · finding age (rewards neither fixing nor detection) · team (would bias).

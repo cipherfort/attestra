@@ -3,7 +3,8 @@
 | | |
 |---|---|
 | Audience | Cloud Security, platform engineers, application teams |
-| Status | DESIGNED. All setup steps REQUIRE EXTERNAL CONFIGURATION. |
+| Status | IMPLEMENTED: Defender for Cloud (Azure Resource Graph) and AWS Security Hub connectors, tested against recorded responses and moto. The setup steps below happen in your cloud accounts. |
+| Limitation | The AWS connector signs in to AWS with the platform's Azure identity (`AssumeRoleWithWebIdentity` with an Entra token), so the platform must run on Azure or have Azure workload identity. Running on AWS with its own identity (IRSA) is planned. |
 | Decision | [ADR-019](../../adr/ADR-019-cloud-integration.md), [ADR-014](../../adr/ADR-014-authentication-architecture.md) (federation) |
 
 ## 1. What the integration does
@@ -36,7 +37,7 @@ securityresources
 | 1 | Security Hub enabled with a **delegated administrator** account and cross-region aggregation |
 | 2 | In the admin account, create an **IAM OIDC identity provider** for the platform's Entra tenant (issuer `https://sts.windows.net/<tenant-id>/` or the v2 endpoint; check which one your tenant issues) with audience = the platform's app registration |
 | 3 | Create role `aap-securityhub-reader` trusting that provider, with conditions on `aud` and `sub` (= the managed identity's object ID). Permissions: `securityhub:GetFindings`, `securityhub:DescribeHub`, `securityhub:ListFindingAggregators`, plus read-only `tag:GetResources` and `organizations:DescribeAccount`. Max session 1h. |
-| 4 | Tagging standard `aap-app-id` on workloads. AWS Config rule `required-tags` (PROPOSED). |
+| 4 | Tagging standard `aap-app-id` on workloads; an AWS Config `required-tags` rule enforces it (recommended). |
 
 The platform exchanges its Entra token via `AssumeRoleWithWebIdentity`. **No AWS access keys exist anywhere.**
 

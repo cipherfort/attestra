@@ -1,5 +1,5 @@
 # Contextual finding risk model (ADR-011, ADR-012).
-# Status: DESIGNED — weights, bands and SLAs are PROPOSED and REQUIRE HUMAN APPROVAL.
+# Weights, bands and SLAs are defaults: adapt them and have them approved in your organization.
 #
 # This is a PRIORITISATION model, not an objective measure of risk. It exists to order work
 # consistently and explainably. Every score stores: inputs, model version, and a rendered explanation.

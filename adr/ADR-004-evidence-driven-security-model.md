@@ -1,6 +1,6 @@
 # ADR-004: Evidence-driven security model
 
-**Status:** Proposed (2026-10-07)  ·  **Related:** [Evidence model](../docs/architecture/04-evidence-model.md), [Control framework](../docs/standards/control-framework.md)
+**Status:** Accepted (2026-10-20), implemented  ·  **Related:** [Evidence model](../docs/architecture/04-evidence-model.md), [Control framework](../docs/standards/control-framework.md)
 
 ## Context
 

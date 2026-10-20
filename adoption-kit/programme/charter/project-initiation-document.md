@@ -5,7 +5,7 @@
 | Version | 0.1 DRAFT |
 | Date | 2026-10-07 |
 | Parent | [Programme Charter](programme-charter.md) (strategic case, objectives, KPIs, benefits). This PID does not repeat them. |
-| Status | REQUIRES HUMAN APPROVAL (programme owner + sponsor) |
+| Status | Template. Approved by the programme owner and sponsor. |
 
 ## 1. Purpose
 

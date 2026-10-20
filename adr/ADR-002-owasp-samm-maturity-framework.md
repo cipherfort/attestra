@@ -1,6 +1,6 @@
 # ADR-002: OWASP SAMM as the maturity framework
 
-**Status:** Proposed (2026-10-07)  ·  **Related:** [SAMM/ASVS methodology](../docs/standards/samm-asvs-mapping.md), [`catalogue/frameworks/samm.yaml`](../catalogue/frameworks/samm.yaml)
+**Status:** Accepted (2026-10-20), implemented  ·  **Related:** [SAMM/ASVS methodology](../docs/standards/samm-asvs-mapping.md), [`catalogue/frameworks/samm.yaml`](../catalogue/frameworks/samm.yaml)
 
 ## Context
 

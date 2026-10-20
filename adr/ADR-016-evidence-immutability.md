@@ -1,6 +1,6 @@
 # ADR-016: Evidence immutability and tamper evidence
 
-**Status:** Proposed (2026-10-07)  ·  **Related:** ADR-007, ADR-008, [Evidence model section 6](../docs/architecture/04-evidence-model.md#6-immutability-and-audit-summary-of-adr-016)
+**Status:** Accepted (2026-10-20), implemented  ·  **Related:** ADR-007, ADR-008, [Evidence model section 6](../docs/architecture/04-evidence-model.md#6-immutability-and-audit-summary-of-adr-016)
 
 ## Context
 

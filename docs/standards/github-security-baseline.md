@@ -2,10 +2,10 @@
 
 | | |
 |---|---|
-| ID | STD-12 · Status: DRAFT. REQUIRES HUMAN APPROVAL. Applied by the project's organization owner (`examples/terraform/azure/envs/github`, ADR-031). |
+| ID | STD-12 · Status: Template. Adapt it and have it approved in your organization. Applied by the project's organization owner (`examples/terraform/azure/envs/github`, ADR-031). |
 | Owner | AppSec lead, with the project's GitHub organization owner (ADR-031) |
 | Applies to | All GitHub organisations holding in-scope code (e.g. `example-org`) |
-| Implementation | Settings as code via the Terraform `integrations/github` provider in a dedicated `github-org-config` repository (PROPOSED). Drift is detected by the platform's GitHub connector. |
+| Implementation | Settings as code via the Terraform `integrations/github` provider in a dedicated `github-org-config` repository (recommended). Drift is detected by the platform's GitHub connector. |
 
 > Feature names and availability change. **Verify each setting against current GitHub Enterprise Cloud documentation and the organisation's plan before you adopt it** (assumption A-01). Where a setting is unavailable, record the gap and the compensating control.
 
@@ -13,9 +13,9 @@
 
 | ID | Setting | Baseline | Why | Verified by |
 |---|---|---|---|---|
-| GH-01 | Authentication | SSO via Entra ID enforced for the enterprise/org. Evaluate Enterprise Managed Users for central lifecycle. | Joiner/mover/leaver control | Annual review |
+| GH-01 | Authentication | SSO through the organization's identity provider enforced for the enterprise or organization. Evaluate Enterprise Managed Users for central lifecycle. | Joiner/mover/leaver control | Annual review |
 | GH-02 | Two-factor authentication | Required for all members and outside collaborators | Account takeover | Org setting (connector) |
-| GH-03 | Base repository permission | `Read` or `No permission`. Access via teams synced from Entra groups. | Least privilege | ASC-SRC-05 |
+| GH-03 | Base repository permission | `Read` or `No permission`. Access via teams synced from identity-provider groups. | Least privilege | ASC-SRC-05 |
 | GH-04 | Repository creation | Members may create private/internal repos only. Public repos via the open-source approval process. | Accidental publication | ASC-SRC-05 |
 | GH-05 | Repository visibility change, deletion, transfer | Org owners only | Data exposure, evidence loss | Audit log |
 | GH-06 | Personal access tokens | Fine-grained PATs require approval with a maximum lifetime. Classic PATs restricted. | Token sprawl | Annual review |

@@ -1,49 +1,48 @@
-# Backup and Restore Plan
+# Backup and restore plan
 
 | | |
 |---|---|
-| Status | DESIGNED |
-| Related | [DR plan](disaster-recovery-plan.md), [ADR-026](../../adr/ADR-026-disaster-recovery.md), [Data Retention Policy](../../adoption-kit/governance/data-retention-policy.md) |
+| Applies to | Any deployment; validate the times with a restore drill in yours |
+| Related | [Disaster recovery](disaster-recovery-plan.md) · [ADR-026](../../adr/ADR-026-disaster-recovery.md) · [Data retention policy template](../../adoption-kit/governance/data-retention-policy.md) |
 
-## 1. What is backed up
+Restoring the database is enough to bring the platform back. Evidence files live in write-once storage that keeps its
+own versions, and everything else is in git or can be recomputed.
 
-| Asset | Mechanism | Frequency / RPO | Retention | Location |
-|---|---|---|---|---|
-| PostgreSQL | Flexible Server automated backups + WAL (PITR) | Continuous, RPO ≤ 15 min (HA) | 35 days | Geo-redundant (UK South + UK West) |
-| PostgreSQL long-term | Azure Backup for PostgreSQL Flexible Server (vaulted) | Monthly | 12 months | Backup vault, GRS |
-| Evidence blobs | No separate backup needed: **WORM + GRS** replication | Synchronous within region, async to pair | Per retention policy | UK South + UK West |
-| Archive (Parquet exports of detached partitions) | Immutable container | Monthly | to 7 years | GRS |
-| Configuration (catalogue, models) | Git (this repo) + `config_versions` table | Each change | Indefinite | GitHub + DB |
-| Infrastructure | Terraform in git, remote state with versioning + soft delete | Each change | Indefinite | GitHub + state storage |
-| Secrets | Key Vault soft delete (90 days) + purge protection. Re-bootstrap procedures. | — | — | Key Vault |
-| Container images | ACR Premium geo-replication. Images re-buildable from git + provenance. | Each build | ACR retention policy | ACR |
+## 1. What to back up
 
-**Not backed up (reconstructible):** projections (`control_states`, `evidence_current_state`, `requirement_states`) are rebuilt from ledgers; the queue tables are transient; GitHub-held data is re-fetched via reconciliation.
+| Asset | How | Suggested target |
+|---|---|---|
+| PostgreSQL | Your provider's point-in-time recovery (managed PostgreSQL, or CloudNativePG with WAL archiving) | Recovery point within 15 minutes; 35 days of history; monthly copies kept for 12 months |
+| Evidence files | No separate backup: S3 Object Lock or Azure Blob immutability keeps every version. Add cross-region replication if you need regional resilience | As long as your retention policy requires |
+| Rules (catalogue, `config/`) | Git, plus the `config_versions` table, which records every version loaded | Indefinitely |
+| Settings (`aap.yaml`, Helm values) | Git | Indefinitely |
+| Secrets | Your secret store (Kubernetes secrets, a mounted CSI store, or Azure Key Vault) with soft delete where it offers it; the `aap bootstrap` commands recreate integration credentials | — |
+| Container images and chart | Released, signed and kept in GHCR; rebuildable from the tagged source | — |
 
-## 2. Restore procedures
+**Not backed up, because it is recomputed:** current control states, evidence freshness and snapshots of the month in
+progress (the scheduler re-evaluates every application on each sweep); the job queue; data held by GitHub or GitLab,
+which connector runs fetch again.
 
-### 2.1 Point-in-time restore (logical error)
-1. Choose the restore time (before the error). Restore to a **new** server (`psql-aap-restore-<date>`). Never overwrite production.
-2. Run chain verification on the restored ledgers. Compare checkpoints with Sentinel.
-3. Choose one: (a) promote the restored server (repoint, migrate forward), or (b) copy specific corrected rows into projections. **Never modify ledgers.** Corrections are new ledger entries.
-4. Rebuild projections (`aap rebuild projections --since <time>`).
-5. Record the restore as an audited event and a decision-log entry.
+## 2. Restore
 
-### 2.2 Single evidence artefact retrieval from archive
-Rehydrate the blob from the archive tier (hours) → verify SHA-256 against the ledger → serve via the standard download flow.
+1. Pick a point in time before the problem. Restore to a **new** database; never overwrite production.
+2. Point a worker at the restored database and let one scheduler sweep run: it verifies the current month's evidence
+   hash chain and re-evaluates every application. A chain failure means the
+   [evidence integrity runbook](../runbooks/evidence-integrity-mismatch.md).
+3. Switch the deployment to the restored database (the `database-url-*` secrets), then `helm upgrade` so the migration
+   job brings it to the running version.
+4. Never edit ledger tables (evidence, evaluations, finding events, audit events). A correction is a new record.
+5. Record the restore in your change log; the platform's audit trail continues from the restored point.
 
-## 3. Backup security
+## 3. Restore drill
 
-Backups inherit encryption (platform-managed keys; CMK if adopted). Restore permissions are limited to platform admins via PIM. Restore actions are logged and emitted to the SIEM. Backup-vault immutability is enabled (PROPOSED).
-
-## 4. Restore drill
+Every 6 months, and before first production use:
 
 | Step | Success criterion |
 |---|---|
-| PITR restore of prod to a scratch server (random time in the last 7 days) | Completes within 1h |
-| Chain verification on restored `evidence` and `audit_events` | 100% pass. Last checkpoint matches Sentinel. |
-| Projection rebuild | `control_states` identical to production at the restore time |
-| Random sample of 20 evidence blobs re-hashed | 100% match |
-| Teardown of the scratch server | Within 24h |
+| Restore production to a scratch database from a random point in the last 7 days | Completes within 1 hour |
+| Start a worker against it and let the scheduler sweep run | No `evidence.integrity_failure`; the hash chain verifies |
+| Compare control states with production at the restore time | Identical for evidence older than the restore point |
+| Fetch a few evidence files from the bucket | Their SHA-256 matches the hashes the evidence page shows |
 
-Drill results are recorded as `process.review_record` evidence for the platform's own controls.
+Record the drill result; it is evidence for your own platform controls.

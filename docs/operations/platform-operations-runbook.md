@@ -1,63 +1,65 @@
-# Platform Operations Runbook
+# Platform operations runbook
 
 | | |
 |---|---|
-| Status | DESIGNED. Commands reference components that do not exist yet; verify each step when the platform is built (E20-F03-S02). |
-| Owner | AppSec platform team (on-call) |
-| Related | [DR plan](disaster-recovery-plan.md), [Backup and restore](backup-and-restore-plan.md), [Incident response](../runbooks/incident-response.md), [ADR-027](../../adr/ADR-027-observability.md) |
+| Applies to | Deployments from the [Helm chart](../../charts/fortproof/README.md) or the [Compose stack](../../deploy/compose/README.md) |
+| Related | [Backup and restore](backup-and-restore-plan.md) · [Disaster recovery](disaster-recovery-plan.md) · [Incident response](../runbooks/incident-response.md) · [Key rotation](../runbooks/key-rotation.md) |
 
-## 1. Service overview
+## 1. What runs
 
-| Component | Runs as | Health signal |
-|---|---|---|
-| `aap-web` (API + BFF + UI) | Container App, internal ingress, 2–6 replicas | `/health/ready`, availability SLO 99.5% |
-| `aap-hook` (webhook receiver) | Container App, external ingress (GitHub IPs), 2–4 replicas | p99 latency < 200 ms, 401 rate |
-| `aap-worker` (queues: ingest, github-sync, evaluate, risk, tickets, siem, scheduler) | Container App, KEDA-scaled per queue | Queue age p95 < 5 min, dead-letter count |
-| PostgreSQL Flexible Server | Zone-redundant HA | CPU, connections, replication lag, storage |
-| Blob (evidence-*) | WORM containers | Capacity, failed writes |
-| Key Vault | — | Secret expiry alerts |
+| Process | Command | Does | Health |
+|---|---|---|---|
+| API | `aap api` | REST API, sign-in, serves the web UI | `GET /api/v1/health/live`, `GET /api/v1/health/ready` (checks the database) |
+| Webhook receiver | `aap hook` | Verifies GitHub and GitLab webhook signatures, records the delivery, queues a job | The only process that needs to be reachable from the internet |
+| Worker | `aap worker` | Claims jobs from the PostgreSQL queue: `ingest`, `onboarding`, `assessment`, `evaluate`, `scheduler`, `snapshot`, `connector`, `github-sync` | Job age and dead jobs (section 3) |
+| Migration job | `aap migrate`, `aap config load`, `aap db provision-logins` | Runs before each install and upgrade | Exit code; the chart stops the upgrade if it fails |
+
+Each process connects with its own database login, so a compromised API cannot write evidence. Evidence files go to
+write-once object storage (S3 with Object Lock, or Azure Blob with an immutability policy).
+
+**The scheduler sweep** runs every 5 minutes by default (`worker.scheduler_interval`; one sweep at a time, however many
+workers run): it queues connector runs that are due, marks findings past their deadline,
+expires exceptions, re-evaluates every classified application, refreshes the current month's snapshot, and verifies
+the current month's evidence hash chain. A broken chain logs a critical error and raises the
+`evidence.integrity_failure` event ([evidence integrity runbook](../runbooks/evidence-integrity-mismatch.md)).
 
 ## 2. Routine operations
 
-| Task | Frequency | Procedure |
+| Task | When | How |
 |---|---|---|
-| Check SLO dashboard and connector health | Daily (business hours) | Azure Monitor workbook "AAP SLOs". Any connector stale > 2× interval → section 4.3. |
-| Review dead-lettered jobs | Daily | `aap jobs list --status dead --since 24h` → classify (bug, upstream, data) → replay or ticket |
-| Integrity verification result | Daily | Alert-driven. A failure means the [evidence integrity runbook](../runbooks/evidence-integrity-mismatch.md). |
-| Partition maintenance | Monthly (automated job; verify) | Confirm next 2 months' partitions exist and **direct grants are revoked** (`tests/database` T8 query) |
-| Retention archive | Monthly | Export partitions past online retention → verify chain → detach (two-person change) |
-| Trusted producer updates | On each `security-workflows` release | Merge PR to `config/trusted-producers.yaml`. Loader activates the new config version. |
-| Catalogue/config release | On approved PR | Loader job → verify `config_versions` active row → spot-check evaluations |
-| Key and secret rotation | Per schedule | [Key rotation runbook](../runbooks/key-rotation.md) |
-| Access review export | Quarterly | Entra access review for org-wide roles. Attach the result as evidence. |
-| Restore drill | 6-monthly | [Backup and restore plan section 4](backup-and-restore-plan.md#4-restore-drill) |
-| Dependency and image updates | Weekly (Dependabot/Renovate) | Normal PR flow. The CD verifies attestations. |
+| Integration health | Daily | **Integrations** page, or `aap integrations status`: what is configured, what is missing, last run and what it could not read. Re-run one now: `aap integrations run <key>` |
+| Dead jobs | Daily | `SELECT queue, count(*) FROM jobs WHERE status = 'dead' GROUP BY queue;` then read `last_error`. Fix the cause; a dead job is re-queued by the next event or sweep for the same application |
+| Rejected evidence | Daily | **Evidence → Rejected**. A spike after a security-workflows release usually means the new commit is not approved yet (`UNAPPROVED_WORKFLOW_REF`) |
+| Trusted producer update | Each security-workflows release | `aap pipelines approve --repository <org>/security-workflows --sha <commit> --release <tag>`, then merge the change to `config/trusted-producers.yaml` by pull request |
+| Rules change (catalogue, config) | Each merged pull request | Deploy; the migration job runs `aap config load`, and every evaluation records the rule version it used |
+| Settings check | Each change to `aap.yaml` | `aap settings check aap.yaml` |
+| Credential rotation | Per schedule | [Key rotation runbook](../runbooks/key-rotation.md) |
+| Access review | Quarterly | **Admin → Role grants**: export and review organization-wide roles |
+| Restore drill | Every 6 months | [Backup and restore section 3](backup-and-restore-plan.md#3-restore-drill) |
+| Image and dependency updates | Weekly | Renovate or Dependabot pull requests; releases are signed (verify before deploying, below) |
 
-## 3. Deployment
+## 3. Deploy and upgrade
 
-1. Merge to `main` → CI (lint, tests, security pipeline, SBOM, provenance) → image pushed to ACR by digest.
-2. CD deploys to **dev**: migration Container Apps job (Alembic `upgrade head`) → new revision → smoke tests (health, synthetic webhook with valid and invalid HMAC, one API call per role).
-3. Manual approval (protected `production` environment).
-4. CD **verifies the image attestation** (`gh attestation verify`), runs the migration job in prod, deploys the new revision with traffic shifted 10% → 100% after 15 minutes of healthy SLOs.
-5. Rollback: shift traffic to the previous revision. Migrations are expand/contract (backward-compatible), so a code rollback needs no DB rollback.
+1. Verify the release before deploying: `cosign verify` on the image and chart, and `gh attestation verify` for the
+   build provenance (commands in each release's notes).
+2. `helm upgrade` (or `docker compose pull && docker compose up -d`). The migration job runs first. Migrations are
+   forward-only, and each release upgrades from the previous minor release.
+3. Smoke test: `/api/v1/health/ready` returns 200, sign in, open the Overview and Integrations pages.
+4. Roll back by deploying the previous image when the release had no database migration (its notes say so).
+   Migrations are forward-only: to undo one, restore the database from before the upgrade
+   ([backup plan, section 2](backup-and-restore-plan.md#2-restore)).
 
-## 4. Common procedures
+## 4. Common problems
 
-### 4.1 Webhook backlog or delivery failures
-Check the `aap-hook` 5xx rate and GitHub's webhook delivery log (App settings) → if the receiver was down, reconciliation (every 6h) backfills; trigger an early run: `aap reconcile github --since <outage start>`.
-
-### 4.2 GitHub rate limiting
-Symptom: `github_rate_limit_remaining` < 20% sustained, connector errors 403/429. Actions: confirm no reconciliation storm, raise backoff, reduce concurrency (`GITHUB_MAX_CONCURRENCY`), stagger schedules. Never switch to a user token.
-
-### 4.3 Connector stale (Jira, DefectDojo, Dependency-Track, Defender, Security Hub, Sentinel)
-The UI already shows a stale banner, and dependent evaluations show `error` (last known state). Check credentials (Key Vault expiry), network egress (firewall logs), and the upstream status. Fix, then trigger `aap connector sync <name>`.
-
-### 4.4 Queue backlog
-Check KEDA scaling (max replicas reached?), DB CPU, and slow handlers (traces). Temporarily raise max replicas. Investigate the slow handler.
-
-### 4.5 Evidence rejections spike
-Usually an expired pin (`UNAPPROVED_WORKFLOW_REF` after the 90-day window) or a `security-workflows` release not yet registered. Check `evidence_rejections` by reason. If it is forged-evidence attempts, see the SIEM event and [incident response](../runbooks/incident-response.md).
+| Symptom | Likely cause | Action |
+|---|---|---|
+| Webhook deliveries failing | Receiver not reachable, or a wrong webhook secret | Check the delivery log in the GitHub App or GitLab group settings; check `aap hook` logs. Missed deliveries are picked up by the next scheduled connector run |
+| GitHub rate limiting (403/429 in connector runs) | Too many repositories synced at once | Lengthen the interval in `config/integrations.yaml`. Never switch to a personal token |
+| Integration shows *Last run failed* | Expired credential, blocked egress, or the upstream is down | Read the error on the Integrations page; fix it, then `aap integrations run <key>` |
+| Controls show *No evidence* after a pipeline run | Evidence rejected, or the run was not on the default branch | **Evidence → Rejected** for that repository; check the workflow commit is approved |
+| Jobs piling up | Worker down, or one slow handler | Check the worker is running and its logs; run more worker replicas (`worker.replicas` in the chart) |
+| `evidence.integrity_failure` | Hash chain mismatch | P1: [evidence integrity runbook](../runbooks/evidence-integrity-mismatch.md) |
 
 ## 5. Escalation
 
-Platform on-call → platform tech lead → AppSec lead. Security incidents → [incident response runbook](../runbooks/incident-response.md) + SOC.
+Platform operator → the AppSec lead. Security incidents: [incident response runbook](../runbooks/incident-response.md).

@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Status | DESIGNED: catalogue v0.1.0 REQUIRES HUMAN APPROVAL (Control Catalogue Owner: AppSec lead) |
+| Status | IMPLEMENTED: 48 controls, catalogue 0.1.0. The catalogue is a default: review and adapt it with your control owner, usually the AppSec lead |
 | Source of truth | [`catalogue/controls/controls.yaml`](../../catalogue/controls/controls.yaml) → rendered as [control-catalogue.md](control-catalogue.md) |
 | Related | [SAMM/ASVS mapping](samm-asvs-mapping.md), [Evidence model](../architecture/04-evidence-model.md), [ADR-002](../../adr/ADR-002-owasp-samm-maturity-framework.md), [ADR-003](../../adr/ADR-003-owasp-asvs-requirements.md), [ADR-004](../../adr/ADR-004-evidence-driven-security-model.md) |
 

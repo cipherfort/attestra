@@ -1,6 +1,6 @@
 # ADR-003: OWASP ASVS as the application security requirement layer
 
-**Status:** Proposed (2026-10-07)  ·  **Related:** [SAMM/ASVS methodology Part B](../docs/standards/samm-asvs-mapping.md#part-b-owasp-asvs-operational-not-a-checklist)
+**Status:** Accepted (2026-10-20), implemented  ·  **Related:** [SAMM/ASVS methodology Part B](../docs/standards/samm-asvs-mapping.md#part-b-owasp-asvs-operational-not-a-checklist)
 
 ## Context
 

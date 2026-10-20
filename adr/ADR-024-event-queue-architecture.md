@@ -1,6 +1,6 @@
 # ADR-024: Event and queue architecture
 
-**Status:** Proposed (2026-10-07)  ·  **Related:** ADR-008, ADR-025
+**Status:** Accepted (2026-10-20), implemented  ·  **Related:** ADR-008, ADR-025
 
 ## Context
 

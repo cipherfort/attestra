@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Status | PROPOSED. Durations assume the Phase 2+ team in the [charter section 16](../charter/programme-charter.md#16-resource-requirements-indicative-to-be-refined-in-the-business-case) and that external dependencies land on time (R-06). |
+| Status | Template. Durations assume the Phase 2+ team in the [charter section 16](../charter/programme-charter.md#16-resource-requirements-indicative-to-be-refined-in-the-business-case) and that external dependencies land on time (R-06). |
 | Start (T0) | Charter approval date (TBC) |
 
 ## Phases
@@ -61,7 +61,7 @@ gantt
 | **12 months** | Pilot complete and signed off. Tier 1 wave onboarded. Jira closure-by-evidence in use. Sentinel events live. Dashboards for all personas. Platform pen tested. KPIs reported monthly from the platform. O2 (≥ 90% Tier 1/2 current evidence) on track. |
 | **18 months** | Tier 2 complete. Tier 3/4 self-service onboarding open. Gates enabled for Tier 1/2 per [pipeline gating roadmap](../../../docs/architecture/05-pipeline-architecture.md#9-gating-roadmap-observe--gate). Second annual SAMM cycle shows a measured trend with provenance. Catalogue v1.x reviewed. Programme moving to BAU per charter exit criteria. |
 
-## 18-month maturity roadmap (targets PROPOSED; organisation level, evidence-backed)
+## 18-month maturity roadmap (default targets; organisation level, evidence-backed)
 
 | SAMM practice | Baseline (expected) | 6 mo | 12 mo | 18 mo | Main levers |
 |---|---|---|---|---|---|

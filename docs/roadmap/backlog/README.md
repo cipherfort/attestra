@@ -1,5 +1,9 @@
 # Implementation Backlog
 
+> **The original design backlog**, kept as a record of how the platform was specified and built. Its phases, pilot and
+> sprints refer to that first delivery plan, not to current work. Current plans are in the [roadmap](../../../ROADMAP.md)
+> and the [issue tracker](https://github.com/cipherfort/fortproof/issues).
+
 | | |
 |---|---|
 | Status | Initial backlog (Stage 1). Refined each sprint by the PO. Stories become Jira issues once the Jira project exists (an import script is part of E01). |

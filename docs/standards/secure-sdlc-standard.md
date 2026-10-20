@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| ID | STD-01 · Status: DRAFT, REQUIRES HUMAN APPROVAL (Governance Board) |
+| ID | STD-01 · Status: Template. Adapt it and have it approved in your organization (Governance Board). |
 | Owner | AppSec lead |
 | Applies to | All applications built or maintained by the organisation (in-house or by suppliers in our repositories) |
 | Review | Annually, and on a major catalogue version |

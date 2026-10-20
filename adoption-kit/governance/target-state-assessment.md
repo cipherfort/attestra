@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Status | DRAFT. Targets PROPOSED for Governance Board approval. |
+| Status | Template. The targets are defaults for your governance board to approve. |
 | Related | [Current state](target-state-assessment.md), [Roadmap](../programme/roadmap/roadmap.md), [`config/samm-targets.yaml`](../../config/samm-targets.yaml), [KPI catalogue](../../docs/standards/kpi-kri-catalogue.md) |
 
 ## 1. Target capability profile
@@ -24,7 +24,7 @@
 
 ## 2. Target SAMM profile
 
-Organisation-level targets in the [roadmap](../programme/roadmap/roadmap.md#18-month-maturity-roadmap-targets-proposed-organisation-level-evidence-backed). Per-tier application targets in [`config/samm-targets.yaml`](../../config/samm-targets.yaml). Headline: **% of Tier 1 apps meeting target** (MAT-01).
+Organisation-level targets in the [roadmap](../programme/roadmap/roadmap.md#18-month-maturity-roadmap-default-targets-organisation-level-evidence-backed). Per-tier application targets in [`config/samm-targets.yaml`](../../config/samm-targets.yaml). Headline: **% of Tier 1 apps meeting target** (MAT-01).
 
 ## 3. Gap-closure map
 

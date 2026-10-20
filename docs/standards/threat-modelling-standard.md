@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| ID | STD-04 · Status: DRAFT, REQUIRES HUMAN APPROVAL |
+| ID | STD-04 · Status: Template. Adapt it and have it approved in your organization. |
 | Owner | AppSec lead |
 | Kit | [`templates/repo-contract/.security/threat-model/`](../../templates/repo-contract/.security/threat-model/system-context.md) · schema [`threat-model.schema.json`](../../schemas/repo-contract/threat-model.schema.json) |
 | References | OWASP Threat Modeling guidance, Threat Modeling Manifesto, STRIDE |

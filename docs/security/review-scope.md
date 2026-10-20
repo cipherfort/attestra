@@ -1,7 +1,7 @@
 # Independent security review: scope and brief
 
-Status: PREPARED. REQUIRES HUMAN APPROVAL and an external reviewer: the maintainer commissions the review (pen test and
-design review) before 1.0. Findings are fixed or published as known issues before the release.
+Status: prepared for an external reviewer. The maintainer commissions the review (penetration test and design review)
+before 1.0. Findings are fixed or published as known issues before the release.
 
 ## What the product protects
 

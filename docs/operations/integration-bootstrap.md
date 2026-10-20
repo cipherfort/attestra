@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Status | IMPLEMENTED as code and commands (Terraform validated, bootstrap commands tested against real services locally). Not yet applied to a real tenant, organization or site. |
+| Status | IMPLEMENTED as code and commands (Terraform validated, bootstrap commands tested against real services locally). The shipped GitHub workflows run on a real GitHub organization; the cloud and Azure tenant steps have not been applied to a real tenant yet. |
 | Decision | [ADR-031](../../adr/ADR-031-integrations-owned-and-bootstrapped-by-the-project.md): the project creates and owns every integration. Nothing is assumed to exist. |
 | Audience | The platform team member running each step. The "Who" column names a role on this project ([RACI](../../adoption-kit/programme/raci/raci.md)), not another team. |
 | Check progress | `aap integrations status`, or the **Integrations** page (platform admin, AppSec, security leadership) |
@@ -131,7 +131,7 @@ Verify: `aap integrations run jira`. Optionally run the live contract test (`AAP
 ## 10. Sentinel (SOC lead approves; nothing to apply)
 
 Step 2 already created the workspace onboarding, the `AppSecPlatform_CL` table, the DCE/DCR and the analytics rules.
-- **REQUIRES HUMAN APPROVAL:** the SOC lead approves the event list in `config/siem-events.yaml` (E18-F01-S01).
+- Agree the event list in `config/siem-events.yaml` with your security operations team before switching the export on.
 
 Verify: within 24 hours a `checkpoint.daily` row arrives. The rule "no evidence checkpoint received in 26 hours" stays quiet.
 

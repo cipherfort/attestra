@@ -1,6 +1,6 @@
 # ADR-008: PostgreSQL data model
 
-**Status:** Proposed (2026-10-07)  ·  **Related:** [Data model](../docs/architecture/03-data-model.md), [`schemas/database/0001_core.sql`](../schemas/database/0001_core.sql)
+**Status:** Accepted (2026-10-20), implemented  ·  **Related:** [Data model](../docs/architecture/03-data-model.md), [`schemas/database/0001_core.sql`](../schemas/database/0001_core.sql)
 
 ## Context
 

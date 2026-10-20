@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Status | DESIGNED: methodology REQUIRES HUMAN APPROVAL. Maturity targets are PROPOSED. |
+| Status | IMPLEMENTED. The methodology and the maturity targets are defaults to adapt and approve in your organization |
 | Related | [Control framework](control-framework.md), [Control catalogue](control-catalogue.md), [ADR-002](../../adr/ADR-002-owasp-samm-maturity-framework.md), [ADR-003](../../adr/ADR-003-owasp-asvs-requirements.md) |
 
 > **Official vs organisation-specific.** The "Intent" and "L1/L2/L3" columns below are **short paraphrases for orientation only**. The authoritative activity descriptions, assessment questions and answer options come from the official OWASP SAMM model, imported at a pinned version ([`catalogue/frameworks/samm.yaml`](../../catalogue/frameworks/samm.yaml)). The UI shows the official text. Everything in the "Controls", "Automation", "Evidence", "Assessment" and "Improvement" columns is **organisation-specific**.
@@ -36,7 +36,7 @@ Key: **Auto** = share of the practice that can be evidenced automatically (H / M
 |---|---|---|---|---|---|---|---|---|
 | **Threat Assessment** | Understand application risk and threats | A: L1 basic risk profile · L2 classification of all apps · L3 periodic review. B: L1 ad-hoc threat modelling · L2 standard method · L3 continuous improvement of models | ASC-GOV-01, -02, ASC-TM-01..03 | M | Classification record (event-bound), threat model files (commit-bound), review record (event-bound, ceiling 365d) | Automated structure + manual review (M2 for T1/T2) | Tier 3/4 only | Threat-model kit. AppSec facilitation for Tier 1. |
 | **Security Requirements** | Specify security requirements for software and suppliers | A: L1 requirements identified · L2 structured framework (ASVS) · L3 requirements library, enforced. B: L1 supplier evaluation · L2 contractual requirements · L3 supplier performance tracked | ASC-REQ-01..03 | M | asvs.yaml (C1), requirement verification derived from evidence | Automated + manual supplier assurance | Per requirement | ASVS profile at onboarding. Requirement-tagged tests. |
-| **Secure Architecture** | Build security into design and technology choices | A: L1 security principles applied · L2 shared security services / reference architectures · L3 architectures enforced. B: L1 technology inventory · L2 approved technology list · L3 enforced | ASC-ARC-02 (B), A via ASC-ARC-01 review | L (A) / H (B) | SBOM/EOL data, architecture review records | Stream B automated from SBOM. Stream A by architecture review + interview. | Migration plans | Publish reference architectures (auth via Entra, secrets via Key Vault). Approved-technology list. |
+| **Secure Architecture** | Build security into design and technology choices | A: L1 security principles applied · L2 shared security services / reference architectures · L3 architectures enforced. B: L1 technology inventory · L2 approved technology list · L3 enforced | ASC-ARC-02 (B), A via ASC-ARC-01 review | L (A) / H (B) | SBOM/EOL data, architecture review records | Stream B automated from SBOM. Stream A by architecture review + interview. | Migration plans | Publish reference architectures (authentication via the identity provider, secrets via a managed secret store). Approved-technology list. |
 
 #### Implementation
 
@@ -100,7 +100,7 @@ else:                       answer = 0, provenance: UNASSESSED
 
 A single organisation-wide "SAMM number" is available only in the executive view, always next to its distribution and evidence mix.
 
-**Targets (PROPOSED).** The target maturity profile per tier is set by governance, e.g. Tier 1: Secure Build ≥ 2.5, Secure Deployment ≥ 2.0, Defect Management ≥ 2.0, Security Testing ≥ 2.0, Threat Assessment ≥ 2.0. Targets live in configuration next to the classification model.
+**Targets (defaults).** The target maturity profile per tier is set by governance, e.g. Tier 1: Secure Build ≥ 2.5, Secure Deployment ≥ 2.0, Defect Management ≥ 2.0, Security Testing ≥ 2.0, Threat Assessment ≥ 2.0. Targets live in configuration next to the classification model.
 
 **Snapshots.** Monthly immutable snapshots (`maturity_snapshots`) support trend reporting. A change to the catalogue or the methodology is recorded with the snapshot, so a jump caused by a methodology change is not mistaken for improvement.
 
@@ -122,7 +122,7 @@ A single organisation-wide "SAMM number" is available only in the executive view
 
 ### B.2 Tier → level
 
-| Tier | ASVS target (PROPOSED) |
+| Tier | ASVS target (default) |
 |---|---|
 | 1 Critical | L3 |
 | 2 High | L2 |
@@ -138,7 +138,7 @@ A requirement applies when (a) its level ≤ the target and (b) its **capability
 | `web_frontend` | V3 |
 | `api` | V4 |
 | `file_handling` | V5 |
-| `authentication: local \| federated \| none` | V6 (local auth requirements drop out when fully federated to Entra; federation requirements remain) |
+| `authentication: local \| federated \| none` | V6 (local auth requirements drop out when fully federated to an identity provider; federation requirements remain) |
 | `sessions` | V7 |
 | `self_contained_tokens` | V9 |
 | `oauth_oidc: client \| resource_server \| authorization_server` | V10 subsections |
@@ -158,7 +158,7 @@ Requirement-to-tag mapping is maintained by AppSec in `catalogue/frameworks/asvs
 
 Requirement status per app: `VERIFIED` · `SCANNED_NO_ISSUES` · `FAILED` · `UNVERIFIED` · `EXCEPTED` · `NOT_APPLICABLE`. The ASVS view groups by chapter and shows which method backs each status. A requirement cannot be marked verified by hand without a review record.
 
-### B.5 Worked example (Tier 1 citizen-facing API)
+### B.5 Worked example (Tier 1 customer-facing API)
 
 ```
 classification: FR-1 (internet + special-category data) → Tier 1 → ASVS target L3

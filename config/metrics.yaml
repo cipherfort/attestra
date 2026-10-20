@@ -1,5 +1,5 @@
 # KPI / KRI catalogue: SOURCE OF TRUTH (rendered to docs/standards/kpi-kri-catalogue.md by
-# tools/metrics/render.py). Status: DESIGNED; targets/thresholds PROPOSED (Governance Board approval).
+# tools/metrics/render.py). Targets and thresholds are defaults to agree in your organization.
 #
 # Rules (TOM section 7, brief section 39):
 #   * No metric rewards finding FEWER issues. Raw finding counts are context only, never targets.

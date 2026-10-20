@@ -92,7 +92,7 @@ Everything in `.security/` is **declared (C0)** until the platform verifies it:
 
 | Declared | Verification |
 |---|---|
-| Owners | Resolved against Entra and GitHub teams. Unresolvable → ASC-GOV-01 fails. |
+| Owners | Resolved against the identity provider and GitHub or GitLab teams. Unresolvable → ASC-GOV-01 fails. |
 | `exposure: internal` | Cross-checked against cloud inventory (public IPs, Front Door/App Gateway, API Management) and DNS where connectors exist. A contradiction raises a finding and uses the **more exposed** value for classification. |
 | `data_classification` | Cannot be verified automatically. Downgrades need approval. Values are sampled in AppSec review. |
 | Capability flags (`api`, `web_frontend`) | Cross-checked with repo detection (OpenAPI files, frameworks). Missing flags raise a suggestion. |

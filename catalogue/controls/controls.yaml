@@ -124,7 +124,7 @@ controls:
       at TEAM level only, never per person (privacy, see platform security architecture section 6).
     implementation: Assign the secure-development course to all engineers via the LMS.
     remediation: Team lead schedules outstanding completions.
-    notes: LMS connector is PROPOSED; until it exists this control is evaluated from a quarterly HR export (M1).
+    notes: A learning-platform connector is planned; until it exists this control is evaluated from a quarterly HR export (M1).
 
   - id: ASC-GOV-05
     title: Security contact and vulnerability disclosure route published
@@ -1063,7 +1063,7 @@ controls:
     proof: Azure Resource Graph / AWS Config resource inventory for mapped scopes compared to declared stores; encryption/backup properties checked.
     implementation: Declare data stores in application.yaml.
     remediation: Declare or remove undeclared stores; enable backups.
-    notes: PROPOSED for a later release; depends on reliable cloud-scope mapping.
+    notes: Planned for a later release; depends on reliable cloud-scope mapping.
 
   - id: ASC-OPS-06
     title: Retired applications are fully decommissioned

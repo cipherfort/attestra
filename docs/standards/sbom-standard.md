@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| ID | STD-08 · Status: DRAFT, REQUIRES HUMAN APPROVAL |
+| ID | STD-08 · Status: Template. Adapt it and have it approved in your organization. |
 | Owner | AppSec lead |
 | Related | [ADR-009](../../adr/ADR-009-sbom-standard.md), [ADR-010](../../adr/ADR-010-cyclonedx-vs-spdx.md), ASC-BLD-03 |
 
@@ -21,7 +21,7 @@ Ensures every application has an accurate, current component inventory bound to 
 | SBM-05 | Lockfiles shall be committed for every package ecosystem used, so SBOMs reflect resolved versions | ASC-BLD-02 params |
 | SBM-06 | SBOMs are produced by the paved-road workflow and ingested by the platform. Pipelines shall not upload directly to Dependency-Track. | Trusted producers |
 | SBM-07 | SBOMs are **internal evidence**, including for public repositories. Publishing an SBOM externally is a product decision recorded per release. | Open Source Policy |
-| SBM-08 | VEX ("not affected") statements are PROPOSED for a later release and require AppSec approval when introduced | — |
+| SBM-08 | VEX ("not affected") statements are planned for a later release and require AppSec approval when introduced | — |
 
 ## 3. Generation tooling (defaults, replaceable)
 

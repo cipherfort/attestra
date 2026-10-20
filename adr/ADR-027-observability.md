@@ -1,6 +1,6 @@
 # ADR-027: Observability
 
-**Status:** Proposed (2026-10-07)  ·  **Related:** ADR-020, ADR-024
+**Status:** Proposed (2026-10-07). Planned: OpenTelemetry tracing, the log redaction filter and the SLOs are not implemented yet  ·  **Related:** ADR-020, ADR-024
 
 ## Context
 
