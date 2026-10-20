@@ -74,8 +74,9 @@ def _reconcile_github_runs(engine: Engine, api: Any, org: str, result: RunResult
     now = datetime.now(UTC)
     with transaction(engine, "aap_worker") as conn:
         last = conn.execute(
-            text(
-                "SELECT max(started_at) FROM connector_runs WHERE connector = 'github' AND status IN ('ok', 'partial')"
+            text(  # full runs only (empty target): a one-repository sync after a webhook does not reconcile
+                "SELECT max(started_at) FROM connector_runs WHERE connector = 'github' AND target = ''"
+                " AND status IN ('ok', 'partial')"
             )
         ).scalar()
         repos = registered_repositories(conn, org)
