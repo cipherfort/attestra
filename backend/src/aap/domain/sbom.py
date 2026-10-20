@@ -7,6 +7,9 @@ from collections.abc import Iterator, Mapping, Sequence
 from typing import Any
 
 NTIA_FIELDS = ("name", "version")
+# CycloneDX component types that are not packages: SBOM generators (Syft, for one) also list the files they read,
+# such as a lockfile or a workflow file. Those have no purl or version and are not part of the inventory.
+NOT_PACKAGES = frozenset({"file", "data"})
 
 
 def walk_components(components: Sequence[Mapping[str, Any]]) -> Iterator[Mapping[str, Any]]:
@@ -17,7 +20,7 @@ def walk_components(components: Sequence[Mapping[str, Any]]) -> Iterator[Mapping
 
 def assess_quality(bom: Mapping[str, Any], min_purl_pct: float = 95.0) -> tuple[int, float, list[str]]:
     """Returns (component count, purl coverage %, problems). Any problem makes the SBOM inconclusive."""
-    comps = list(walk_components(bom.get("components") or []))
+    comps = [c for c in walk_components(bom.get("components") or []) if c.get("type") not in NOT_PACKAGES]
     problems = []
     if bom.get("bomFormat") != "CycloneDX":
         problems.append("not a CycloneDX document")
