@@ -3,6 +3,13 @@
 All notable changes, newest first. From 0.1.0 on this file is maintained by release-please from Conventional Commit
 messages (`feat:`, `fix:`, `docs:` ...); see [RELEASING.md](RELEASING.md).
 
+## [0.1.1](https://github.com/cipherfort/fortproof/compare/v0.1.0...v0.1.1) (2026-10-20)
+
+
+### Bug Fixes
+
+* **image:** build the bundled gh from source with patched dependencies ([#53](https://github.com/cipherfort/fortproof/issues/53)) ([98a9cf9](https://github.com/cipherfort/fortproof/commit/98a9cf98f1de6a90efe978c20561cf049de6be84))
+
 ## 0.1.0 (2026-10-20)
 
 First public preview: the evidence engine, all 48 control evaluators, GitHub and GitLab, shipped security pipelines
