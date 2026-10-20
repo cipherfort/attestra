@@ -1,7 +1,7 @@
 # Evaluate with Docker Compose
 
 The whole platform on one machine in about 15 minutes, with real sign-in (OpenID Connect via Keycloak), S3 evidence
-storage with Object Lock (RustFS) and the demo world. Status: IMPLEMENTED and run end to end (`setup.sh`).
+storage with Object Lock (RustFS) and the demo world. Tested end to end (`setup.sh`).
 
 ```bash
 deploy/compose/setup.sh            # generates secrets, builds the image (or set AAP_IMAGE), starts, loads the demo

@@ -54,7 +54,16 @@ python3 tools/docs/check_links.py
 python3 tools/licenses/check.py
 tests/database/run.sh
 terraform fmt -check -recursive examples/terraform/azure
+
+cd frontend
+npm ci
+npm run types:check && npm run build && npm run budget   # generated API types current, typecheck, size budget
+# browser tests: start the API with the demo world (README, "For development"), then
+E2E_BASE_URL=http://127.0.0.1:8765 npx playwright test   # every page and role, axe WCAG 2.2 AA, keyboard paths
 ```
+
+Changed the UI? Regenerate the screenshots in the README and on the docs site with `npm run screenshots` and
+`npm run screenshots:webp` (needs the demo API running and `cwebp`).
 
 ## Rules the code follows
 
@@ -85,5 +94,5 @@ The record names its kind, the settings and secrets it needs, its schedule, and 
 
 - **Python:** ruff (lint + format), mypy strict on the whole `aap` package.
 - **TypeScript:** `tsc --noEmit` via `npm run build`.
-- **Docs:** plain English, short sentences, a status label on every design statement (IMPLEMENTED, DESIGNED, PROPOSED).
+- **Docs:** plain English, short sentences. Describe what the code does today; mark anything not built yet as *Planned* (ADRs use *Proposed* until accepted).
 - Match the surrounding code.

@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Status | DESIGNED: requires approval from the Head of Security Engineering and CISO |
+| Status | Template. Have it approved by your security engineering lead and CISO. |
 | Related | [Governance Model](governance-model.md), [RACI](../programme/raci/raci.md), [Charter](../programme/charter/programme-charter.md) |
 
 ## 1. Operating principles
@@ -61,7 +61,7 @@
 | Manual SAMM assessment | Annual, independent | Annual, champion + AppSec | Automated-only, with sampling | Automated-only |
 | Exception approver | AppSec lead (+ CISO above threshold) | AppSec lead | Business Unit Security Lead | Business Unit Security Lead |
 
-The tier boundaries and ASVS levels above are **PROPOSED** and **REQUIRE HUMAN APPROVAL**. The [classification model](../../docs/standards/control-framework.md#3-application-classification-model) is configuration, so they can change without code changes.
+The tier boundaries and ASVS levels above are defaults to approve in your organization. The [classification model](../../docs/standards/control-framework.md#3-application-classification-model) is configuration, so they can change without code changes.
 
 ## 5. Core processes
 

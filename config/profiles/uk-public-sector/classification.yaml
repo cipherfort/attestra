@@ -1,6 +1,6 @@
 # Application classification model: UK PUBLIC-SECTOR profile (the values the platform was designed with).
 # Select it in config/organization.yaml (profile: uk-public-sector).
-# Status: DESIGNED — tier boundaries, labels and ASVS targets REQUIRE HUMAN APPROVAL.
+# Tier boundaries, labels and ASVS targets are defaults: adapt them and have them approved in your organization.
 # All labels are configuration; nothing in code depends on the label text, only on tier rank.
 #
 # Method (transparent, two-step):

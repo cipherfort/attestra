@@ -2,8 +2,7 @@
 
 | | |
 |---|---|
-| Status | IMPLEMENTED; independent review pending ([review scope](review-scope.md), REQUIRES HUMAN ACTION) |
-| Classification of this document | Internal |
+| Status | IMPLEMENTED. An independent security review is planned before 1.0 ([review scope](review-scope.md)) |
 | Related ADRs | 013–017, 022, 025, 027, 028, 030, 032, 033 |
 | Last threat-model refresh | 2026-10-16 (M5: open-source product, plugins, GitLab, packaging; section 4.1) |
 
@@ -24,10 +23,10 @@ The platform holds an **organisation-wide map of exploitable weaknesses**: which
 
 ```
  Internet ──TB1──▶ aap-hook (HMAC-verified, enqueue only)
- Internet ──TB1──X  aap-web (NOT exposed; reachable only via corporate network / ZTNA)
- Corporate users ──TB2──▶ aap-web (Entra OIDC, Conditional Access, BFF session)
- aap-web / aap-worker ──TB3──▶ PostgreSQL, Blob, Key Vault (private endpoints, managed identity)
- aap-worker ──TB4──▶ GitHub API, Jira, DD, DT, Azure, AWS, public feeds (egress allowlist)
+ Internet ──TB1──X  aap-web (not exposed: reach it through your corporate network or zero-trust access)
+ Corporate users ──TB2──▶ aap-web (OIDC sign-in through your identity provider, BFF session)
+ aap-web / aap-worker ──TB3──▶ PostgreSQL, evidence storage, secret store (private network, per-process logins)
+ aap-worker ──TB4──▶ GitHub/GitLab API, ticketing, DD, DT, cloud APIs, public feeds (egress allowlist)
  Consumer repo workflows ──TB5──▶ GitHub (artifacts, attestations): NOT directly to the platform
 ```
 
@@ -37,23 +36,23 @@ The platform holds an **organisation-wide map of exploitable weaknesses**: which
 
 | Control | Design | Status |
 |---|---|---|
-| Workforce authN | Entra ID OIDC auth code + PKCE via BFF. Session cookie `__Host-` prefixed, `HttpOnly; Secure; SameSite=Lax`, 8h absolute and 30 min idle. Conditional Access: compliant device + MFA. | DESIGNED |
-| Service authN | Managed identities for Azure resources. GitHub App JWT → installation token (1h). Jira service account token in Key Vault. | DESIGNED |
-| AuthZ model | RBAC + scope (org unit / application) evaluated in the API **and** PostgreSQL RLS as defence in depth ([ADR-013](../../adr/ADR-013-rbac-model.md)). Deny by default. | DESIGNED |
-| Role source | Entra groups → platform roles. App-level roles derived from `application.yaml` owners (GitHub teams) cross-checked against Entra. | DESIGNED |
-| Privileged access | `platform-admin` via Entra PIM (just-in-time, approval, 4h max). Break-glass account monitored by Sentinel. | DESIGNED |
-| Segregation of duties | Exception requester ≠ approver. Manual-assessment reviewer ≠ member of the app team. False-positive confirmer for P1/P2 ≠ marker. **Enforced in code, not policy.** | DESIGNED |
-| Admins cannot rewrite evidence | The DB role used by the app has no UPDATE/DELETE on ledger tables. The blob container has a WORM policy. | DESIGNED |
+| Workforce authN | OpenID Connect (Entra ID, Okta, Keycloak or any OIDC provider): authorization code + PKCE through a backend-for-frontend, so no token reaches the browser. Session cookie `__Host-` prefixed, `HttpOnly; Secure; SameSite=Lax`, 8 h absolute and 30 min idle. MFA and device policy are enforced by your identity provider. | IMPLEMENTED |
+| Service authN | GitHub App JWT → installation token (1 h). Integration tokens from the secret store. Cloud access by federated identity (IRSA, Azure workload identity), no keys. Service clients use OIDC bearer tokens. | IMPLEMENTED |
+| AuthZ model | RBAC + scope (org unit / application) evaluated in the API **and** PostgreSQL RLS as defence in depth ([ADR-013](../../adr/ADR-013-rbac-model.md)). Deny by default. | IMPLEMENTED |
+| Role source | Role grants made on the Admin page, to people or to identity-provider groups, plus app roles in the token. Application owners come from `application.yaml`. | IMPLEMENTED |
+| Privileged access | `platform_admin` is assigned in the identity provider, never in the platform, and gives structure and access administration without application data. Just-in-time elevation (for example Entra PIM) is recommended. | IMPLEMENTED |
+| Segregation of duties | Exception requester ≠ approver. Manual-assessment reviewer ≠ member of the app team. False-positive confirmer ≠ marker. **Enforced in code, not policy.** | IMPLEMENTED |
+| Admins cannot rewrite evidence | Each process has its own database login, and none has UPDATE or DELETE on ledger tables. Evidence files are in write-once storage. | IMPLEMENTED |
 
 ### 3.2 Data protection
 
 | Control | Design |
 |---|---|
-| In transit | TLS 1.2+ everywhere, TLS 1.3 preferred. Private endpoints for PG, Blob and Key Vault. `sslmode=verify-full` to PG. |
-| At rest | Platform-managed encryption by default. **Customer-managed keys (Key Vault) for PG and Blob — PROPOSED, REQUIRES HUMAN APPROVAL** (cost and key-ops overhead vs data sensitivity). |
+| In transit | TLS 1.2+ everywhere, TLS 1.3 preferred. Private network access to the database and storage where your platform offers it (the Azure example uses private endpoints). `sslmode=verify-full` to PostgreSQL. |
+| At rest | Provider-managed encryption by default. Customer-managed keys for the database and storage are an option each organization weighs against their cost and key operations. |
 | Sensitive fields | Secret-scanning findings store **only** the secret type, location, fingerprint and validity. **Never the secret value.** Raw secret-scanner output is redacted by the ingestion worker before it reaches WORM storage. |
 | Public vs internal | A public repository's *code* is public. Its *security evidence and findings are not* ([ADR-028](../../adr/ADR-028-supply-chain-security.md), "Open source" section). The platform never writes findings back to public repos (no PR comments with vuln detail on public repos). SARIF to the GHAS tab is acceptable because GitHub restricts code-scanning alert visibility to users with security-alert access. |
-| Data minimisation | Developer identity is limited to GitHub login + Entra object ID where linked. No commit-level productivity metrics. See the [privacy considerations](#6-privacy-considerations). |
+| Data minimisation | Developer identity is limited to the GitHub or GitLab login and the identity provider's subject where linked. No commit-level productivity metrics. See the [privacy considerations](#6-privacy-considerations). |
 
 ### 3.3 Evidence integrity ([ADR-016](../../adr/ADR-016-evidence-immutability.md))
 
@@ -74,16 +73,16 @@ The platform holds an **organisation-wide map of exploitable weaknesses**: which
 | XSS | React escaping by default. Strict CSP (`default-src 'self'`; no inline script). Markdown rendered with a sanitiser. Scanner-provided strings (titles, descriptions) are treated as untrusted. |
 | CSRF | SameSite cookie + double-submit token on state-changing BFF routes. |
 | AuthZ bypass / IDOR | Every resource fetch is scoped by the caller's permitted org units in the repository layer. RLS backs it up. An access-control test matrix runs in CI ([test strategy](../roadmap/backlog/epic-22-testing.md)). |
-| Rate limiting | Per-identity token-bucket limits at the API (per replica; good enough at 2–6 replicas, so no Redis dependency), plus stricter limits on export endpoints. Webhook receiver: per-source limits plus Container Apps scale ceiling. |
+| Rate limiting | Planned in the API: per-identity limits, stricter on exports. Until then, set request limits at your ingress for both the API and the webhook receiver. |
 | Webhook spoofing | HMAC-SHA256 (`X-Hub-Signature-256`) with constant-time compare. Delivery-ID replay cache (24h). The payload is treated as a *hint*: the worker re-fetches state from the GitHub API. |
-| Secrets | Key Vault only, accessed via managed identity. No secrets in env files, Terraform state outputs or logs. The GitHub App private key is in Key Vault ([ADR-015](../../adr/ADR-015-secrets-management.md)). |
+| Secrets | In the secret store only (Kubernetes secrets, a mounted CSI store, or Azure Key Vault through managed identity). No secrets in env files, Terraform state outputs or logs. On Azure the GitHub App key can be a non-exportable Key Vault key ([ADR-015](../../adr/ADR-015-secrets-management.md)). |
 
 ### 3.5 Supply chain of the platform itself
 
 Covered in [ADR-028](../../adr/ADR-028-supply-chain-security.md) and [ADR-030](../../adr/ADR-030-build-provenance-and-artifact-integrity.md):
 - dependencies pinned via lockfiles (`uv.lock`, `package-lock.json`); third-party Actions pinned by SHA; Dependabot/Renovate updates;
 - container images built from minimal base images pinned by digest; signed (Sigstore) and provenance-attested;
-- deployment verifies the attestation before rollout (`gh attestation verify` in CD, and Container Apps pulls only from the platform ACR by digest);
+- deployment verifies the signature and attestation before rollout (`cosign verify` and `gh attestation verify`), and the Helm chart pins the image by digest;
 - the platform consumes **its own** reusable security workflows. Dogfooding is planned before 1.0 ([ROADMAP](../../ROADMAP.md)).
 
 ### 3.6 Resilience
@@ -105,22 +104,22 @@ Scope: the components and trust boundaries above. Ratings are inherent → resid
 | T-02 | Consumer repo → evidence | **T**ampering | The maintainer alters the code *after* the scan, so evidence refers to a commit that differs from what is deployed | M | Evidence is bound to `head_sha` and, for artifacts, to digest. Deployment evidence links the digest to the environment. A mismatch yields `NO_EVIDENCE` for the deployed version. | L |
 | T-03 | Reusable workflow running on a persistent self-hosted runner | **T**ampering | A prior job on the same runner poisons the toolchain (e.g. replaces the scanner binary) | M | Ephemeral runners for security workflows (ARC/ephemeral VM, or GitHub-hosted). Tool binaries are verified by checksum. Recorded as the `runner_environment` attribute; evidence from non-ephemeral runners is capped at confidence C2. | M (until ephemeral runners exist) |
 | T-04 | Webhook receiver | **S**poofing / **D**oS | Forged or replayed webhooks; flooding | M | HMAC, replay cache, payload-as-hint, ingress IP restriction to GitHub `hooks` ranges (from `/meta`), rate limits, scale ceiling | L |
-| T-05 | Workers parsing scanner output | **E**levation | Malicious SARIF/SBOM exploits a parser (e.g. YAML deserialisation, zip bomb, XXE) | M | Safe loaders, limits, isolated worker identity with no Key Vault access beyond needs, no outbound except allowlist | L |
+| T-05 | Workers parsing scanner output | **E**levation | Malicious SARIF/SBOM exploits a parser (e.g. YAML deserialisation, zip bomb, XXE) | M | Safe loaders, limits, isolated worker identity with no secret access beyond its needs, no outbound except allowlist | L |
 | T-06 | API | **I**nfo disclosure | IDOR: user in business unit A reads app B's findings | H | Scoped repository layer + RLS + authZ test matrix in CI | L |
 | T-07 | API | **E**levation | User self-approves an exception or confirms their own false positive | M | SoD enforced in the workflow engine. Audit event. Sentinel analytics rule on SoD-override attempts. | L |
 | T-08 | DB | **T**ampering | DBA or compromised admin rewrites evidence or control states to inflate maturity | M | Append-only grants and trigger, hash chain, external checkpoint, daily verification, PIM for DB admin | L |
-| T-09 | DB / Blob | **I**nfo disclosure | Exfiltration of the vulnerability map | H | Private endpoints, no public network access, Entra auth to PG, Defender for Databases/Storage, egress allowlist, audit of bulk export | M |
-| T-10 | GitHub App key | **E**levation | App private key stolen; attacker reads all repos (including private code) | H | Key in Key Vault (HSM-backed if Premium), read-only app permissions, **no `contents:write`**, IP allow list on the GitHub App (Enterprise), rotation every 90 days, alert on token use from an unexpected IP | M |
+| T-09 | DB / Blob | **I**nfo disclosure | Exfiltration of the vulnerability map | H | Private network access only, per-process database logins, your provider's database and storage threat detection, egress allowlist, audit of bulk export | M |
+| T-10 | GitHub App key | **E**levation | App private key stolen; attacker reads all repos (including private code) | H | Key in the secret store (on Azure, a non-exportable Key Vault key), read-only app permissions, **no `contents:write`**, IP allow list on the GitHub App (Enterprise), rotation every 90 days, alert on token use from an unexpected IP | M |
 | T-11 | Jira integration | **I**nfo disclosure | Ticket contents (vuln details) visible to a wide Jira audience | M | Dedicated Jira project(s) with issue security levels. Tickets carry the minimal detail plus a link back to the platform. | L |
 | T-12 | Platform admin | **R**epudiation | Admin changes the risk model to downgrade priorities and denies it | M | Risk model and control catalogue are **version-controlled config** (PR + review), loaded by digest. Runtime changes are disabled. Every evaluation stores the model version. | L |
 | T-13 | Upstream tool (DT/DD) | **T**ampering | Compromised DefectDojo marks findings mitigated en masse | M | Platform closure requires its own evidence (re-scan). Mass-closure anomaly detection (> N closures/hour → alert). | L |
-| T-14 | Third-party Actions in reusable workflows | **T**ampering | Compromised action tag (as with `trivy-action`, Mar 2026) exfiltrates secrets | H | SHA pinning, Actions allowlist at the enterprise level, minimal `permissions:`, **no platform secrets in workflows** (pull model), harden-runner egress audit (PROPOSED) | L |
+| T-14 | Third-party Actions in reusable workflows | **T**ampering | Compromised action tag (as with `trivy-action`, Mar 2026) exfiltrates secrets | H | SHA pinning, Actions allowlist at the enterprise level, minimal `permissions:`, **no platform secrets in workflows** (pull model), harden-runner egress audit (planned) | L |
 | T-15 | Public repos | **I**nfo disclosure | Evidence or findings for a public repo leak via PR comments, workflow logs or artifacts | M | Reusable workflows detect `github.event.repository.visibility == 'public'`, suppress detail in logs and job summaries, and set artifact retention to 1 day (the platform pulls immediately) | L |
 | T-16 | Fork PRs on public repos | **E**levation | `pull_request_target` misuse runs untrusted code with secrets | H | Reusable workflows **never** use `pull_request_target`. The platform does not depend on fork-PR evidence. Org policy: approval required for first-time contributors. | L |
 | T-17 | Availability | **D**oS | Platform outage during a CVE emergency | M | HA PG, multi-replica web, read-only degraded mode, CVE query also runnable directly against Dependency-Track as a fallback (runbook) | L |
 | T-18 | Maturity metrics | **T**ampering (gaming) | Teams game metrics (see TOM section 7) | M | Metric design + sampling audits | M |
 
-**Residual risks to accept explicitly (REQUIRES HUMAN APPROVAL):** T-03 until ephemeral runners exist, T-09 (inherent to an aggregated vuln store), T-10 (GitHub App read access to all code is inherent to the design), T-18.
+**Residual risks each adopting organization should accept explicitly:** T-03 until ephemeral runners exist, T-09 (inherent to an aggregated vuln store), T-10 (GitHub App read access to all code is inherent to the design), T-18.
 
 ### 4.1 Refresh for the open-source product (M5, 2026-10-16)
 
@@ -159,9 +158,9 @@ deployment forms. Each new threat below names its control and the test that hold
 
 ## 6. Privacy considerations
 
-The platform processes personal data in a limited form: names, emails, GitHub logins and Entra IDs of owners, champions, reviewers and approvers; actor identities in audit logs; commit author identity inside raw scanner output (e.g. secret-scanning commit metadata).
+The platform processes personal data in a limited form: names, emails, GitHub or GitLab logins and identity-provider IDs of owners, champions, reviewers and approvers; actor identities in audit logs; commit author identity inside raw scanner output (e.g. secret-scanning commit metadata).
 
 - **Purpose limitation:** security assurance only. The platform **must not** be used for individual performance management. Per-person metrics are not built (team level only). This is stated in the DPIA and the acceptable-use notice.
 - **Minimisation:** commit author emails are stripped from normalised records where not needed. Raw artefacts retain them, under restricted access.
 - **Retention:** see [ADR-017](../../adr/ADR-017-evidence-retention.md).
-- **Lawful basis and DPIA:** **REQUIRES HUMAN APPROVAL.** The Data Protection Officer must confirm whether a DPIA is required (employee monitoring considerations) and the applicable lawful basis. This design does not claim compliance with UK GDPR / DPA 2018 or any other regime.
+- **Lawful basis and DPIA:** each adopting organization's data protection officer confirms whether a DPIA is required (employee monitoring considerations) and the applicable lawful basis. This design does not claim compliance with UK GDPR / DPA 2018 or any other regime.

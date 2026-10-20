@@ -189,7 +189,7 @@ def render(catalogue, samm) -> str:
     w = out.append
     w("# Control Catalogue (rendered)\n")
     w("> **Generated** from `catalogue/controls/controls.yaml` by `tools/catalogue/validate.py`. Do not edit by hand.  ")
-    w(f"> Catalogue version **{catalogue['catalogue_version']}**: status DESIGNED, REQUIRES HUMAN APPROVAL.  ")
+    w(f"> Catalogue version **{catalogue['catalogue_version']}**: the default catalogue: review and adapt it with your control owner.  ")
     w("> Tier columns: **M** mandatory · **R** recommended · **–** not applicable.  ")
     w("> Mappings are framework references. Control wording, thresholds and evidence rules are organisation-specific.\n")
     by_mode = defaultdict(int)

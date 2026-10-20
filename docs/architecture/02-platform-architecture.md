@@ -52,7 +52,7 @@ flowchart LR
     DD[DefectDojo]
   end
   subgraph Ext[Enterprise services]
-    ENTRA[Entra ID]
+    ENTRA[Identity provider - OIDC]
     JIRA[Jira]
     SENT[SIEM: Sentinel / HTTPS / syslog]
     DFC[Defender for Cloud]
@@ -85,14 +85,14 @@ flowchart LR
 
 | # | Component | Responsibility | Status |
 |---|---|---|---|
-| C1 | **Web UI** | Role-based views (engineer, team, owner, leadership, exec). No business logic. | IMPLEMENTED (redesign in progress) |
+| C1 | **Web UI** | Overview, applications, evidence explorer with the verification chain, findings, supply chain, control catalogue, maturity, leadership report, exceptions, assessments, integrations and administration; each role sees only its pages. No business logic. | IMPLEMENTED |
 | C2 | **API service + BFF** | REST `/api/v1`, OpenAPI 3.1. OIDC session for humans (BFF), OIDC client credentials for service clients. AuthZ enforcement point. | IMPLEMENTED |
 | C3 | **Webhook receiver** | Only internet-facing component. Verifies the GitHub HMAC or GitLab secret token, dedups by delivery ID, enqueues, returns 202. **No read path to data.** | IMPLEMENTED |
 | C4 | **Ingestion workers** | Fetch workflow-run and job artifacts from the source control provider, verify identity and attestation, hash, store to WORM, write evidence records, optionally forward to Dependency-Track and DefectDojo. | IMPLEMENTED |
 | C5 | **Connector workers** | Scheduled and event pulls: GitHub and GitLab settings, OSV, CISA KEV, EPSS, endoflife.date, and optionally DefectDojo, Dependency-Track, Defender for Cloud and Security Hub. Each connector is a plugin behind one interface. | IMPLEMENTED |
 | C6 | **Control evaluator** | Applies versioned control rules to evidence. Produces control-state records with an explanation. | IMPLEMENTED (48 evaluators) |
 | C7 | **Risk engine** | Computes contextual priority and SLA per finding from a versioned, configurable model. | IMPLEMENTED |
-| C8 | **Maturity engine** | Derives SAMM activity and practice scores from control states plus manual assessments. ASVS coverage. | IMPLEMENTED (ASVS coverage per requirement: DESIGNED) |
+| C8 | **Maturity engine** | Derives SAMM activity and practice scores from control states plus manual assessments. ASVS coverage. | IMPLEMENTED (ASVS status per requirement: planned) |
 | C9 | **Workflow engine** | Exceptions, manual assessments, onboarding, approvals. State machines with audit. | IMPLEMENTED |
 | C10 | **Ticketing integration** | Jira, GitHub Issues or GitLab Issues: create, update and transition with deterministic dedup keys. | IMPLEMENTED |
 | C11 | **Event export** | Curated security events to one SIEM (Sentinel, HTTPS/Splunk HEC or syslog); notifications through chat webhooks (Slack, Teams). | IMPLEMENTED |
@@ -105,7 +105,7 @@ The components are **logical**. Physically, they ship as **three deployables** t
 |---|---|---|
 | `aap-web` | C1 static assets + C2 API/BFF | HTTP, 2–6 replicas |
 | `aap-hook` | C3 | HTTP, 2–4 replicas, separate ingress and identity |
-| `aap-worker` | C4–C13, selected by queue name | Queue-depth KEDA scaling, 1–N replicas |
+| `aap-worker` | C4–C13, selected by queue name | 1–N replicas (scale on queue depth, for example with KEDA) |
 
 ## 4. Technology choices (summary; detail and alternatives in ADRs)
 
@@ -113,16 +113,16 @@ The components are **logical**. Physically, they ship as **three deployables** t
 |---|---|---|---|
 | Language (API + workers) | **Python 3.12, FastAPI, SQLAlchemy 2, Alembic, Pydantic v2** | Go; TypeScript/NestJS | ADR-023 |
 | Frontend | **React + TypeScript (Vite), OpenAPI-generated client** | Next.js SSR; server-rendered HTMX | ADR-023 |
-| Database | **PostgreSQL 16** (Azure Flexible Server, zone-redundant HA) | Cosmos DB; graph DB for mappings | ADR-008 |
+| Database | **PostgreSQL 16**, managed or operated (high availability recommended) | Cosmos DB; graph DB for mappings | ADR-008 |
 | Queue | **PostgreSQL-backed job queue + transactional outbox** (`SELECT … FOR UPDATE SKIP LOCKED`), behind an interface | Azure Service Bus; Redis/Celery | ADR-024 |
-| Evidence store | **Azure Blob, version-level immutability (WORM), private endpoint** | DB `bytea`; S3 Object Lock | ADR-007, 016 |
-| AuthN | **Entra ID OIDC, BFF pattern** (httpOnly session cookie); service-to-service via managed identity | SPA with tokens in browser | ADR-014 |
+| Evidence store | **Write-once object storage**: S3 with Object Lock, or Azure Blob with version-level immutability | DB `bytea` | ADR-007, 016 |
+| AuthN | **OpenID Connect (any provider), BFF pattern** (httpOnly session cookie); cloud access by federated identity | SPA with tokens in browser | ADR-014 |
 | Source integration | **GitHub App** (read-only scopes) + webhooks; pull-based evidence collection | Push from CI with API keys | ADR-005 |
 | Pipeline | **Central reusable workflows**, released by tag, consumed by SHA | Per-repo copies; external CI | ADR-006 |
-| SBOM | **CycloneDX** primary; SPDX accepted and converted | SPDX primary | ADR-009, 010 |
-| Hosting | **Azure Container Apps** in a VNet-integrated environment, private endpoints | AKS; App Service | ADR-025 |
+| SBOM | **CycloneDX**; accepting SPDX is planned | SPDX primary | ADR-009, 010 |
+| Hosting | **Any Kubernetes** (Helm chart); Docker Compose for evaluation | Azure Container Apps (the original design) | ADR-025 |
 | IaC | **Terraform** (azurerm 4.x in the Azure example; AWS example included) | Bicep | ADR-025 |
-| Observability | **OpenTelemetry → Azure Monitor / App Insights**; audit to Log Analytics → Sentinel | Self-hosted Grafana stack | ADR-027 |
+| Observability | **Structured logs and health endpoints**; audit ledger in PostgreSQL, curated events to your SIEM; OpenTelemetry planned | Vendor-specific APM | ADR-027 |
 | Search | **PostgreSQL full-text + trigram**; no dedicated search engine at this scale | OpenSearch | ADR-008 |
 
 Why Python: security engineers who will maintain and extend it mostly write Python, and the connector and parser ecosystem is strongest in Python. The workload is I/O-bound integration, where Go's performance advantage does not matter. Rationale and the counter-argument (type safety) are in ADR-023.
@@ -160,7 +160,7 @@ sequenceDiagram
   Note over DB: control evaluator re-evaluates affected controls
 ```
 
-This removes every platform credential from consumer repositories, which fixes current-state issue CS-1. It also means **the platform verifies evidence independently instead of trusting what a pipeline tells it**.
+This removes every platform credential from consumer repositories (see the [problem definition](01-problem-definition.md#31-common-weaknesses-this-design-avoids)). It also means **the platform verifies evidence independently instead of trusting what a pipeline tells it**.
 
 ### 5.2 Configuration evidence (continuous)
 
@@ -172,9 +172,9 @@ The GitHub connector polls repo, ruleset and security settings (and reacts to `r
 stateDiagram-v2
   [*] --> New: detected (DD/GHAS/DT/cloud)
   New --> Triaged: auto-priority + owner mapped
-  Triaged --> Ticketed: P1–P3 → Jira (dedup key)
+  Triaged --> Ticketed: P1–P3 → ticket (dedup key)
   Triaged --> FalsePositive: champion + 2nd reviewer for P1/P2
-  Ticketed --> FixPending: Jira "Done" / PR merged
+  Ticketed --> FixPending: ticket done / PR merged
   FixPending --> Verified: re-scan on same scope no longer reports it
   FixPending --> Ticketed: re-scan still reports it (ticket re-opened)
   Ticketed --> Excepted: approved exception
@@ -206,7 +206,7 @@ subscribes to that evidence type ─▶ for each (app, control, scope):
                     outbox: control.state_changed
 ```
 
-A scheduled sweep (hourly) re-evaluates time-based freshness so that controls fall to `STALE` without waiting for an event.
+The scheduler sweep (every 5 minutes by default, `worker.scheduler_interval`) re-evaluates time-based freshness so that controls fall to `STALE` without waiting for an event.
 
 ## 6. Multi-tenancy
 
@@ -239,7 +239,8 @@ Every system below is created and owned by this project ([ADR-031](../../adr/ADR
 | Defender for Cloud (Azure Resource Graph) | IMPLEMENTED, tested against recorded responses. Reader + Security Reader: `modules/azure-reader`. |
 | AWS Security Hub | IMPLEMENTED, tested with moto. Role trusting the worker identity (no keys): `envs/aws`. |
 | Sentinel | IMPLEMENTED (curated events, dedup, daily checkpoint, dispatch), tested against recorded responses. Table/DCR/rules: `modules/sentinel`. |
-| Entra ID sign-in | IMPLEMENTED (OIDC BFF, sessions, CSRF, bearer for services), tested against a real OIDC server. Apps, roles, groups, federated credential: `modules/entra`. |
-| Evidence WORM store | IMPLEMENTED (`AzureBlobStore`), tested against Azurite; WORM policy by `modules/platform` (locking: decision D-016). |
+| GitLab | IMPLEMENTED (settings, CI/CD components, webhooks, GitLab Issues; evidence capped at C2, [ADR-033](../../adr/ADR-033-gitlab-evidence-trust.md)), tested end to end against GitLab CE nightly. Token: `aap bootstrap gitlab`. |
+| OIDC sign-in (Entra ID, Okta, Keycloak, any OpenID Connect provider) | IMPLEMENTED (OIDC BFF, sessions, CSRF, bearer for services), tested against a real OIDC server and Keycloak. Entra example: `modules/entra`. |
+| Evidence WORM store | IMPLEMENTED: S3 with Object Lock (`S3BlobStore`, tested against RustFS in the Compose stack), Azure Blob with an immutability policy (`AzureBlobStore`, tested against Azurite; policy by `modules/platform`), or local disk for development. |
 | Other SIEMs (Splunk, Elastic, Exabeam, …) | IMPLEMENTED: HTTPS sink (JSON or Splunk HEC) and syslog sink (RFC 5424 over TLS) |
-| EPSS / CISA KEV | DESIGNED. Public feeds, no auth. |
+| OSV, CISA KEV, FIRST EPSS, endoflife.date | IMPLEMENTED: built-in feeds, public, no account needed. |

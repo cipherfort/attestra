@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Status | DRAFT input for the DPO. **Does not claim compliance with UK GDPR, the Data Protection Act 2018 or any other law.** Legal and DPO review is required. |
+| Status | Input for your data protection officer. **Does not claim compliance with UK GDPR, the Data Protection Act 2018 or any other law.** Legal and DPO review is required. |
 | Owner | Programme owner, with the DPO |
 | Companion | [DPIA considerations](dpia-considerations.md), [Data Retention Policy](../../adoption-kit/governance/data-retention-policy.md) |
 
@@ -12,13 +12,13 @@
 
 | Category | Examples | Data subjects | Source | Necessity |
 |---|---|---|---|---|
-| Identity of owners and roles | Names, work emails, Entra object IDs, GitHub logins of business/technical owners, champions | Staff, contractors | `application.yaml`, Entra, GitHub | Required for ownership and escalation |
+| Identity of owners and roles | Names, work emails, identity-provider IDs, GitHub or GitLab logins of business/technical owners, champions | Staff, contractors | `application.yaml`, the identity provider, GitHub or GitLab | Required for ownership and escalation |
 | Workflow actors | Requester/approver of exceptions, reviewers, assessors | Staff | Platform sessions | Required for SoD and accountability |
 | Audit records | Actor, action, time, source IP, user agent | Platform users | API | Required for security of the platform |
 | Developer activity inside raw artefacts | Commit author names/emails in scanner output, committer of an exposed secret | Developers, external contributors (public repos) | Scanner output | Incidental. Minimised in normalised records. |
 | Training completion | Course completion dates | Engineers | LMS export | Team-level coverage only |
 | Security findings | Vulnerabilities in applications | Not personal data in themselves | Scanners | Core purpose |
-| **Application data** | Citizen data processed by the applications | — | **Not processed.** The platform never ingests application data. | — |
+| **Application data** | Customer or end-user data processed by the applications | — | **Not processed.** The platform never ingests application data. | — |
 
 ## 2. Purposes
 
@@ -28,7 +28,7 @@ Security assurance of applications · risk management and remediation tracking �
 
 | Measure | Implementation |
 |---|---|
-| Minimisation | Secret values are never stored. Committer emails are stripped from normalised findings. Only the attributes needed for ownership are synced from Entra. |
+| Minimisation | Secret values are never stored. Committer emails are stripped from normalised findings. Only the attributes needed for ownership come from the identity provider. |
 | Purpose limitation | Prohibited-use statement in the charter and acceptable-use notice. No individual leaderboards. |
 | Access control | RBAC + RLS. Auditor access time-bound. Admins lack default detail access. ([Access Control Model](access-control-model.md)) |
 | Retention | Defined per category. Leavers pseudonymised after 90 days. ([Retention Policy](../../adoption-kit/governance/data-retention-policy.md)) |

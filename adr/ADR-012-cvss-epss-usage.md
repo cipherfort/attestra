@@ -1,6 +1,6 @@
 # ADR-012: Use of CVSS, EPSS and CISA KEV
 
-**Status:** Proposed (2026-10-07)  ·  **Related:** ADR-011
+**Status:** Accepted (2026-10-20), implemented  ·  **Related:** ADR-011
 
 ## Context
 

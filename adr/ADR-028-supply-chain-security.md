@@ -1,6 +1,6 @@
 # ADR-028: Software supply-chain security (platform, workflows and open-source estate)
 
-**Status:** Proposed (2026-10-07)  ·  **Related:** ADR-006, ADR-029, ADR-030, controls ASC-SRC-06, ASC-BLD-06/07/09
+**Status:** Accepted (2026-10-20), implemented  ·  **Related:** ADR-006, ADR-029, ADR-030, controls ASC-SRC-06, ASC-BLD-06/07/09
 
 ## Context
 

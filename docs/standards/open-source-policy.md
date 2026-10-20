@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| ID | STD-14 · Status: DRAFT. REQUIRES HUMAN APPROVAL (Legal for licensing, CISO for security). |
+| ID | STD-14 · Status: Template. Adapt it and have it approved in your organization (Legal for licensing, CISO for security). |
 | Owner | AppSec lead, with OSS governance / Legal |
 | Related | [ADR-028](../../adr/ADR-028-supply-chain-security.md), [ADR-029](../../adr/ADR-029-open-source-dependency-governance.md), [`config/licence-policy.yaml`](../../config/licence-policy.yaml) |
 

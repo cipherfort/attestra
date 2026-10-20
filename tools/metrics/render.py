@@ -53,7 +53,7 @@ def render(doc: dict) -> str:
     lines = [
         "# KPI / KRI Catalogue (rendered)\n",
         "> **Generated** from `config/metrics.yaml` by `tools/metrics/render.py`. Do not edit by hand.  ",
-        "> Status: DESIGNED. Targets and thresholds are PROPOSED and need Governance Board approval.\n",
+        "> Targets and thresholds are defaults: agree them with whoever governs your security programme.\n",
         "Design rules: no metric rewards finding fewer issues; every metric is computed by the platform from its ledgers; "
         "reporting is at team, application or business unit level, **never per person** "
         "([TOM section 7](../../adoption-kit/governance/target-operating-model.md#7-how-the-tom-avoids-gaming)).\n",

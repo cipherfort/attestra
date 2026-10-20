@@ -3,7 +3,7 @@
 | | |
 |---|---|
 | Version | 0.1 OUTLINE. Cost figures to be completed in Phase 0 (WP0.6) with Finance. **No cost figures in this draft are quotes.** |
-| Status | REQUIRES HUMAN APPROVAL (sponsor, finance) |
+| Status | Template. Approved by the sponsor and finance. |
 | Parent | [Programme Charter](programme-charter.md) |
 
 ## 1. Strategic case (summary)

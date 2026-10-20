@@ -1,6 +1,6 @@
 # ADR-029: Open-source dependency governance
 
-**Status:** Proposed (2026-10-07)  ·  **Related:** ADR-028, [`config/licence-policy.yaml`](../config/licence-policy.yaml), controls ASC-BLD-07/08/09
+**Status:** Accepted (2026-10-20), implemented  ·  **Related:** ADR-028, [`config/licence-policy.yaml`](../config/licence-policy.yaml), controls ASC-BLD-07/08/09
 
 ## Context
 

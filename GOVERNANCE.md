@@ -20,6 +20,21 @@ A contributor becomes a maintainer after sustained, high-quality contributions (
 
 Semantic versioning. Releases are signed and carry SBOMs and build provenance. Database migrations are forward-only, and each release upgrades from the previous minor release.
 
+## Sponsorship and the commercial boundary
+
+FortProof is sponsored by [CipherFort Security](https://cipherfortsecurity.com), whose founder is the founding
+maintainer. So that users, contributors and a future OWASP review can rely on it, these commitments hold:
+
+- **Everything in this repository is open source.** Code is Apache-2.0 and documentation CC BY-SA 4.0. No feature is
+  held back from the repository, and there is no "enterprise edition" of anything in it.
+- **Security fixes are never held back** for paying customers. They are released and disclosed under
+  [SECURITY.md](SECURITY.md) for everyone at the same time.
+- **Contributors keep their rights.** Contributions are made under the DCO, not a CLA, so nobody, the sponsor included,
+  can relicense them.
+- **CipherFort Security sells services around the project**, never the project itself: hosting, support, onboarding,
+  training, and optional add-ons that live outside this repository.
+- **Decisions follow the process above**, whoever employs the maintainers. The sponsor gets no vote of its own.
+
 ## Code of conduct
 
 Everyone in the project follows the [Code of Conduct](CODE_OF_CONDUCT.md).

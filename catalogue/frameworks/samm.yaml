@@ -1,5 +1,5 @@
 # OWASP SAMM structure (identifiers + official names ONLY).
-# Status: DESIGNED. Activity text, assessment questions and answer options are NOT transcribed here:
+# Activity text, assessment questions and answer options are NOT transcribed here:
 # they are imported verbatim from the official model (github.com/owaspsamm/core, model/ directory)
 # at the pinned version below, so that platform content never diverges from or misquotes SAMM.
 # The short IDs (e.g. I-SB-A) are this platform's stable keys; the importer maps them to the

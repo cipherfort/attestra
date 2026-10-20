@@ -1,6 +1,6 @@
 # ADR-023: API architecture and implementation stack
 
-**Status:** Proposed (2026-10-07)  ·  **Related:** ADR-013, ADR-014, ADR-024
+**Status:** Accepted (2026-10-20), implemented  ·  **Related:** ADR-013, ADR-014, ADR-024
 
 ## Context
 

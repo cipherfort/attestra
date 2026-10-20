@@ -1,6 +1,6 @@
 # ADR-009: SBOM as a first-class capability
 
-**Status:** Proposed (2026-10-07), amended by [ADR-031](ADR-031-integrations-owned-and-bootstrapped-by-the-project.md) (2026-10-08)  ·  **Originally built on:** the earlier prototype's ADR-0001 (reference only since ADR-031)  ·  **Related:** ADR-010, control ASC-BLD-03
+**Status:** Accepted (2026-10-20), implemented; the Azure services named here are one deployment option since [ADR-032](ADR-032-open-source-product.md) made the product provider-neutral, amended by [ADR-031](ADR-031-integrations-owned-and-bootstrapped-by-the-project.md) (2026-10-08)  ·  **Originally built on:** the earlier prototype's ADR-0001 (reference only since ADR-031)  ·  **Related:** ADR-010, control ASC-BLD-03
 
 ## Context
 

@@ -49,7 +49,7 @@ flowchart TB
   ART -. pulled by .-> P[Platform ingestion]
 ```
 
-## 3. Capabilities and default tools (all DESIGNED; tools are replaceable)
+## 3. Capabilities and default tools (tools are replaceable)
 
 | Capability / evidence type | Default tool | Why this default | Runs on | Gate (when enabled) |
 |---|---|---|---|---|
@@ -89,8 +89,8 @@ flowchart TB
 - Top-level `permissions: {}`. Each job declares the minimum (`contents: read`, `security-events: write` only for SARIF upload, `id-token: write` + `attestations: write` only in `emit-evidence`).
 - **Every third-party action pinned by full commit SHA** with a version comment. Dependabot updates the pins. An org Actions allowlist restricts usable actions ([ADR-028](../../adr/ADR-028-supply-chain-security.md)).
 - Tool binaries are downloaded by version with checksum verification. The checksum goes in the manifest (`tool.binary_sha256`).
-- No secrets are required for default capabilities. Private registry pulls use OIDC (Azure/AWS federation), as the existing `image-scan.yml` does.
-- `step-security/harden-runner` in audit mode to baseline egress, then block mode for Tier 1 repos. PROPOSED.
+- No secrets are required for default capabilities. Private registry pulls use OIDC (Azure or AWS federation).
+- Planned: `step-security/harden-runner` in audit mode to baseline egress, then block mode for Tier 1 repositories.
 - **Public repositories:** job summaries and logs print counts only, never finding detail. Artifacts are kept 1 day (the platform pulls within minutes). SARIF goes to GHAS, which restricts alert visibility to users with security-alert access.
 - **Fork PRs:** get a read-only token and no secrets. DAST/API never run for fork PRs. Fork-PR evidence never satisfies controls.
 
@@ -121,9 +121,9 @@ While both paths run, use a different DefectDojo engagement name for the platfor
 | Mechanism | What it guarantees | Status |
 |---|---|---|
 | Org **ruleset "require workflows"**: `aap-security` must pass before merge on default branches of in-scope repos | The caller cannot be deleted or bypassed without an org-admin ruleset change, which is audited | Org ruleset: Team/Enterprise plan (decision D-018), applied by `examples/terraform/azure/envs/github`. Repository rulesets otherwise. |
-| ASC-SRC-01 required checks | Detected even if the ruleset is changed | DESIGNED |
-| ASC-SRC-02 CODEOWNERS on `.github/workflows/` | Workflow edits need owner review | DESIGNED |
-| Freshness | A removed workflow produces `STALE` → `NO_EVIDENCE` within the ceiling window, which raises a control-gap finding | DESIGNED |
+| ASC-SRC-01 required checks | Detected even if the ruleset is changed | IMPLEMENTED (control evaluator) |
+| ASC-SRC-02 CODEOWNERS on `.github/workflows/` | Workflow edits need owner review | IMPLEMENTED (control evaluator) |
+| Freshness | A removed workflow produces `STALE` → `NO_EVIDENCE` within the ceiling window, which raises a control-gap finding | IMPLEMENTED |
 
 ## 9. Gating roadmap (observe → gate)
 

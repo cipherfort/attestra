@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Status | DRAFT, REQUIRES HUMAN APPROVAL (Governance Board, engineering leadership for time allocation) |
+| Status | Template. Have it approved by your governance board, and by engineering leadership for the time it asks of champions. |
 | Owner | AppSec lead. Champions lead (AppSec engineer). |
 | Related | ASC-GOV-03, E17, KPI PPL-01 |
 

@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Status | DRAFT. **REQUIRES HUMAN APPROVAL** (records management, DPO, internal audit). Not a statement of legal compliance. |
+| Status | Template. Have it approved by your records management, privacy and internal audit owners. Not a statement of legal compliance. |
 | Owner | AppSec lead (data owner); platform team (operator) |
 | Decision record | [ADR-017](../../adr/ADR-017-evidence-retention.md) |
 

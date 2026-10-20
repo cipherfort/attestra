@@ -1,6 +1,6 @@
 # ADR-030: Build provenance and artifact integrity
 
-**Status:** Proposed (2026-10-07), amended by [ADR-031](ADR-031-integrations-owned-and-bootstrapped-by-the-project.md) (2026-10-08)  ·  **Related:** ADR-006, ADR-016, ADR-028, controls ASC-BLD-06, ASC-DEP-03
+**Status:** Accepted (2026-10-20), implemented, amended by [ADR-031](ADR-031-integrations-owned-and-bootstrapped-by-the-project.md) (2026-10-08)  ·  **Related:** ADR-006, ADR-016, ADR-028, controls ASC-BLD-06, ASC-DEP-03
 
 ## Context
 

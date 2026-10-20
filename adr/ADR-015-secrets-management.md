@@ -1,6 +1,6 @@
 # ADR-015: Secrets management
 
-**Status:** Proposed (2026-10-07)  ·  **Related:** ADR-014, the Key Vault pattern from the earlier prototype
+**Status:** Accepted (2026-10-20), implemented; the Azure services named here are one deployment option since [ADR-032](ADR-032-open-source-product.md) made the product provider-neutral  ·  **Related:** ADR-014, the Key Vault pattern from the earlier prototype
 
 ## Context
 

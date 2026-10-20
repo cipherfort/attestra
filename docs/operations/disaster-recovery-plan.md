@@ -1,39 +1,41 @@
-# Disaster Recovery Plan
+# Disaster recovery plan
 
 | | |
 |---|---|
-| Status | DESIGNED. Validate the times with a first restore drill in your deployment. |
-| Decision | [ADR-026](../../adr/ADR-026-disaster-recovery.md) |
-| Targets | RTO 4h (zonal/service failure), 8h (regional). RPO 15 min (database), 0 for acknowledged raw evidence. |
+| Applies to | Any deployment; validate the times with a restore drill in yours |
+| Decision | [ADR-026](../../adr/ADR-026-disaster-recovery.md) (written for Azure; the approach applies to any provider) |
+| Suggested targets | Recovery time 4 hours (service failure), 8 hours (regional). Recovery point 15 minutes for the database; nothing lost for evidence files already acknowledged |
 
 ## 1. Scenarios
 
-| # | Scenario | Impact | Recovery strategy | Expected time |
+| # | Scenario | Impact | Recovery | Expected time |
 |---|---|---|---|---|
-| S1 | Single zone failure | Possible brief interruption | PG zone-redundant HA automatic failover. Container Apps reschedules. | Minutes (automatic) |
-| S2 | Bad deployment | Errors or degraded function | Traffic back to the previous revision | < 15 min |
-| S3 | Data corruption / logical error (e.g. bad migration, faulty evaluator writes) | Wrong projections. Ledgers intact (append-only). | Fix code. **Rebuild projections from ledgers** (`aap rebuild projections`). If a ledger is affected (should not be possible), PITR to a new server and compare. | 1–4h |
-| S4 | Regional outage (UK South) | Platform unavailable | Restore PG from geo-redundant backup in UK West. Redeploy compute via Terraform (`envs/prod-dr`). Blob GRS failover (customer-initiated) if needed. Repoint private DNS. | ≤ 8h |
-| S5 | Key Vault unavailable or secrets lost | Connectors fail | Soft-delete recovery. Re-bootstrap secrets per [key rotation runbook](../runbooks/key-rotation.md). | 1–2h |
-| S6 | Security compromise of the platform | Integrity/confidentiality | [Incident response runbook](../runbooks/incident-response.md) first. Rebuild from IaC and verified images. Restore data from a pre-compromise point after chain verification. | Incident-driven |
-| S7 | GitHub outage | No new evidence | Nothing to recover. Reconciliation catches up. Freshness ceilings may mark evidence stale; a pause-freshness flag (admin, audited) prevents false STALE during an upstream outage. | Upstream-driven |
+| S1 | A node or zone fails | Brief interruption | Kubernetes reschedules the processes; use a highly available PostgreSQL | Minutes |
+| S2 | A bad release | Errors or wrong results | Deploy the previous image if the release had no migration; otherwise restore the database from before the upgrade ([backup plan](backup-and-restore-plan.md)) | Under 1 hour |
+| S3 | Wrong results from a code defect | Current control states wrong; ledgers intact (append-only) | Fix and release; the next scheduler sweep re-evaluates every application from the ledgers | 1–4 hours |
+| S4 | Regional outage | Platform unavailable | Restore the database from a cross-region backup, deploy the chart in another region, fail over the evidence bucket's replica, repoint DNS | Up to 8 hours |
+| S5 | Secrets lost | Integrations fail | Recover from the secret store's soft delete, or recreate credentials with the `aap bootstrap` commands ([key rotation](../runbooks/key-rotation.md)) | 1–2 hours |
+| S6 | The platform is compromised | Integrity or confidentiality | [Incident response](../runbooks/incident-response.md) first; rebuild from verified release images; restore data from a point before the compromise, after the hash chain verifies | Incident-driven |
+| S7 | GitHub or GitLab is down | No new evidence | Nothing to recover; connector runs catch up afterwards. Evidence may turn stale meanwhile, which is the honest state | Upstream-driven |
 
 ## 2. Roles
 
-Incident lead: platform tech lead · Decision to fail over regionally: AppSec lead (or delegate) · Communications: platform PO · SOC informed for S6.
+Incident lead: the platform operator. Decision to fail over to another region: the AppSec lead or a delegate.
+Security operations are informed for S6.
 
-## 3. Regional failover procedure (S4)
+## 3. Regional failover (S4)
 
-1. Declare DR (AppSec lead). Communicate "read-only/unavailable" status.
-2. `terraform apply` `infrastructure/envs/prod-dr` (pre-provisioned network, Key Vault, ACR replica). Parameter: restore point.
-3. Restore PG Flexible Server from geo-backup to UK West (server name in `prod-dr` vars).
-4. If the primary storage account is unavailable, initiate the storage account failover. Confirm the immutability policies persist.
-5. Deploy the current image digests (geo-replicated ACR) with `INGESTION_PAUSED=true`.
-6. Run **chain verification** on the restored DB, and checkpoint comparison against Sentinel's `checkpoint.daily`.
-7. Repoint private DNS / Front Door origin. Smoke test.
-8. Unpause ingestion. Trigger GitHub reconciliation from the last evidence time.
-9. Post-incident review. Fail back when the region recovers (reverse procedure, planned window).
+1. Declare the incident and tell users the platform is unavailable.
+2. Restore PostgreSQL from the cross-region backup in the recovery region.
+3. Fail over the evidence bucket to its replica if the primary is unavailable; confirm the retention lock carried over.
+4. Deploy the same release with the Helm chart, with `worker.replicas: 0` and `hook.enabled: false`, so nothing is
+   ingested yet.
+5. Start one worker and let a scheduler sweep verify the hash chain and re-evaluate.
+6. Repoint DNS, then smoke test (health check, sign-in, Overview).
+7. Re-enable the webhook receiver and the workers. Connector runs catch up on what was missed.
+8. Review afterwards; fail back in a planned window.
 
 ## 4. Testing
 
-Restore drill 6-monthly ([backup plan](backup-and-restore-plan.md)). Regional failover tabletop annually. Full regional failover exercise once before production use. Drill results are recorded as platform evidence (`process.review_record`).
+Restore drill every 6 months ([backup plan](backup-and-restore-plan.md#3-restore-drill)); a regional failover
+tabletop once a year; one full failover exercise before production use.

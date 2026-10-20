@@ -1,6 +1,6 @@
 # ADR-010: CycloneDX as canonical SBOM format; SPDX accepted
 
-**Status:** Proposed (2026-10-07)  ·  **Related:** ADR-009
+**Status:** Accepted (2026-10-20). CycloneDX is implemented; accepting and converting SPDX input is planned  ·  **Related:** ADR-009
 
 ## Context
 

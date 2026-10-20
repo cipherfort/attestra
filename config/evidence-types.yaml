@@ -1,5 +1,5 @@
 # Evidence type registry: the ONLY evidence types controls may reference.
-# Status: DESIGNED. Loaded by the evaluator by content digest; changes go via PR (ADR-016, T-12).
+# Loaded by the evaluator by content digest; changes go via PR (ADR-016, T-12).
 #
 # confidence_max: the highest confidence evidence of this type can carry
 #   C0 declared   — claimed by the team (e.g. a field in .security/*.yaml). Never satisfies a control alone.

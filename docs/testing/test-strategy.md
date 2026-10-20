@@ -15,19 +15,20 @@ The platform's credibility rests on three properties, which get the heaviest tes
 
 ## 2. Test levels
 
-| Level | Scope | Tooling | Runs | Gate |
-|---|---|---|---|---|
-| Static | Lint, types, catalogue/config/schema/OpenAPI validation, link check | ruff, mypy (strict, whole backend), `tools/*` validators, Spectral, oasdiff | Every PR | Blocking |
-| Unit | Evaluators, freshness policies, risk model, classification, fingerprints, parsers, policy module | pytest + Hypothesis (property-based) | Every PR | Blocking, coverage ≥ 85% on `domain/`, `evaluators/`, `risk/` |
-| Database | DDL security properties (ledgers, SoD, RLS, partitions), migrations up/down | `tests/database/run.sh`, Testcontainers | Every PR touching schema | Blocking |
-| Integration | Repository layer + RLS, queue semantics, connectors against recorded fixtures (VCR) and stub servers | pytest, Testcontainers PG, WireMock-style stubs | Every PR | Blocking |
-| API contract | Implementation conforms to OpenAPI. Negative cases generated. | Schemathesis against `schemas/api/openapi.yaml` | Every PR (smoke), nightly (full) | Blocking (smoke) |
-| End-to-end | Sandbox GitHub org with canary repos → `security-workflows` → ingestion → evaluation → Jira sandbox → re-scan closure | Playwright (UI), scripted scenarios | Nightly + pre-release | Release gate |
-| Security | Abuse cases AC-01…AC-10, authZ matrix, SAST/SCA/secrets/container/IaC on the platform, DAST (ZAP) on dev, parser fuzzing | pytest, ZAP, Atheris/Hypothesis | PR (abuse cases, authZ), nightly (DAST, fuzz) | Blocking (PR set) |
-| Penetration test | Independent, full scope ([E19-F04-S02](../roadmap/backlog/epic-19-platform-security.md)) | External | Before 1.0, then annually | Go-live gate |
-| Performance | Design scale ([architecture section 7](../architecture/02-platform-architecture.md#7-scale-envelope-design-target)) | k6/Locust, synthetic data generator | Pre-release, monthly | Release gate for listed SLOs |
-| Resilience / failure | Upstream outages, rate limits, PG failover, worker crash mid-job, poison messages | Fault injection (toxiproxy), chaos scripts | Pre-release | Release gate |
-| DR | Restore drill | [Backup plan section 4](../operations/backup-and-restore-plan.md#4-restore-drill) | 6-monthly | Operational gate |
+| Level | What it checks | Tooling | When |
+|---|---|---|---|
+| Static | Lint and strict types; catalogue, config, schema and metrics validation; generated reference pages current; links; the shipped pipelines and this repository's workflows (actionlint, zizmor); the licence gate; Terraform format, validation and Checkov | ruff, mypy, `tools/*` validators, actionlint, zizmor, Checkov | Every pull request |
+| Unit | Evaluators, freshness, risk model, classification, fingerprints, parsers, policy module | pytest, Hypothesis (property-based) | Every pull request |
+| Database | Security properties of the schema (append-only ledgers, SoD, RLS, partitions) and upgrades from every earlier migration, with data | `tests/database/run.sh`, pytest on PostgreSQL 16 | Every pull request |
+| Integration | Repository layer and RLS, the job queue, connectors against recorded API shapes and fakes (moto, respx), the demo world end to end | pytest on PostgreSQL 16 | Every pull request |
+| API contract | The OpenAPI document matches the implementation in both directions; generated requests, including malformed ones, against every implemented read operation | alignment test, Schemathesis | Every pull request |
+| Browser | Every page and role in a browser against the real API and its Content Security Policy; WCAG 2.2 AA in both themes (axe); keyboard paths; reduced motion; the bundle-size budget | Playwright, axe-core | Every pull request |
+| Packaging | The container image runs as non-root with a read-only root filesystem; the Helm chart lints, validates (Kubernetes 1.27 and 1.31) and installs and upgrades on kind; the docs site builds | Docker, Helm, kubeconform, kind, MkDocs | Every pull request |
+| Supply chain | Code scanning, secrets in the full history, dependency updates, OpenSSF Scorecard; releases signed with SBOM and provenance | CodeQL, gitleaks, Dependabot, Scorecard, cosign | Every pull request, weekly, each release |
+| Fuzzing | Every parser of untrusted input, 5,000 examples each | Hypothesis (`fuzz` profile) | Nightly |
+| Live services | GitLab CE end to end with a real runner; opt-in tests against Dependency-Track, DefectDojo, an OIDC provider and Azurite | pytest | Nightly (GitLab), opt-in |
+| Disaster recovery | Restore drill | [Backup plan section 3](../operations/backup-and-restore-plan.md#3-restore-drill) | Every 6 months (operators) |
+| Planned | An independent penetration test before 1.0, then yearly; load tests at the [design scale](../architecture/02-platform-architecture.md#7-scale-envelope-design-target); fault injection (upstream outages, worker crashes); DAST against a deployed instance | External, k6, toxiproxy, ZAP | Before 1.0 |
 
 ## 3. Key test suites
 
@@ -47,13 +48,13 @@ For every activity control: **"configuration present, never executed → NO_EVID
 | Replay of the same run | Idempotent (no duplicate evidence) |
 
 ### 3.3 Access control
-Matrix generated from OpenAPI `x-permission` × roles × (in-scope, out-of-scope): out-of-scope → 404 (AC-03) · SoD (AC-04) · export restrictions (AC-10) · RLS-level tests T5–T9 plus API-level equivalents · executive role cannot reach finding detail.
+Every operation declares `x-permission` (checked in CI) · out-of-scope → 404 (AC-03) · SoD (AC-04) · export restrictions (AC-10) · RLS-level tests T5–T9 plus API-level tests for every persona of the demo world.
 
 ### 3.4 Deduplication and lifecycle
 10 identical pipeline runs → 0 new findings and 0 new tickets (PS-6) · concurrent workers on the same dedup key → one ticket · Jira Done without a fix → reopened (PS-7) · regression → reopened finding.
 
 ### 3.5 Supply chain of the platform
-Unpinned action → CI fail (zizmor) · unattested image → CD refuses (`gh attestation verify` negative test) · SBOM generated and attested per build.
+Unpinned action → CI fail (zizmor) · every release image is signed (cosign) and carries an SBOM and build provenance; verify both before deploying (the commands are in each release's notes).
 
 ## 4. Test data
 

@@ -6,7 +6,7 @@
 | Date | 2026-10-07 |
 | Sponsor | CISO (**to confirm**) |
 | Programme owner | AppSec lead (**to confirm**) |
-| Status | **REQUIRES HUMAN APPROVAL.** No commitment is made until signed off at the Security Leadership review. |
+| Status | Template. No commitment is made until it is signed off at your security leadership review. |
 
 ---
 
@@ -43,7 +43,7 @@ Detailed current state, including security observations on the existing scaffold
 - **Answer "are we affected?" in minutes** during the next Log4Shell-class event, from SBOM inventory across every application.
 - **Audit-ready by construction:** every claim traceable to evidence.
 
-## 4. Objectives (SMART; targets PROPOSED for confirmation in Phase 0)
+## 4. Objectives (SMART; targets to confirm in Phase 0)
 
 | # | Objective | Measure | Target |
 |---|---|---|---|
@@ -83,7 +83,7 @@ Sponsor: CISO. Owner: AppSec lead. Decision forum: the **AppSec Governance Board
 
 ## 9. Assumptions
 
-GitHub Enterprise Cloud with GHAS covers in-scope orgs · Entra ID is the IdP · Azure (UK South) hosts the platform · Jira is available with API access · artifact attestations are available for private repos · 100–500 applications, 300–2,000 repos · a data-classification scheme exists. Each has a validation step in Phase 0 ([problem definition section 7](../../../docs/architecture/01-problem-definition.md#7-assumptions-validate-them-for-your-organisation)).
+GitHub Enterprise Cloud with GHAS covers in-scope orgs · Entra ID is the IdP · Azure (UK South) hosts the platform · Jira is available with API access · artifact attestations are available for private repos · 100–500 applications, 300–2,000 repos · a data-classification scheme exists. Each has a validation step in Phase 0 ([problem definition section 7](../../../docs/architecture/01-problem-definition.md#7-what-it-assumes-and-what-it-doesnt)).
 
 ## 10. Constraints
 
@@ -130,7 +130,7 @@ The project creates and owns every technical integration ([ADR-031](../../../adr
 
 ## 15. KRIs (thresholds trigger Board escalation)
 
-| KRI | Threshold (PROPOSED) |
+| KRI | Threshold (default) |
 |---|---|
 | Open KEV-listed vulnerabilities on internet-facing apps | > 0 for > 7 days |
 | P1 findings past SLA | > 0 |

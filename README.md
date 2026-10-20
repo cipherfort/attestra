@@ -55,7 +55,7 @@ uv sync && uv run aap migrate && uv run aap demo seed
 AAP_AUTH_MODE=dev AAP_ENV=development uv run aap api --port 8765   # open http://localhost:8765
 ```
 
-Switch between people with **Viewing as** (top right) to see what each role sees. Every integration on one machine,
+Switch between people from the account menu (top right, **Viewing as**) to see what each role sees. Every integration on one machine,
 including GitLab CE and the scanners: [`deploy/local/`](deploy/local/README.md). Production: the
 [Helm chart](charts/fortproof/README.md).
 
@@ -63,17 +63,18 @@ including GitLab CE and the scanners: [`deploy/local/`](deploy/local/README.md).
 
 | Works (tested) | Not yet |
 |---|---|
-| Evidence verification, ledgers, all 48 control evaluators, risk scoring, maturity, a role-scoped API and web UI, OIDC sign-in; application registration with AppSec approval; exceptions; manual assessments; admin screens; CSV export | Maturity trends over time and an organization-wide rollup; a richer web UI (in progress) |
+| Evidence verification, ledgers, all 48 control evaluators, risk scoring, maturity with monthly snapshots and an organization-wide roll-up, a role-scoped API; OIDC sign-in; application registration with AppSec approval; exceptions; manual assessments; admin screens; CSV export | Organization-specific dashboards and saved views |
+| A web UI with an overview dashboard, an evidence explorer that shows how each record was verified, global findings, supply chain and "Are we affected?", the control catalogue, maturity trends, a leadership report, keyboard navigation and a light and dark theme (WCAG 2.2 AA tested) | PDF and OSCAL exports; ASVS status per requirement |
 | Shipped GitHub security pipelines with a signed evidence manifest; built-in OSV, CISA KEV, EPSS and end-of-life feeds; integrations as plugins (GitHub, GitLab, Jira, GitHub and GitLab Issues, Dependency-Track, DefectDojo, Defender for Cloud, Security Hub, Sentinel, SIEM over HTTPS or syslog, chat webhooks); S3 (Object Lock), Azure Blob or disk evidence storage; one `aap.yaml`; per-process database logins | The first tagged release with signed images and chart (the release pipeline is built and tested; no release has been cut yet) |
 | GitLab (settings, CI components, issues; evidence capped at C2, [ADR-033](adr/ADR-033-gitlab-evidence-trust.md)); a Helm chart tested on kind; a Compose evaluation stack; AWS and Azure Terraform examples | An independent security review; a recorded end-to-end run on a real GitHub organization (the shipped workflows already run there) |
 
-345 automated tests run on every change (unit, PostgreSQL integration, database security properties and parser fuzzing), plus 5 opt-in tests against real services, a nightly GitLab CE end-to-end run, an API contract fuzz test and a Helm install and upgrade on kind. Details: [ROADMAP](ROADMAP.md).
+Every change runs 361 backend tests (unit, PostgreSQL integration, database security properties and parser fuzzing) and 86 browser tests against the real API and its Content Security Policy (every page, every role, WCAG 2.2 AA in both themes, keyboard paths), plus an API contract fuzz test, a bundle-size budget and a Helm install and upgrade on kind. Opt-in tests run against real services, and GitLab CE runs end to end nightly. Details: [ROADMAP](ROADMAP.md).
 
 ## Documentation
 
 | If you want to… | Read |
 |---|---|
-| Read it all online | [fortproof.dev](https://fortproof.dev/) |
+| Read it all online | [fortproof.dev](https://fortproof.dev/), starting with the [tour](https://fortproof.dev/tour/) |
 | Understand how it works | [Platform architecture](docs/architecture/02-platform-architecture.md) · [Evidence model](docs/architecture/04-evidence-model.md) · [Control framework](docs/standards/control-framework.md) |
 | See every control | [Control catalogue](docs/standards/control-catalogue.md) (rendered from [`catalogue/controls/controls.yaml`](catalogue/controls/controls.yaml)) |
 | Run it with real integrations | [Local integration stack](deploy/local/README.md) · [Integration bootstrap runbook](docs/operations/integration-bootstrap.md) · [Infrastructure](examples/terraform/azure/README.md) |
@@ -84,21 +85,21 @@ including GitLab CE and the scanners: [`deploy/local/`](deploy/local/README.md).
 ## Repository map
 
 ```text
-backend/        Python package `aap`: domain engine, evaluators, ingestion, connectors, API, webhook receiver, worker
-frontend/       React + TypeScript UI, served by the API from the same origin
-catalogue/      the control catalogue and framework mappings (OWASP SAMM, ASVS)
-config/         the rules as data: tiers, risk model, evidence types, trusted producers, exceptions, integrations
-schemas/        database schema, OpenAPI 3.1 spec, evidence manifest, repository contract
-templates/      the files a team adds to its repository to onboard
-pipelines/      the shipped security pipelines and the aap-evidence manifest tool (see pipelines/README.md)
-deploy/local/   every integration on one machine (Docker Compose + bootstrap script)
-charts/fortproof/      Helm chart (production on any Kubernetes)
-deploy/compose/  evaluation stack (Docker Compose)
-examples/       reference Terraform (Azure, AWS) and deployment workflows
-docs/           architecture, standards, guides, operations, runbooks, roadmap backlog
-adoption-kit/   programme and governance documents to adapt (a worked example)
-adr/            architecture decision records
-tools/          validators: catalogue, config, metrics, links, licences
+backend/           Python package `aap`: domain engine, evaluators, ingestion, connectors, API, webhook receiver, worker
+frontend/          React + TypeScript UI, served by the API from the same origin
+catalogue/         the control catalogue and framework mappings (OWASP SAMM, ASVS)
+config/            the rules as data: tiers, risk model, evidence types, trusted producers, exceptions, integrations
+schemas/           database schema, OpenAPI 3.1 spec, evidence manifest, repository contract
+templates/         the files a team adds to its repository to onboard
+pipelines/         the shipped security pipelines and the aap-evidence manifest tool (see pipelines/README.md)
+deploy/local/      every integration on one machine (Docker Compose + bootstrap script)
+charts/fortproof/  Helm chart (production on any Kubernetes)
+deploy/compose/    evaluation stack (Docker Compose)
+examples/          reference Terraform (Azure, AWS) and deployment workflows
+docs/              architecture, standards, guides, operations, runbooks, roadmap backlog
+adoption-kit/      programme and governance documents to adapt (a worked example)
+adr/               architecture decision records
+tools/             validators: catalogue, config, metrics, links, licences
 ```
 
 ## Contributing and security

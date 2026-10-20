@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| ID | STD-02 · Status: DRAFT, REQUIRES HUMAN APPROVAL (tier labels, thresholds, ASVS targets) |
+| ID | STD-02 · Status: Template. Adapt it and have it approved in your organization (tier labels, thresholds, ASVS targets). |
 | Owner | AppSec lead |
 | Configuration | [`config/profiles/<profile>/classification.yaml`](../../config/profiles/generic/classification.yaml) (authoritative) |
 | Review | Annually. Model changes by PR plus Governance Board approval. |
@@ -15,8 +15,8 @@ Assigns every application a risk tier that determines its security requirements,
 
 | Tier | Label (configurable) | Meaning | ASVS target | Typical examples |
 |---|---|---|---|---|
-| 1 | Critical | High-impact public services, sensitive data at scale, or critical business functions | L3 | National citizen-facing services. Identity or cloud-admin tooling. |
-| 2 | High | Significant operational or information-security impact | L2 | Internet-facing services with citizen data. Core internal systems. |
+| 1 | Critical | High-impact public services, sensitive data at scale, or critical business functions | L3 | Large-scale public or customer-facing services. Identity or cloud-admin tooling. |
+| 2 | High | Significant operational or information-security impact | L2 | Internet-facing services with customer personal data. Core internal systems. |
 | 3 | Standard | Normal business applications | L1 + automatable L2 | Internal line-of-business apps |
 | 4 | Low | Low-risk, limited-impact, prototypes | L1 | Internal tools without sensitive data, time-limited prototypes |
 

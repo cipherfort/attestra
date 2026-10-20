@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Status | DESIGNED: REQUIRES HUMAN APPROVAL at programme initiation |
+| Status | Template. Agree it at programme initiation. |
 | Related | [Governance model](../../governance/governance-model.md), [Target operating model](../../governance/target-operating-model.md) |
 
 **R** Responsible (does the work) · **A** Accountable (one per row) · **C** Consulted · **I** Informed

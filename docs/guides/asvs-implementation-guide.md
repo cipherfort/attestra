@@ -3,7 +3,7 @@
 | | |
 |---|---|
 | Audience | Engineers and security champions |
-| Status | DRAFT |
+| Status | Guidance for application teams |
 | Standard | [Security Requirements Standard](../standards/security-requirements-standard.md) |
 
 ## 1. In one paragraph
@@ -20,10 +20,10 @@ Copy [`templates/repo-contract/.security/asvs.yaml`](../../templates/repo-contra
 | `capabilities.web_frontend` | true if you serve browser UI | Scopes V3 |
 | `capabilities.api` | true if you expose an API | Scopes V4 |
 | `capabilities.file_handling` | true if you accept or serve files | Scopes V5 |
-| `capabilities.authentication` | `federated` (Entra/national IdP), `local`, `mixed`, `none` | Scopes V6/V8 sections |
+| `capabilities.authentication` | `federated` (the workforce or customer identity provider), `local`, `mixed`, `none` | Scopes V6/V8 sections |
 | `capabilities.sessions`, `self_contained_tokens`, `oauth_oidc`, `webrtc` | As applicable | V7, V9, V10, V17 |
 
-If you think a requirement genuinely doesn't apply, add it to `not_applicable` with a justification. Status: PROPOSED. The platform records these requests but has no approval step for them yet, so until one exists the requirement still counts as applicable (an exception is the approved route today).
+If you think a requirement genuinely doesn't apply, add it to `not_applicable` with a justification. The platform records these requests but has no approval step for them yet, so until one exists the requirement still counts as applicable (an exception is the approved route today).
 
 ## 3. Step 2: tag your security tests
 

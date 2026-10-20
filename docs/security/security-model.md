@@ -27,8 +27,9 @@ The platform pulls evidence; nobody pushes it. For each evidence bundle it check
 3. every file matches its SHA-256;
 4. where available, the signature names the approved workflow (C3).
 
-Anything else is rejected with a reason code, recorded and visible. Accepted evidence is stored write-once and chained
-by hash; the chain head is exported daily, so later tampering is detectable.
+Anything else is rejected with a reason code, recorded and visible (**Evidence → Rejected**). Accepted evidence is
+stored write-once and chained by hash. The chain is verified on every scheduler sweep, and when a SIEM is connected a
+daily checkpoint is exported to it, so later tampering is detectable.
 
 ## Limits we state rather than hide
 

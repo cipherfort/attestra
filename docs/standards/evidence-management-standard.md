@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| ID | STD-11 · Status: DRAFT, REQUIRES HUMAN APPROVAL |
+| ID | STD-11 · Status: Template. Adapt it and have it approved in your organization. |
 | Owner | AppSec lead. Platform team operates. |
 | Related | [Evidence model](../architecture/04-evidence-model.md), [ADR-004](../../adr/ADR-004-evidence-driven-security-model.md), [ADR-016](../../adr/ADR-016-evidence-immutability.md), [ADR-017](../../adr/ADR-017-evidence-retention.md), [Data Retention Policy](../../adoption-kit/governance/data-retention-policy.md) |
 

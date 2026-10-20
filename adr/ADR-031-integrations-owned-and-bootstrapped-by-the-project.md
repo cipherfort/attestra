@@ -1,6 +1,6 @@
 # ADR-031: The project creates and owns every integration it depends on
 
-**Status:** Proposed (2026-10-08) · **Amends:** [ADR-005](ADR-005-github-primary-source-integration.md), [ADR-006](ADR-006-github-actions-security-pipeline.md), [ADR-009](ADR-009-sbom-standard.md), [ADR-014](ADR-014-authentication-architecture.md), [ADR-018](ADR-018-jira-integration.md), [ADR-019](ADR-019-cloud-integration.md), [ADR-020](ADR-020-siem-integration.md), [ADR-025](ADR-025-deployment-model.md), [ADR-030](ADR-030-build-provenance-and-artifact-integrity.md) · **Runbook:** [integration bootstrap](../docs/operations/integration-bootstrap.md)
+**Status:** Accepted (2026-10-20), implemented · **Amends:** [ADR-005](ADR-005-github-primary-source-integration.md), [ADR-006](ADR-006-github-actions-security-pipeline.md), [ADR-009](ADR-009-sbom-standard.md), [ADR-014](ADR-014-authentication-architecture.md), [ADR-018](ADR-018-jira-integration.md), [ADR-019](ADR-019-cloud-integration.md), [ADR-020](ADR-020-siem-integration.md), [ADR-025](ADR-025-deployment-model.md), [ADR-030](ADR-030-build-provenance-and-artifact-integrity.md) · **Runbook:** [integration bootstrap](../docs/operations/integration-bootstrap.md)
 
 ## Context
 

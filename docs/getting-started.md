@@ -10,18 +10,31 @@ deploy/compose/setup.sh
 Open http://localhost:8000. You are sent to the sign-in page (Keycloak, part of the evaluation stack). Sign in as
 **appsec** with the password the script printed.
 
-## A five-minute tour
+## A ten-minute tour
 
-1. **Applications.** Four demo applications with their risk tier, how many mandatory controls are *proven by current
-   evidence*, and open findings by priority. Proven means evidence, not configuration: a scanner that is configured
-   but has not run on the latest commit does not count.
-2. **Open Claims API.** "Why Tier 1?" explains the classification. "Needs attention" lists each failing control with
-   the reason and a link to request an exception. Every control row expands to the evidence behind it.
-3. **Open a finding.** Its priority is explained (exploited in the wild? internet-facing? which data?). Closing is not
-   a button: only a re-scan that no longer reports it closes it.
-4. **Are we affected?** Type `CVE-2021-44228`: which applications contain the vulnerable component, at which scope.
-5. **Sign out and sign in as `dev`.** An engineer in no team sees nothing. As **admin** (Admin page), add `dev` to the
+The demo is an example organization with four applications and a year of history, built by the same code a real
+deployment runs. Press **⌘K** (Ctrl+K) at any time to jump to an application, a page or a CVE.
+
+1. **Overview.** Mandatory controls proven by verified evidence, open P1 findings, findings past their deadline and
+   rejected evidence, each with twelve months of history. Below: SAMM maturity by business function, recent activity,
+   coverage by control domain and the most urgent findings.
+2. **Applications → Claims API.** "Needs attention" lists each mandatory control that current evidence doesn't prove,
+   with the reason. "Why Tier 1?" explains the classification. On **Controls**, open any control to see its state in
+   every scope and the evidence behind it.
+3. **Evidence.** Open a *Static analysis* record: the chain shows the pipeline run and commit that produced it, the file
+   hashes, each verification check, its place in the hash-chained ledger and the confidence it earned. Then open the
+   **Rejected** tab: a scan result from a copy of the security workflow kept in the application's own repository was
+   refused as an *untrusted producer*.
+4. **Findings.** Open one: its priority is explained (exploited in the wild? internet-facing? which data?). Closing is
+   not a button: only a re-scan that no longer reports it closes it.
+5. **Are we affected?** Type `CVE-2021-44228`: which applications contain the vulnerable component, and which can only
+   be reported as *possibly affected* because their SBOM is missing or stale.
+6. **Sign in as `lead`.** The **Leadership** report and **Maturity**: monthly trends and how each SAMM practice spreads
+   across applications.
+7. **Sign in as `dev`, then as `admin`.** An engineer in no team sees nothing. As `admin`, on **Admin**, add `dev` to the
    Claims team; signed in again, `dev` sees Claims API only.
+
+More screens, with what each one shows: the [tour](tour.md).
 
 ## Next
 

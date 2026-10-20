@@ -1,6 +1,6 @@
 # ADR-013: RBAC model
 
-**Status:** Proposed (2026-10-07)  ·  **Related:** ADR-014, ADR-022, [Platform security section 3.1](../docs/security/platform-security-architecture.md#31-identity-and-access)
+**Status:** Accepted (2026-10-20), implemented  ·  **Related:** ADR-014, ADR-022, [Platform security section 3.1](../docs/security/platform-security-architecture.md#31-identity-and-access)
 
 ## Context
 

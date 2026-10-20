@@ -18,7 +18,7 @@
 
 | Item | Requirement |
 |---|---|
-| Edition and auth | Jira Cloud: service account + API token, or an OAuth 2.0 app. Jira Data Center: PAT for a service user. The token is stored in platform Key Vault. |
+| Edition and auth | Jira Cloud: service account + API token, or an OAuth 2.0 app. Jira Data Center: PAT for a service user. The token is stored in the platform's secret store (`aap secrets put jira-api-token`). |
 | Projects | Use each team's project (mapped per app) or one security project per business unit (default) |
 | Issue type | `Security Finding` (or `Bug` with label `appsec`) |
 | Custom field / entity property | `AAP Dedup Key` (text, hidden from create screens). Used for idempotent create and reconciliation. |

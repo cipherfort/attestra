@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| ID | STD-13 · Status: DRAFT, REQUIRES HUMAN APPROVAL |
+| ID | STD-13 · Status: Template. Adapt it and have it approved in your organization. |
 | Owner | AppSec Platform Product Owner |
 | Related | [Pipeline architecture](../architecture/05-pipeline-architecture.md), [GitHub Security Baseline](github-security-baseline.md), [ADR-006](../../adr/ADR-006-github-actions-security-pipeline.md) |
 

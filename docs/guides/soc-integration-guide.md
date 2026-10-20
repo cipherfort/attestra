@@ -3,7 +3,7 @@
 | | |
 |---|---|
 | Audience | SOC analysts and engineers, platform team |
-| Status | IMPLEMENTED (export, dedup, dispatch; `modules/sentinel` creates the table, DCR and rules). Event catalogue REQUIRES HUMAN APPROVAL (SOC lead). |
+| Status | IMPLEMENTED (export, dedup, dispatch; `modules/sentinel` creates the table, DCR and rules). Agree the event list (`config/siem-events.yaml`) with your security operations team. |
 | Decision | [ADR-020](../../adr/ADR-020-siem-integration.md) · event catalogue [`config/siem-events.yaml`](../../config/siem-events.yaml) |
 
 ## 1. What the SOC receives (and doesn't)
@@ -31,14 +31,14 @@ Eleven curated event types that indicate **active risk or possible compromise**:
 | Repo | string | `org/repo` |
 | ResourceIds | dynamic | Azure resource IDs / AWS ARNs |
 | VulnIds | dynamic | CVE/GHSA/MAL ids |
-| Actor | string | Entra object ID or GitHub login |
+| Actor | string | Identity-provider subject or GitHub/GitLab login |
 | PlatformUrl | string | Deep link (requires platform access) |
 | CorrelationId | string | |
 | Details | dynamic | Minimal, no secret values |
 
 ## 3. Example analytics rules (KQL sketches)
 
-**Exposed secret used after exposure** (correlate with Entra service principal sign-ins):
+**Exposed secret used after exposure** (correlate with your identity provider's service principal or workload sign-ins):
 ```kusto
 AppSecPlatform_CL
 | where EventType == "secret.exposed_active"

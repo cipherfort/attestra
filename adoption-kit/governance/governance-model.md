@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Status | DESIGNED: decision rights and thresholds REQUIRE HUMAN APPROVAL (CISO) |
+| Status | Template. Decision rights and thresholds are defaults for your CISO to approve. |
 | Related | [Target operating model](target-operating-model.md), [RACI](../programme/raci/raci.md), [ADR-021 Exceptions](../../adr/ADR-021-security-exceptions.md) |
 
 ## 1. Structure
@@ -61,7 +61,7 @@ Standards state *what* and *why*. The catalogue states *how it is tested*. A sta
 
 ## 4. Risk acceptance (exception approval thresholds)
 
-Approver authority depends on **residual priority** and **tier**. These values are PROPOSED.
+Approver authority depends on **residual priority** and **tier**. These values are defaults.
 
 | Residual priority ↓ / Tier → | Tier 1 | Tier 2 | Tier 3 | Tier 4 | Max duration |
 |---|---|---|---|---|---|

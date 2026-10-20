@@ -1,5 +1,5 @@
 # Trusted evidence producers (evidence model section 4, ADR-005/006/016).
-# Status: DESIGNED. Evidence from any producer/version not listed here is REJECTED (UNTRUSTED_PRODUCER /
+# Evidence from any producer/version not listed here is REJECTED (UNTRUSTED_PRODUCER /
 # UNAPPROVED_WORKFLOW_REF). Changes by PR only (CODEOWNERS: appsec-platform, 2 approvals).
 #
 # Shipped workflows (pipelines/github/, rendered by `aap pipelines export`): sast, sca, secrets, iac, sbom, container,

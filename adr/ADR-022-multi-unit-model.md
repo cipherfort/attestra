@@ -1,6 +1,6 @@
 # ADR-022: Multi-unit (multi-tenancy) model
 
-**Status:** Proposed (2026-10-07)  ·  **Related:** ADR-013, ADR-008, schema tests T5–T8
+**Status:** Accepted (2026-10-20), implemented  ·  **Related:** ADR-013, ADR-008, schema tests T5–T8
 
 ## Context
 

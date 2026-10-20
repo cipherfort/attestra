@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| ID | STD-06 · Status: DRAFT, REQUIRES HUMAN APPROVAL |
+| ID | STD-06 · Status: Template. Adapt it and have it approved in your organization. |
 | Owner | AppSec lead |
 | Related | [Pipeline architecture](../architecture/05-pipeline-architecture.md), [Pipeline Security Standard](pipeline-security-standard.md) |
 
@@ -46,4 +46,4 @@ Gates are introduced per tier, after observe periods, by Governance Board decisi
 
 ## 5. Penetration test requirements
 
-Scope agreed with AppSec. Tester independence (an external CREST-accredited provider or the internal red team; the accreditation requirement is PROPOSED). Authenticated testing across all roles. Business-logic testing. Report with CVSS and reproduction steps. Retest of fixed findings within 90 days.
+Scope agreed with AppSec. Tester independence (an external CREST-accredited provider or the internal red team; the accreditation requirement is optional). Authenticated testing across all roles. Business-logic testing. Report with CVSS and reproduction steps. Retest of fixed findings within 90 days.

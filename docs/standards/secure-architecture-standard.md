@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| ID | STD-05 · Status: DRAFT, REQUIRES HUMAN APPROVAL |
+| ID | STD-05 · Status: Template. Adapt it and have it approved in your organization. |
 | Owner | AppSec lead, with Enterprise Architecture |
 | Related | SAMM Secure Architecture (D-SA) and Architecture Assessment (V-AA) |
 
@@ -14,9 +14,9 @@ Sets the security principles, reference patterns and review obligations for appl
 
 | ID | Principle | Expectation |
 |---|---|---|
-| ARC-P1 | Centralised identity | Workforce authentication via Entra ID (OIDC/SAML). Citizen authentication via the approved identity provider. **No local password stores** without an exception. |
+| ARC-P1 | Centralised identity | Workforce authentication via the organization's identity provider (OIDC or SAML). Customer authentication via the approved customer identity provider. **No local password stores** without an exception. |
 | ARC-P2 | Least privilege | Managed identities and workload identity federation over keys. Scoped roles. No standing admin. |
-| ARC-P3 | Secrets in vaults | Key Vault / Secrets Manager via managed identity. Never in code, IaC variables or app settings. (ASC-DEP-04) |
+| ARC-P3 | Secrets in vaults | A managed secret store (for example Azure Key Vault, AWS Secrets Manager or HashiCorp Vault) accessed by workload identity. Never in code, IaC variables or app settings. (ASC-DEP-04) |
 | ARC-P4 | Private by default | Data services on private endpoints. Internet exposure only through an approved edge (WAF). |
 | ARC-P5 | Defence in depth for authorisation | Server-side authorisation on every request, object-level checks, deny by default |
 | ARC-P6 | Secure defaults | Security headers, TLS 1.2+, safe parsers, framework protections enabled |
@@ -26,7 +26,7 @@ Sets the security principles, reference patterns and review obligations for appl
 
 ## 3. Reference architectures (to be published as patterns, E21)
 
-Web application behind Front Door/App Gateway WAF · internal API with Entra-protected app roles · event-driven worker with managed identity · Container Apps / AKS workload baseline · CI/CD with OIDC deployment.
+Web application behind a WAF · internal API protected by identity-provider app roles · event-driven worker with workload identity · a hardened container workload baseline · CI/CD with OIDC deployment.
 
 ## 4. Requirements
 

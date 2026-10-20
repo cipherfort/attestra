@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Status | DRAFT for CISO approval |
+| Status | Template for your CISO to approve. |
 | Owner | AppSec lead |
 | Horizon | 18–24 months, reviewed annually |
 

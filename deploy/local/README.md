@@ -6,7 +6,7 @@ Every external system the platform talks to, on one machine, started from nothin
 - see the platform with production sign-in (OIDC) instead of the demo persona switcher.
 
 ```bash
-deploy/local/bootstrap.sh            # core: PostgreSQL 16, OIDC provider (Entra stand-in), Azurite (Blob stand-in)
+deploy/local/bootstrap.sh            # core: PostgreSQL 16, OIDC provider (stands in for your identity provider), Azurite (Azure Blob stand-in)
 deploy/local/bootstrap.sh scanners   # + Dependency-Track 4.14.5 + DefectDojo 3.4.0 (~5 GB RAM, first start ~5 min)
 source deploy/local/aap.env && cd backend
 uv run aap demo seed                             # optional: four demo applications (evidence goes to Azurite)
@@ -33,7 +33,7 @@ The script:
 | Service | Port | Stand-in for | Difference from production |
 |---|---|---|---|
 | PostgreSQL 16 | 55433 | Azure PostgreSQL Flexible Server | Password login, no TLS |
-| mock-oauth2-server 2.1.10 | 8090 | Entra ID | Signs everyone in as "Local Developer" (appsec_engineer); client secret instead of the managed-identity federated credential |
+| mock-oauth2-server 2.1.10 | 8090 | Your identity provider (Entra ID, Okta, …) | Signs everyone in as "Local Developer" (appsec_engineer); client secret instead of the managed-identity federated credential |
 | Azurite 3.35.0 | 10000 | Azure Blob Storage | **Does not enforce immutability policies.** The platform's write-once checks are exercised; the WORM policy is verified only in Azure |
 | Dependency-Track 4.14.5 | 8081 | Same | Embedded state on a Docker volume |
 | DefectDojo 3.4.0 | 8082 | Same | Same images as `examples/terraform/azure/modules/scanners` |

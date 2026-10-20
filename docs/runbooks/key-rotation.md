@@ -1,22 +1,30 @@
-# Key and Secret Rotation Runbook
+# Key and secret rotation runbook
 
 | | |
 |---|---|
-| Related | [ADR-015](../../adr/ADR-015-secrets-management.md), [ADR-005](../../adr/ADR-005-github-primary-source-integration.md) |
-| Principle | Rotate with overlap (new credential live before the old one is revoked). Every rotation is recorded as an audited change. |
+| Related | [ADR-015](../../adr/ADR-015-secrets-management.md) · [ADR-005](../../adr/ADR-005-github-primary-source-integration.md) · [Integration bootstrap](../operations/integration-bootstrap.md) |
+| Principle | Where the upstream system allows two credentials at once, make the new one live before revoking the old. Record every rotation as a change. |
 
-| Credential | Schedule | Where | Procedure |
-|---|---|---|---|
-| GitHub App private key (`aap-reader`) | 90 days, or immediately on suspicion | Key Vault (key or secret), GitHub App settings | 1. Generate a new private key in the App settings (GitHub allows multiple active keys). 2. Import to Key Vault as a new version. 3. Restart workers / wait for the config refresh. Verify token minting. 4. Delete the old key in GitHub. 5. Disable the old Key Vault version. |
-| GitHub webhook secret | 180 days | Key Vault, App settings | 1. Receiver accepts the **current and next** secret (dual-secret mode). 2. Set the next secret in Key Vault, then in GitHub. 3. After 24h of deliveries verifying with the new secret, remove the old one. |
-| Jira service token | 90 days | Key Vault | Create a new token for the service account → Key Vault new version → verify a sync → revoke the old token |
-| DefectDojo API key (platform user) | 90 days | Key Vault | Regenerate in DefectDojo (this invalidates the old key immediately) → update Key Vault right away → expect a short connector error window. Schedule off-peak. |
-| Dependency-Track API key (platform team) | 90 days | Key Vault | Add a new key to the team → Key Vault → verify → delete the old key |
-| Session encryption key | 365 days | Key Vault | Add the new key as primary. Keep the old as decrypt-only for 8h (max session). Then remove. |
-| Database access | n/a | Entra auth (managed identity) | No passwords to rotate. Ensure password auth stays disabled for application roles. |
-| Cloud access (Azure/AWS) | n/a | Managed identity / web identity federation | No secrets. Review role assignments quarterly. |
-| **Repo-held DD/DT keys** (if your repositories used them before adoption) | Retire | Consumer repo secrets | After migration (E07-F03-S02): delete the repo secrets **and** revoke the keys in DD/DT. Rotating alone is not enough, because every repo writer had access. |
+Secrets are stored with `aap secrets put <name>` (value from a hidden prompt or standard input) in the deployment's
+secret store: Kubernetes secrets or a mounted CSI store, or Azure Key Vault. The processes read them at start-up, so
+restart after a change (`kubectl rollout restart deploy`, or restart the Compose services).
 
-**Expiry alerts:** every Key Vault secret has `expires` set. An Azure Monitor alert fires 14 days before.
+| Secret | Suggested schedule | Procedure |
+|---|---|---|
+| `github-app-private-key` | 90 days, or at once on suspicion | Generate a new key in the GitHub App settings (GitHub allows several active keys) → `aap secrets put github-app-private-key` → restart → confirm the next GitHub connector run succeeds → delete the old key in GitHub. On Azure the key can live in Key Vault as a non-exportable key instead: `aap bootstrap github-app-key-to-keyvault` |
+| `github-webhook-secret`, `gitlab-webhook-secret` | 180 days | The receiver checks one secret, so plan a short window: set the new value in the secret store and restart the receiver, then immediately set it in the GitHub App (or GitLab group hook) settings. Deliveries in between fail and are picked up by the next connector run |
+| `gitlab-token`, `gitlab-issues-token` | Before the token's expiry (GitLab enforces one) | `aap bootstrap gitlab` creates a fresh read-only group token; store it, restart, then revoke the old token in GitLab |
+| `jira-api-token` | 90 days | Create a new token for the service account → `aap secrets put jira-api-token` → restart → confirm a sync → revoke the old token |
+| `dependency-track-api-key` | 90 days | Add a new key to the platform's team in Dependency-Track → store it → restart → confirm a sync → delete the old key |
+| `defectdojo-api-token` | 90 days | Regenerating in DefectDojo invalidates the old token at once: store the new one straight away and restart, off-peak |
+| `siem-http-token`, `notify-webhook-url` | Per your SIEM or chat tool's policy | Create the new token or webhook → store it → restart → confirm the next event arrives → revoke the old one |
+| `oidc-client-secret` | Per your identity provider's policy | Add a second client secret in the identity provider → store it → restart → confirm sign-in → remove the old secret |
+| Database logins (`database-url-*`) | Yearly, or on suspicion | Change the values in the secret, then `helm upgrade`: the migration job sets the new passwords (`aap db provision-logins`). Restart the processes |
+| Cloud access (AWS, Azure) | No secret | Federated identity (IRSA, Azure workload identity): review the role assignments quarterly |
 
-**Emergency rotation:** follow the same steps without overlap where compromise is suspected (revoke first, accept the outage), and open a P1/P2 incident.
+**Emergency rotation:** when a credential may be compromised, revoke it first and accept the outage, then create and
+store the new one, and open an incident ([incident response](incident-response.md)).
+
+**Repository-held scanner keys:** if application repositories held Dependency-Track or DefectDojo keys before the
+shipped pipelines replaced them, delete those repository secrets **and** revoke the keys. Rotating alone is not
+enough, because everyone who could write to those repositories could read them.

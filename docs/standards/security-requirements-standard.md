@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| ID | STD-03 · Status: DRAFT, REQUIRES HUMAN APPROVAL |
+| ID | STD-03 · Status: Template. Adapt it and have it approved in your organization. |
 | Owner | AppSec lead |
 | Framework | OWASP ASVS 5.0 (official requirement text imported verbatim, never paraphrased) |
 | Related | [ASVS Implementation Guide](../guides/asvs-implementation-guide.md), [SAMM/ASVS methodology Part B](samm-asvs-mapping.md#part-b-owasp-asvs-operational-not-a-checklist) |
@@ -22,7 +22,7 @@ Defines which technical security requirements apply to an application, and how t
 | REQ-05 | A requirement is VERIFIED only by: a passing automated test tagged with the requirement ID, a configuration check, or an independent manual review/pen test record. **Scanner silence is not verification.** | Requirement-status rules |
 | REQ-06 | Requirements arising from threat models, regulation or contracts shall be recorded as `custom_requirements` with a verification method | asvs.yaml schema |
 | REQ-07 | Suppliers developing for us shall be contractually bound to the same ASVS level for the application's tier | ASC-REQ-03 (manual) |
-| REQ-08 | Mobile applications shall additionally follow OWASP MASVS (adoption PROPOSED when the first mobile app is onboarded) | Future control |
+| REQ-08 | Mobile applications shall additionally follow OWASP MASVS (planned for when the first mobile application is onboarded) | Future control |
 
 ## 3. Requirement status values
 
