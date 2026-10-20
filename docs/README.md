@@ -35,7 +35,7 @@ repository → security pipeline → evidence (verified) → controls → findin
 Every integration is optional and starts unconfigured; until one is set up, the controls that depend on it show *No evidence*, never a pass.
 
 - [Integration bootstrap](operations/integration-bootstrap.md): source control, sign-in, ticketing, vulnerability data, cloud posture, SIEM and storage
-- Guides: [GitLab](guides/gitlab-guide.md) · [Jira](guides/jira-integration-guide.md) · [SIEM and SOC](guides/soc-integration-guide.md) · [Cloud security](guides/cloud-security-integration-guide.md) · [ASVS](guides/asvs-implementation-guide.md)
+- Guides: [GitHub end to end](guides/github-e2e.md) · [GitLab](guides/gitlab-guide.md) · [Jira](guides/jira-integration-guide.md) · [SIEM and SOC](guides/soc-integration-guide.md) · [Cloud security](guides/cloud-security-integration-guide.md) · [ASVS](guides/asvs-implementation-guide.md)
 - [Writing a plugin](develop/plugins.md)
 
 ## Operating it

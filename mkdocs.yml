@@ -66,6 +66,7 @@ nav:
       - SBOM: standards/sbom-standard.md
       - Software supply chain: standards/software-supply-chain-security-standard.md
   - Guides:
+      - GitHub end to end: guides/github-e2e.md
       - GitLab: guides/gitlab-guide.md
       - ASVS: guides/asvs-implementation-guide.md
       - Cloud security: guides/cloud-security-integration-guide.md
