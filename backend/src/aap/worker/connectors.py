@@ -6,7 +6,7 @@ from __future__ import annotations
 import json
 import os
 from collections.abc import Callable, Mapping
-from datetime import UTC, datetime
+from datetime import UTC, datetime, timedelta
 from typing import Any
 
 from sqlalchemy import Engine, text
@@ -62,7 +62,34 @@ def github(engine: Engine, bundle: ConfigBundle, store: SecretStore, p: Mapping[
         result.items += len(out.written)
         if out.gaps:
             result.gaps[name] = out.gaps
+    if not p.get("repo"):  # a full run also picks up workflow runs whose webhook never arrived
+        result.items += _reconcile_github_runs(engine, api, org, result)
     return result
+
+
+def _reconcile_github_runs(engine: Engine, api: Any, org: str, result: RunResult) -> int:
+    from aap.connectors.github_settings import Unavailable
+    from aap.services.github_sync import reconcile_runs, registered_repositories
+
+    now = datetime.now(UTC)
+    with transaction(engine, "aap_worker") as conn:
+        last = conn.execute(
+            text(  # full runs only (empty target): a one-repository sync after a webhook does not reconcile
+                "SELECT max(started_at) FROM connector_runs WHERE connector = 'github' AND target = ''"
+                " AND status IN ('ok', 'partial')"
+            )
+        ).scalar()
+        repos = registered_repositories(conn, org)
+    # since the last good run (an hour of overlap), at most 7 days back; 3 days on the first run
+    since = max(now - timedelta(days=7), (last - timedelta(hours=1)) if last else now - timedelta(days=3))
+    queued = 0
+    for name, external_id in repos:
+        try:
+            with transaction(engine, "aap_worker") as conn:
+                queued += reconcile_runs(conn, api, name, external_id, since)
+        except Unavailable as e:
+            result.gaps[f"{name} (workflow runs)"] = str(e)
+    return queued
 
 
 def jira(engine: Engine, bundle: ConfigBundle, store: SecretStore, p: Mapping[str, Any]) -> RunResult:

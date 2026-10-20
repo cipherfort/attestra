@@ -1,0 +1,40 @@
+{
+  "commit_sha": "94db251634355762b1cd08f5ae284e1d84e67bb9",
+  "evidence_type": "scan.sca",
+  "files": [
+    {
+      "media_type": "application/sarif+json",
+      "path": "osv.sarif",
+      "sha256": "cef95ce1cabe48ae3a6a781b96a561d6620c4cc6c12bdac14018b4396239a66e",
+      "size_bytes": 24136
+    }
+  ],
+  "predicate_type": "https://fortproof.dev/attestation/evidence/v1",
+  "produced_at": "2026-10-20T08:17:28Z",
+  "pull_request": null,
+  "ref": "refs/heads/main",
+  "repository": {
+    "full_name": "cipherfort/fortproof-e2e-app",
+    "id": 1423458634,
+    "visibility": "public"
+  },
+  "result": "findings",
+  "run": {
+    "attempt": 1,
+    "event": "push",
+    "id": 39392284604,
+    "runner_environment": "github-hosted",
+    "workflow_ref": "cipherfort/fortproof-e2e-app/.github/workflows/aap-security.yml@refs/heads/main"
+  },
+  "schema_version": "1.0",
+  "summary": {
+    "by_level": {
+      "warning": 8
+    },
+    "results": 8
+  },
+  "tool": {
+    "name": "osv-scanner",
+    "version": "2.7.0"
+  }
+}

@@ -12,7 +12,7 @@ from __future__ import annotations
 import json
 from collections.abc import Callable
 from dataclasses import dataclass, field
-from datetime import datetime
+from datetime import datetime, timedelta
 from typing import Any
 
 import jsonschema
@@ -27,7 +27,7 @@ from aap.connectors.github_settings import (
     summarise_application,
     summarise_threat_model,
 )
-from aap.store import evidence_store, findings_store, registry
+from aap.store import evidence_store, findings_store, jobs, registry
 
 C3_TYPES = {"scan.secrets"}  # GitHub executed these scans itself: execution evidence, not configuration
 
@@ -260,3 +260,47 @@ def sync_repository(
             subj={**subject, "files": [".security/application.yaml", ".security/asvs.yaml"]},
         )
     return result
+
+
+def registered_repositories(conn: Connection, org: str) -> list[tuple[str, str]]:
+    """(full name, external id) of the organization's GitHub repositories linked to an application."""
+    rows = conn.execute(
+        text("""SELECT DISTINCT r.full_name, r.external_id FROM repositories r
+                JOIN application_repositories ar ON ar.repository_id = r.id
+                WHERE r.provider = 'github' AND NOT r.archived AND r.full_name LIKE :o ORDER BY r.full_name"""),
+        {"o": f"{org}/%"},
+    )
+    return [(str(r.full_name), str(r.external_id)) for r in rows]
+
+
+def reconcile_runs(
+    conn: Connection, api: Any, repo_full_name: str, repo_external_id: str, since: datetime, limit: int = 100
+) -> int:
+    """Queue ingestion for completed workflow runs since `since` that left neither evidence nor a rejection: what a
+    missed `workflow_run` webhook would have queued (receiver down, delivery failed, or no public endpoint). Ingestion
+    is idempotent, so a run that legitimately produced nothing is only looked at again while it is inside the window.
+    Returns the number of runs queued."""
+    queued = 0
+    params = {"status": "completed", "created": f">={since:%Y-%m-%dT%H:%M:%SZ}"}
+    # GitHub lists newest first; queue oldest first so evidence arrives in the order the runs happened
+    runs = list(api.pages(f"/repos/{repo_full_name}/actions/runs", params, key="workflow_runs"))[: limit * 5]
+    for run in reversed(runs):
+        run_id = int(run["id"])
+        seen = conn.execute(
+            text("""SELECT EXISTS (SELECT 1 FROM evidence WHERE ingested_at >= :floor AND run_ref->>'run_id' = :r)
+                        OR EXISTS (SELECT 1 FROM evidence_rejections WHERE run_id = :n)"""),
+            {"floor": since - timedelta(days=1), "r": str(run_id), "n": run_id},
+        ).scalar()
+        if seen:
+            continue
+        payload = {
+            "provider": "github",
+            "repo_external_id": int(repo_external_id),
+            "repo": repo_full_name,
+            "run_id": run_id,
+        }
+        if jobs.enqueue(conn, "ingest", payload, dedup_key=f"run:{repo_external_id}:{run_id}") is not None:
+            queued += 1
+        if queued >= limit:
+            break
+    return queued
