@@ -5,7 +5,7 @@
 | Version | 0.1 DRAFT for leadership review |
 | Date | 2026-10-07 |
 | Sponsor | CISO (**to confirm**) |
-| Programme owner | Head of Application Security (**to confirm**) |
+| Programme owner | AppSec lead (**to confirm**) |
 | Status | **REQUIRES HUMAN APPROVAL.** No commitment is made until signed off at the Security Leadership review. |
 
 ---

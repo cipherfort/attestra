@@ -1,7 +1,8 @@
 # Curated application-security events exported to the SIEM (ADR-020).
-# Status: DESIGNED. REQUIRES HUMAN APPROVAL from the SOC lead (E18-F01-S01).
+# The default event set: agree it with your security operations team.
 # Only these event types leave the platform. Routine findings, control states and evaluations do NOT.
-# Destination: Sentinel custom table AppSecPlatform_CL via the Logs Ingestion API (DCR). Other SIEMs: the HTTPS (JSON or Splunk HEC) or syslog (RFC 5424, TLS) sink.
+# Destinations: any HTTPS collector (JSON or Splunk HEC), syslog (RFC 5424 over TLS), or Microsoft Sentinel (custom table
+# AppSecPlatform_CL through the Logs Ingestion API).
 
 version: 1
 

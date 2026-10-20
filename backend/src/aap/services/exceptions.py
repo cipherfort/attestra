@@ -32,7 +32,7 @@ from aap.store import findings_store, jobs
 DEFAULT_ROLE_MAP = {
     "appsec_engineer": "appsec_engineer",
     "unit_lead": "unit_security_lead",
-    "security_leadership": "head_of_appsec",
+    "security_leadership": "appsec_lead",
 }
 
 

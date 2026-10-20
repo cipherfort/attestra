@@ -3,7 +3,7 @@
 | | |
 |---|---|
 | Status | DRAFT for CISO approval |
-| Owner | Head of Application Security |
+| Owner | AppSec lead |
 | Horizon | 18–24 months, reviewed annually |
 
 ## 1. Vision

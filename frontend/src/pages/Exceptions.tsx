@@ -28,7 +28,7 @@ const OPEN = new Set(["draft", "pending_approval", "approved"]);
 const TARGET: Record<string, string> = { control: "Control", finding: "Finding", requirement: "Requirement", sla: "Deadline" };
 /** Approver levels in the exception policy (config/exception-policy.yaml), in words. */
 const APPROVER: Record<string, string> = {
-  ciso: "CISO", head_of_appsec: "Head of AppSec", unit_security_lead: "Unit security lead", appsec_engineer: "AppSec engineer",
+  ciso: "CISO", appsec_lead: "AppSec lead", unit_security_lead: "Unit security lead", appsec_engineer: "AppSec engineer",
 };
 const approver = (r: string) => APPROVER[r] ?? r.replaceAll("_", " ");
 

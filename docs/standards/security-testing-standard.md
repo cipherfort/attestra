@@ -3,7 +3,7 @@
 | | |
 |---|---|
 | ID | STD-06 · Status: DRAFT, REQUIRES HUMAN APPROVAL |
-| Owner | Head of Application Security |
+| Owner | AppSec lead |
 | Related | [Pipeline architecture](../architecture/05-pipeline-architecture.md), [Pipeline Security Standard](pipeline-security-standard.md) |
 
 ## 1. Purpose

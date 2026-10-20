@@ -3,7 +3,7 @@
 | | |
 |---|---|
 | ID | STD-02 · Status: DRAFT, REQUIRES HUMAN APPROVAL (tier labels, thresholds, ASVS targets) |
-| Owner | Head of Application Security |
+| Owner | AppSec lead |
 | Configuration | [`config/profiles/<profile>/classification.yaml`](../../config/profiles/generic/classification.yaml) (authoritative) |
 | Review | Annually. Model changes by PR plus Governance Board approval. |
 
