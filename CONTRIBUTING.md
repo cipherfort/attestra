@@ -18,7 +18,7 @@ Questions that aren't bugs go to [Discussions](https://github.com/cipherfort/for
 
 ## Developer Certificate of Origin (DCO)
 
-We use the [DCO](https://developercertificate.org/), not a contributor licence agreement. Every commit must be signed off, certifying you have the right to contribute it under the project's licence (Apache-2.0):
+We use the [DCO](https://developercertificate.org/), not a contributor licence agreement. Every commit must be signed off, certifying you have the right to contribute it under the project's licences (Apache-2.0 for code, CC BY-SA 4.0 for documentation):
 
 ```bash
 git commit -s -m "Explain what and why"

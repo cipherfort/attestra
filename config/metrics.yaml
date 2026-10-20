@@ -20,7 +20,7 @@ metrics:
     direction: up
     target: { tier_1_2: 100, all: 90 }
     frequency: monthly
-    owner: head_of_appsec
+    owner: appsec_lead
     anti_gaming: Denominator comes from discovery (E02), not from the registry itself, so not registering does not help.
   - id: COV-02
     name: Repository onboarding
@@ -42,7 +42,7 @@ metrics:
     direction: up
     target: { tier_1: 100 }
     frequency: quarterly
-    owner: head_of_appsec
+    owner: appsec_lead
     anti_gaming: Assessments require an approver outside the team (M2).
   - id: COV-04
     name: Threat-model coverage
@@ -53,7 +53,7 @@ metrics:
     direction: up
     target: { tier_1: 100, tier_2: 80 }
     frequency: monthly
-    owner: head_of_appsec
+    owner: appsec_lead
     anti_gaming: Review evidence is bound to the commit of the reviewed files and invalidated by architecture-change signals.
 
   # ---------------------------------------------------------------- Pipeline
@@ -99,7 +99,7 @@ metrics:
     direction: up
     target: { tier_1_2: 90 }
     frequency: monthly
-    owner: head_of_appsec
+    owner: appsec_lead
     anti_gaming: Scans crawling below threshold are INCONCLUSIVE and do not count.
   - id: PIP-05
     name: Secrets protection coverage
@@ -122,7 +122,7 @@ metrics:
     unit: count
     direction: context
     frequency: weekly
-    owner: head_of_appsec
+    owner: appsec_lead
     anti_gaming: Context only, not a target. Reducing detection would lower it, so it is never used to rate teams.
   - id: VUL-02
     name: Mean/median time to remediate (verified)
@@ -155,7 +155,7 @@ metrics:
     direction: down
     target: { all: 5 }
     frequency: quarterly
-    owner: head_of_appsec
+    owner: appsec_lead
     anti_gaming: Fingerprints are deterministic; regressions are detected automatically.
   - id: VUL-05
     name: False-positive rate
@@ -165,7 +165,7 @@ metrics:
     unit: percent
     direction: context
     frequency: quarterly
-    owner: head_of_appsec
+    owner: appsec_lead
     anti_gaming: P1/P2 FPs need a second reviewer; quarterly sampling. A high rate triggers tool tuning, not team rating.
   - id: VUL-06
     name: Exception health
@@ -189,7 +189,7 @@ metrics:
     direction: up
     target: { baseline_plus_points_at_18m: 30 }
     frequency: monthly
-    owner: head_of_appsec
+    owner: appsec_lead
     anti_gaming: Manual answers are capped by automated evidence; provenance is shown alongside.
   - id: MAT-02
     name: SAMM maturity by practice and business unit
@@ -199,7 +199,7 @@ metrics:
     unit: score_0_3
     direction: up
     frequency: monthly
-    owner: head_of_appsec
+    owner: appsec_lead
     anti_gaming: Distributions, not rankings. Methodology changes are marked on trends.
   - id: MAT-03
     name: Mandatory control coverage
@@ -210,7 +210,7 @@ metrics:
     direction: up
     target: { tier_1_2: 90 }
     frequency: weekly
-    owner: head_of_appsec
+    owner: appsec_lead
     anti_gaming: N/A requires approval; excepted controls don't count as satisfied.
 
   # ---------------------------------------------------------------- Evidence
@@ -245,7 +245,7 @@ metrics:
     direction: up
     target: { all: 75 }
     frequency: monthly
-    owner: head_of_appsec
+    owner: appsec_lead
     anti_gaming: Confidence is assigned by the platform, never declared.
   - id: EVD-04
     name: Evaluator calibration agreement
@@ -256,7 +256,7 @@ metrics:
     direction: up
     target: { all: 97 }
     frequency: quarterly
-    owner: head_of_appsec
+    owner: appsec_lead
     anti_gaming: Random sample chosen by the platform.
 
   # ---------------------------------------------------------------- People
@@ -269,7 +269,7 @@ metrics:
     direction: up
     target: { all: 90 }
     frequency: quarterly
-    owner: head_of_appsec
+    owner: appsec_lead
     anti_gaming: Training completion from LMS, not self-declared.
   - id: PPL-02
     name: Secure development training coverage
@@ -310,7 +310,7 @@ metrics:
     unit: count
     threshold: "> 0"
     frequency: weekly
-    owner: head_of_appsec
+    owner: appsec_lead
   - id: KRI-04
     name: Dark applications
     kind: kri
@@ -319,7 +319,7 @@ metrics:
     unit: percent
     threshold: "> 5%"
     frequency: weekly
-    owner: head_of_appsec
+    owner: appsec_lead
   - id: KRI-05
     name: Unregistered repos with production deployments
     kind: kri
@@ -328,7 +328,7 @@ metrics:
     unit: count
     threshold: "> 0 for 14 days"
     frequency: weekly
-    owner: head_of_appsec
+    owner: appsec_lead
   - id: KRI-06
     name: Unattributed cloud findings
     kind: kri
@@ -346,7 +346,7 @@ metrics:
     unit: count
     threshold: "rising 3 consecutive months"
     frequency: monthly
-    owner: head_of_appsec
+    owner: appsec_lead
   - id: KRI-08
     name: Evidence integrity failures
     kind: kri

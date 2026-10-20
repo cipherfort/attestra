@@ -3,7 +3,7 @@
 | | |
 |---|---|
 | ID | STD-03 · Status: DRAFT, REQUIRES HUMAN APPROVAL |
-| Owner | Head of Application Security |
+| Owner | AppSec lead |
 | Framework | OWASP ASVS 5.0 (official requirement text imported verbatim, never paraphrased) |
 | Related | [ASVS Implementation Guide](../guides/asvs-implementation-guide.md), [SAMM/ASVS methodology Part B](samm-asvs-mapping.md#part-b-owasp-asvs-operational-not-a-checklist) |
 

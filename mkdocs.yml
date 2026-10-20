@@ -4,6 +4,7 @@ site_name: FortProof
 site_description: Evidence-driven application security assurance
 site_url: https://fortproof.dev/
 repo_url: https://github.com/cipherfort/fortproof
+copyright: FortProof contributors · Code Apache-2.0 · Documentation CC BY-SA 4.0
 edit_uri: edit/main/docs/
 docs_dir: docs
 site_dir: site

@@ -1,25 +1,25 @@
 # Security exception policy (ADR-021, governance model section 4). Enforced by the workflow engine.
-# Status: PROPOSED. REQUIRES HUMAN APPROVAL (CISO).
+# A default policy: have it approved by whoever owns security risk in your organization (often the CISO), then adapt it.
 # Per-control max durations in the catalogue (exception.max_days) apply in addition; the SHORTER wins.
 
 version: 1
 
-approver_roles: [ciso, head_of_appsec, unit_security_lead, appsec_engineer]
+approver_roles: [ciso, appsec_lead, unit_security_lead, appsec_engineer]
 
 approval_matrix:                # residual priority → tier → minimum approver role
-  P1: { 1: ciso,                      2: ciso,                      3: head_of_appsec,            4: head_of_appsec }
-  P2: { 1: head_of_appsec,            2: head_of_appsec,            3: unit_security_lead, 4: unit_security_lead }
-  P3: { 1: head_of_appsec,            2: unit_security_lead, 3: unit_security_lead, 4: appsec_engineer }
+  P1: { 1: ciso,                      2: ciso,                      3: appsec_lead,            4: appsec_lead }
+  P2: { 1: appsec_lead,            2: appsec_lead,            3: unit_security_lead, 4: unit_security_lead }
+  P3: { 1: appsec_lead,            2: unit_security_lead, 3: unit_security_lead, 4: appsec_engineer }
   P4: { 1: unit_security_lead, 2: appsec_engineer,           3: appsec_engineer,           4: appsec_engineer }
 
 platform_roles:                 # platform role (api/policy.py) → approver role above. Map security_leadership to
   appsec_engineer: appsec_engineer   # ciso if your CISO approves in the platform; until then P1 Tier 1/2 exceptions
   unit_lead: unit_security_lead      # cannot be approved here at all (fail closed).
-  security_leadership: head_of_appsec
+  security_leadership: appsec_lead
 
 role_rank:                      # a higher-ranked approver may always approve
   ciso: 4
-  head_of_appsec: 3
+  appsec_lead: 3
   unit_security_lead: 2
   appsec_engineer: 1
 

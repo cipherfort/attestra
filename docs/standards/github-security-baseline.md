@@ -3,7 +3,7 @@
 | | |
 |---|---|
 | ID | STD-12 · Status: DRAFT. REQUIRES HUMAN APPROVAL. Applied by the project's organization owner (`examples/terraform/azure/envs/github`, ADR-031). |
-| Owner | Head of Application Security, with the project's GitHub organization owner (ADR-031) |
+| Owner | AppSec lead, with the project's GitHub organization owner (ADR-031) |
 | Applies to | All GitHub organisations holding in-scope code (e.g. `example-org`) |
 | Implementation | Settings as code via the Terraform `integrations/github` provider in a dedicated `github-org-config` repository (PROPOSED). Drift is detected by the platform's GitHub connector. |
 

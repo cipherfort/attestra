@@ -174,7 +174,7 @@ test("an exception shows where its approval stands and links to what it covers",
   await page.getByRole("link", { name: "EX-000002" }).click();
   const progress = page.getByRole("list", { name: "Approval progress" });
   await expect(progress).toContainText("Business owner co-signs");
-  await expect(progress).toContainText("Head of AppSec or above");
+  await expect(progress).toContainText("AppSec lead or above");
   await page.getByRole("link", { name: /^Finding / }).click();
   await expect(page).toHaveURL(/\/findings\//);
 });

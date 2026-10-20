@@ -3,7 +3,7 @@
 | | |
 |---|---|
 | Status | DRAFT, REQUIRES HUMAN APPROVAL (Governance Board, engineering leadership for time allocation) |
-| Owner | Head of Application Security. Champions lead (AppSec engineer). |
+| Owner | AppSec lead. Champions lead (AppSec engineer). |
 | Related | ASC-GOV-03, E17, KPI PPL-01 |
 
 ## 1. Purpose

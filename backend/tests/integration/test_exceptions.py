@@ -82,14 +82,14 @@ def test_tier1_control_exception_needs_the_right_role_and_a_cosign(client, app_i
     r = new(client, "ajones", claims, "P3")
     assert r.status_code == 201, r.text
     x = r.json()
-    assert x["status"] == "draft" and x["required_approver_role"] == "head_of_appsec"
+    assert x["status"] == "draft" and x["required_approver_role"] == "appsec_lead"
     assert x["business_owner_cosign_required"] and x["max_days"] == 90  # catalogue Tier 1 limit beats P3's 180
     assert act(client, "ekim", x["id"], "submit").status_code in (403, 404)  # not the requester / out of scope
     assert act(client, "ajones", x["id"], "submit").json()["status"] == "pending_approval"
 
     decide = {"outcome": "approve", "comment": "accepted for one quarter"}
     weak = act(client, "cpatel", x["id"], "decision", **decide)
-    assert weak.status_code == 403 and "head_of_appsec" in weak.json()["detail"]  # appsec_engineer ranks too low
+    assert weak.status_code == 403 and "appsec_lead" in weak.json()["detail"]  # appsec_engineer ranks too low
     assert act(client, "hlead", x["id"], "decision", **decide).status_code == 409  # Tier 1: no co-sign yet
     assert act(client, "bsmith", x["id"], "cosign").status_code == 403  # only the business owner co-signs
     assert act(client, "dlee", x["id"], "cosign").json()["cosigned"]

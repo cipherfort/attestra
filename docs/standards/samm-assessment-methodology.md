@@ -3,7 +3,7 @@
 | | |
 |---|---|
 | Status | DRAFT, REQUIRES HUMAN APPROVAL |
-| Owner | Head of Application Security. Operated by Security Governance. |
+| Owner | AppSec lead. Operated by Security Governance. |
 | Calculation | [SAMM/ASVS mapping section A.3](samm-asvs-mapping.md#a3-maturity-calculation), [`config/maturity-methodology.yaml`](../../config/maturity-methodology.yaml), targets [`config/samm-targets.yaml`](../../config/samm-targets.yaml) |
 
 This document covers **how assessments are run**. The calculation is defined in the SAMM/ASVS mapping document and the configuration above.

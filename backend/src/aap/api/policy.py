@@ -118,7 +118,7 @@ SERVICE_ROLES = {"Reports.Read": "reports_reader"}  # app-only tokens (client cr
 APPROVER_ROLE_FOR = {
     "appsec_engineer": "appsec_engineer",
     "unit_lead": "unit_security_lead",
-    "security_leadership": "head_of_appsec",
+    "security_leadership": "appsec_lead",
 }
 
 

@@ -2,7 +2,8 @@
 
 > **FortProof by [CipherFort Security](https://cipherfortsecurity.com)**, open source under Apache-2.0. The command line, settings (`AAP_*`) and database roles keep the technical prefix `aap`.
 
-[![Licence: Apache-2.0](https://img.shields.io/badge/licence-Apache--2.0-blue)](LICENSE)
+[![Code licence: Apache-2.0](https://img.shields.io/badge/code-Apache--2.0-blue)](LICENSE)
+[![Docs licence: CC BY-SA 4.0](https://img.shields.io/badge/docs-CC%20BY--SA%204.0-lightgrey)](LICENSE-docs)
 [![OpenSSF Best Practices](https://www.bestpractices.dev/projects/15625/badge)](https://www.bestpractices.dev/projects/15625)
 [![OpenSSF Baseline](https://www.bestpractices.dev/projects/15625/baseline)](https://www.bestpractices.dev/en/projects/15625/baseline-1)
 [![OpenSSF Scorecard](https://api.securityscorecards.dev/projects/github.com/cipherfort/fortproof/badge)](https://scorecard.dev/viewer/?uri=github.com/cipherfort/fortproof)
@@ -110,4 +111,7 @@ Found a vulnerability? Please report it privately: [SECURITY.md](SECURITY.md).
 
 ## Licence
 
-[Apache License 2.0](LICENSE). The project builds on OWASP SAMM and OWASP ASVS, which are © OWASP and licensed CC BY-SA 4.0; see [NOTICE](NOTICE).
+Code is under the [Apache License 2.0](LICENSE). Documentation (`docs/`, `adoption-kit/`, `adr/` and the Markdown files at
+the top of the repository) is under [Creative Commons Attribution-ShareAlike 4.0](LICENSE-docs); code samples inside it stay
+under Apache-2.0. The project builds on OWASP SAMM and OWASP ASVS, which are © OWASP and licensed CC BY-SA 4.0; see
+[NOTICE](NOTICE).

@@ -3,7 +3,7 @@
 | | |
 |---|---|
 | ID | STD-08 · Status: DRAFT, REQUIRES HUMAN APPROVAL |
-| Owner | Head of Application Security |
+| Owner | AppSec lead |
 | Related | [ADR-009](../../adr/ADR-009-sbom-standard.md), [ADR-010](../../adr/ADR-010-cyclonedx-vs-spdx.md), ASC-BLD-03 |
 
 ## 1. Purpose

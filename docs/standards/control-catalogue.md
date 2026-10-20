@@ -109,7 +109,7 @@ The application has a schema-valid .security/application.yaml in its primary rep
 - **Applies when:** always
 - **Assessment:** automated · evaluator `registry_complete@1` · min confidence C1 · evidence `registry.application`
 - **Parameters:** `{max_unlinked_repos: 0, owners_must_resolve: true}`
-- **How we prove it operates:** The GitHub connector reads application.yaml daily and on push, validates it against the schema, and resolves owners against Entra ID and GitHub teams. Departed owners fail the control within 24h.
+- **How we prove it operates:** The GitHub connector reads application.yaml daily and on push, validates it against the schema, and resolves owners against your identity provider and GitHub teams. Departed owners fail the control within 24h.
 - **Implementation:** Merge the onboarding PR raised by the platform; complete owner and classification fields.
 - **Remediation:** Update owners in application.yaml; the control re-evaluates on push.
 - **Exceptions:** not permitted
@@ -156,7 +156,7 @@ At least 90% of engineers contributing to the app's repositories in the last 90 
 - **Applies when:** always
 - **Assessment:** automated · evaluator `team_training_coverage@1` · min confidence C3 · evidence `training.completion`
 - **Parameters:** `{contributor_window_days: 90, threshold_pct: 90}`
-- **How we prove it operates:** LMS completion export (connector) joined to GitHub contributors via the Entra/GitHub identity link. Reported at TEAM level only, never per person (privacy, see platform security architecture section 6).
+- **How we prove it operates:** LMS completion export (connector) joined to GitHub contributors via the identity provider's link to GitHub accounts. Reported at TEAM level only, never per person (privacy, see platform security architecture section 6).
 - **Implementation:** Assign the secure-development course to all engineers via the LMS.
 - **Remediation:** Team lead schedules outstanding completions.
 - **Exceptions:** allowed, max days T1:90 / T2:180 / T3:365 / T4:365
@@ -392,7 +392,7 @@ No outside collaborators with write/admin; admin limited to ≤ 3 users or a tea
 - **Assessment:** automated · evaluator `repo_access_policy@1` · min confidence C1 · evidence `repo.access`
 - **Parameters:** `{max_admin_users: 3, public_requires: open_source_approval_id}`
 - **How we prove it operates:** Collaborator/team permissions API, visibility; public repos cross-checked against open-source approval records.
-- **Implementation:** Manage access through GitHub teams synced from Entra.
+- **Implementation:** Manage access through GitHub teams synced from your identity provider.
 - **Remediation:** Remove direct admin grants; request open-source approval or make private.
 - **Exceptions:** allowed, max days T1:90 / T2:180 / T3:365 / T4:365
 - **Mappings:** SAMM: I-SB-A L1 · SSDF: PS.1.1 · CSF 2.0: PR.AA-05
