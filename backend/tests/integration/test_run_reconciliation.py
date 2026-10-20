@@ -36,7 +36,7 @@ def test_unseen_runs_are_queued_once_and_seen_ones_skipped(engine, demo, admin):
     assert "example-org/claims-api" in repos
     repo, ext = "example-org/claims-api", repos["example-org/claims-api"]
     admin("DELETE FROM jobs WHERE queue = 'ingest' RETURNING id")
-    api = FakeRuns([900000001, 900000002, seen_evidence, seen_rejection])
+    api = FakeRuns([900000002, 900000001, seen_evidence, seen_rejection])  # newest first, as GitHub lists them
     since = datetime.now(UTC) - timedelta(days=400)
     with transaction(engine, "aap_worker") as conn:
         assert reconcile_runs(conn, api, repo, ext, since) == 2
@@ -49,7 +49,7 @@ def test_unseen_runs_are_queued_once_and_seen_ones_skipped(engine, demo, admin):
             .scalars()
             .all()
         )
-        assert [q["run_id"] for q in queued] == [900000001, 900000002]
+        assert [q["run_id"] for q in queued] == [900000001, 900000002]  # oldest first
         assert all(
             q["repo"] == repo and q["repo_external_id"] == int(ext) and q["provider"] == "github" for q in queued
         )

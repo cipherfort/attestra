@@ -282,7 +282,9 @@ def reconcile_runs(
     Returns the number of runs queued."""
     queued = 0
     params = {"status": "completed", "created": f">={since:%Y-%m-%dT%H:%M:%SZ}"}
-    for run in api.pages(f"/repos/{repo_full_name}/actions/runs", params, key="workflow_runs"):
+    # GitHub lists newest first; queue oldest first so evidence arrives in the order the runs happened
+    runs = list(api.pages(f"/repos/{repo_full_name}/actions/runs", params, key="workflow_runs"))[: limit * 5]
+    for run in reversed(runs):
         run_id = int(run["id"])
         seen = conn.execute(
             text("""SELECT EXISTS (SELECT 1 FROM evidence WHERE ingested_at >= :floor AND run_ref->>'run_id' = :r)
