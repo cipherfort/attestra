@@ -30,12 +30,25 @@ def get(client, path, login="cpatel"):
 
 @pytest.fixture(scope="module")
 def units(engine, demo):
+    """Org units by slug, plus "root": the organisation (it exists once, whichever module created it first)."""
     with transaction(engine, "aap_worker") as conn:
-        return {r.slug: str(r.id) for r in conn.execute(text("SELECT id, slug FROM org_units"))}
+        found = {r.slug: str(r.id) for r in conn.execute(text("SELECT id, slug FROM org_units"))}
+        found["root"] = str(conn.execute(text("SELECT id FROM org_units WHERE parent_id IS NULL")).scalar_one())
+        return found
 
 
-def test_application_trend_has_a_year_with_the_current_month_provisional(client):
-    r = get(client, "/applications/APP-00001/trend")
+@pytest.fixture(scope="module")
+def app(engine, demo):
+    """The demo applications' keys by name (other modules may have registered applications first)."""
+    with transaction(engine, "aap_worker") as conn:
+        return {
+            name: conn.execute(text("SELECT app_key FROM applications WHERE id = :a"), {"a": aid}).scalar_one()
+            for name, aid in demo.applications.items()
+        }
+
+
+def test_application_trend_has_a_year_with_the_current_month_provisional(client, app):
+    r = get(client, f"/applications/{app['Claims API']}/trend")
     assert r.status_code == 200, r.text
     t = r.json()
     current = f"{datetime.now(UTC):%Y-%m}"
@@ -43,12 +56,14 @@ def test_application_trend_has_a_year_with_the_current_month_provisional(client)
     proven = t["metrics"]["mandatory_satisfied"]
     assert proven[-1] is not None and proven[-1] > (proven[0] or 0)  # the evidence arrived during the year
     assert {f["item"] for f in t["samm_functions"]} >= {"G", "D", "I", "V", "O"}
-    assert get(client, "/applications/APP-00001/trend?months=3").json()["periods"][-1] == current
+    assert get(client, f"/applications/{app['Claims API']}/trend?months=3").json()["periods"][-1] == current
 
 
-def test_trends_are_scoped(client, units):
-    assert get(client, "/applications/APP-00002/trend", "ajones").status_code == 404  # Payments: not her team
-    root = units["example-org"]
+def test_trends_are_scoped(client, units, app):
+    assert (
+        get(client, f"/applications/{app['Payments Portal']}/trend", "ajones").status_code == 404
+    )  # Payments: not her team
+    root = units["root"]
     assert get(client, f"/org-units/{root}/trend", "fwong").status_code == 200  # executive: aggregates
     assert get(client, f"/org-units/{root}/trend", "dlee").status_code == 404  # Benefits lead: not the whole org
     benefits = get(client, f"/org-units/{units['benefits']}/trend", "dlee")
@@ -56,18 +71,18 @@ def test_trends_are_scoped(client, units):
 
 
 def test_the_maturity_rollup_is_a_distribution_not_a_league_table(client, units):
-    r = get(client, f"/org-units/{units['example-org']}/maturity", "fwong")
+    r = get(client, f"/org-units/{units['root']}/maturity", "fwong")
     assert r.status_code == 200, r.text
     body = r.json()
     assert body["snapshot"] == f"{datetime.now(UTC):%Y-%m}"
     assert body["distribution"] and all(d["p25"] <= d["median"] <= d["p75"] for d in body["distribution"])
     assert "app_key" not in str(body)  # no per-application ranking
-    assert get(client, f"/org-units/{units['example-org']}/maturity?snapshot=1999-01", "fwong").status_code == 404
+    assert get(client, f"/org-units/{units['root']}/maturity?snapshot=1999-01", "fwong").status_code == 404
     snaps = get(client, "/maturity/snapshots", "fwong").json()["items"]
     assert len(snaps) >= 12 and snaps[-1]["published"] is False and all(s["published"] for s in snaps[:-1])
 
 
-def test_evidence_and_rejections_across_applications(client):
+def test_evidence_and_rejections_across_applications(client, app):
     items = get(client, "/evidence?limit=100").json()["items"]
     when = [datetime.fromisoformat(e["observed_at"]) for e in items]
     assert items and when == sorted(when, reverse=True)
@@ -76,24 +91,31 @@ def test_evidence_and_rejections_across_applications(client):
     assert sca and all(e["type"] == "scan.sca" for e in sca)
     mine = get(client, "/evidence?limit=100", "ajones").json()["items"]
     # other modules add applications to the Claims team; other teams' evidence must never show
-    assert mine and not {e["app_key"] for e in mine} & {"APP-00002", "APP-00003", "APP-00004"}
+    assert mine and not {e["app_key"] for e in mine} & {
+        f"{app['Payments Portal']}",
+        f"{app['HR Leave Tracker']}",
+        f"{app['Team Wiki Helper']}",
+    }
     rejected = get(client, "/evidence-rejections").json()["items"]
     assert any(x["reason_code"] == "UNTRUSTED_PRODUCER" for x in rejected)  # the demo's forged submission
     assert get(client, "/evidence?filter[confidence]=C9").status_code == 422
 
 
-def test_the_activity_feed_is_newest_first_and_scoped(client):
+def test_the_activity_feed_is_newest_first_and_scoped(client, app):
     feed = get(client, "/activity?limit=50").json()["items"]
     when = [datetime.fromisoformat(x["at"]) for x in feed]
     assert feed and when == sorted(when, reverse=True)
     assert {"evidence_accepted", "finding_opened"} <= {x["kind"] for x in feed}
     theirs = get(client, "/activity?limit=50", "ekim").json()["items"]
-    assert theirs and {x["app_key"] for x in theirs} == {"APP-00002"}
-    assert all(x["app_key"] == "APP-00001" for x in get(client, "/activity?application=APP-00001").json()["items"])
+    assert theirs and {x["app_key"] for x in theirs} == {f"{app['Payments Portal']}"}
+    assert all(
+        x["app_key"] == f"{app['Claims API']}"
+        for x in get(client, f"/activity?application={app['Claims API']}").json()["items"]
+    )
 
 
-def test_sbom_components_page_by_purl_with_matched_vulnerabilities(client):
-    sboms = get(client, "/applications/APP-00001/sboms").json()["items"]
+def test_sbom_components_page_by_purl_with_matched_vulnerabilities(client, app):
+    sboms = get(client, f"/applications/{app['Claims API']}/sboms").json()["items"]
     current = next(s for s in sboms if s["is_current"])
     first = get(client, f"/sboms/{current['id']}/components?limit=2").json()
     assert len(first["items"]) == 2 and first["page"]["next_cursor"]
@@ -105,7 +127,9 @@ def test_sbom_components_page_by_purl_with_matched_vulnerabilities(client):
     assert get(client, f"/sboms/{current['id']}/components?cursor=%%%").status_code == 400
 
 
-def test_sbom_list_says_whether_each_sbom_is_fresh_and_how_many_components_are_vulnerable(client):
-    current = next(s for s in get(client, "/applications/APP-00001/sboms").json()["items"] if s["is_current"])
+def test_sbom_list_says_whether_each_sbom_is_fresh_and_how_many_components_are_vulnerable(client, app):
+    current = next(
+        s for s in get(client, f"/applications/{app['Claims API']}/sboms").json()["items"] if s["is_current"]
+    )
     assert current["freshness"] in {"active", "expiring", "expired", "superseded", "revoked"}
     assert current["vulnerable_components"] >= 1

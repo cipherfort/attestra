@@ -35,6 +35,11 @@ def _q(engine, sql, **p):
         return conn.execute(text(sql), p).all()
 
 
+def _claims(engine):
+    """The demo Claims API's key (other modules may have registered applications before the demo was seeded)."""
+    return _q(engine, "SELECT app_key FROM applications WHERE name = 'Claims API'")[0].app_key
+
+
 # ------------------------------------------------------------------------------------------ GitHub
 
 
@@ -154,9 +159,10 @@ def test_github_settings_become_evidence_and_alerts_become_findings(engine, bund
         for r in _q(
             engine,
             """SELECT DISTINCT ON (evidence_type) evidence_type, confidence, summary,
-            producer_ref FROM evidence WHERE scope_ref IN (:r, 'APP-00001') AND producer_ref LIKE 'connector:github-settings%'
+            producer_ref FROM evidence WHERE scope_ref IN (:r, :k) AND producer_ref LIKE 'connector:github-settings%'
             ORDER BY evidence_type, ingested_at DESC""",
             r=REPO,
+            k=_claims(engine),
         )
     }
     assert ev["repo.ruleset"].summary["required_approvals"] == 2 and ev["repo.ruleset"].confidence == "C1"
@@ -239,11 +245,12 @@ def test_defender_paging_mapping_and_closure(engine, scopes):
     assert len(found) == 2 and json.loads(route.calls[1].request.content)["options"]["$skipToken"] == "next"
     with transaction(engine, "aap_worker") as conn:
         rep = cloud_sync.sync(conn, "azure", "defender", found, datetime.now(UTC))
-    assert rep.unmapped == 1 and rep.by_app == {"APP-00001": 1}
+    assert rep.unmapped == 1 and rep.by_app == {_claims(engine): 1}
     post = _q(
         engine,
         """SELECT summary, confidence FROM evidence WHERE evidence_type = 'cloud.posture'
-                         AND scope_ref = 'APP-00001' ORDER BY ingested_at DESC LIMIT 1""",
+                         AND scope_ref = :k ORDER BY ingested_at DESC LIMIT 1""",
+        k=_claims(engine),
     )[0]
     assert post.summary["max_severity"] == "high" and post.confidence == "C3"
     with transaction(engine, "aap_worker") as conn:
@@ -300,7 +307,7 @@ def test_security_hub_via_moto(engine, scopes):
     assert [f.id for f in found] == ["f-crit"]  # other account and LOW severity filtered at the API
     with transaction(engine, "aap_worker") as conn:
         rep = cloud_sync.sync(conn, "aws", "security_hub", found, datetime.now(UTC))
-    assert rep.by_app == {"APP-00001": 1}
+    assert rep.by_app == {_claims(engine): 1}
     assert (
         _q(engine, "SELECT source_system FROM findings WHERE fingerprint = 'cloud:aws:f-crit'")[0].source_system
         == "security_hub"
