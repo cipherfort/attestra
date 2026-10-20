@@ -27,6 +27,8 @@ RUN uv sync --frozen --no-dev
 # binary carries x/net 0.58.0, with fixable HIGH CVEs (CVE-2026-78669 and others) that fail the release scan. Go back to
 # the upstream binary once cli/cli ships a release with the fix. Go 1.27.2 (not the 1.27.1 the release used) fixes
 # twelve standard-library vulnerabilities in net/http, crypto/tls and html/template. Cross-compiled, static, no cgo.
+# The tag is checked out (and its commit checked) so Go stamps the module version v2.102.0+dirty; from a bare commit
+# it stamps a v2.0.0 pseudo-version, which scanners match against every gh CVE since 2.0.
 FROM --platform=$BUILDPLATFORM golang:1.27.2-bookworm@sha256:5cf287a799e6b94384bad13d16b14904c531f51ba65792237e122ce42b392f61 AS gh
 ARG GH_VERSION=2.102.0
 ARG GH_COMMIT=fc4b137cdef0a6bd28fd461b7cf9c84a5812a8cd
@@ -35,7 +37,7 @@ ARG TARGETARCH
 ENV CGO_ENABLED=0 GOTOOLCHAIN=local GOFLAGS=-trimpath
 WORKDIR /src
 RUN git init -q . && git remote add origin https://github.com/cli/cli.git \
- && git fetch -q --depth 1 origin "$GH_COMMIT" && git checkout -q FETCH_HEAD \
+ && git fetch -q --depth 1 origin tag "v$GH_VERSION" && git checkout -q "v$GH_VERSION" \
  && test "$(git rev-parse HEAD)" = "$GH_COMMIT" \
  && go get golang.org/x/net@v0.60.0 && go mod tidy \
  && GOOS="$TARGETOS" GOARCH="$TARGETARCH" go build \
