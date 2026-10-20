@@ -9,6 +9,8 @@ edit_uri: edit/main/docs/
 docs_dir: docs
 site_dir: site
 strict: false
+hooks:
+  - tools/docs/site_links.py   # links to files outside docs/ go to GitHub
 theme:
   name: material
   features: [navigation.sections, navigation.top, search.suggest, content.code.copy]
@@ -97,4 +99,5 @@ nav:
       - Privacy: security/privacy-assessment.md
       - DPIA: security/dpia-considerations.md
   - Testing: testing/test-strategy.md
-  - Roadmap backlog: roadmap/backlog/README.md
+  - Roadmap: https://github.com/cipherfort/fortproof/blob/main/ROADMAP.md
+  - Design backlog (history): roadmap/backlog/README.md

@@ -4,7 +4,7 @@ name: docs
 on:
   push:
     branches: [main]
-    paths: [docs/**, schemas/**, mkdocs.yml, .github/workflows/docs.yml]
+    paths: [docs/**, schemas/**, mkdocs.yml, tools/docs/site_links.py, .github/workflows/docs.yml]
   workflow_dispatch:
 permissions: {}
 concurrency:
