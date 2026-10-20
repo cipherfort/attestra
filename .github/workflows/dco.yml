@@ -27,6 +27,11 @@ jobs:
             if [ "$OPENED_BY" = "dependabot[bot]" ] && [ "$author" = "dependabot[bot] <49699333+dependabot[bot]@users.noreply.github.com>" ]; then
               continue
             fi
+            # The same for release-please's generated release commit (version bump and changelog): its pull request
+            # is opened by github-actions[bot], which only a workflow can do.
+            if [ "$OPENED_BY" = "github-actions[bot]" ] && [ "$author" = "github-actions[bot] <41898282+github-actions[bot]@users.noreply.github.com>" ]; then
+              continue
+            fi
             if ! git log -1 --format='%B' "$c" | grep -qiF "Signed-off-by: $author"; then
               echo "::error::commit $c is not signed off by its author ($author). Use: git commit -s"
               fail=1
