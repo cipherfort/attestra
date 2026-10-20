@@ -59,4 +59,6 @@ The platform enforces its rules; your organization decides them. These are start
 
 ## The project
 
+New here? The launch article explains the problem and walks through the product: [Configuration isn't proof](https://medium.com/@ciphermichael/configuration-isnt-proof-an-open-source-way-to-show-your-applications-are-built-securely-190d192fa4b8).
+
 FortProof is open source: code under Apache-2.0, documentation under CC BY-SA 4.0. [Roadmap](../ROADMAP.md) · [Contributing](../CONTRIBUTING.md) · [Security policy](../SECURITY.md) · [Backlog](roadmap/backlog/README.md) · [Source on GitHub](https://github.com/cipherfort/fortproof)
