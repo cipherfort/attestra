@@ -91,6 +91,7 @@ nav:
   - Reference:
       - Settings (aap.yaml): reference/settings.md
       - API: reference/api.md
+      - External interfaces: reference/interfaces.md
   - Security of the platform:
       - Security architecture: security/platform-security-architecture.md
       - Independent review scope: security/review-scope.md

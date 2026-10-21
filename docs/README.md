@@ -46,7 +46,7 @@ Every integration is optional and starts unconfigured; until one is set up, the 
 
 ## Reference
 
-[REST API](reference/api.md) (from the [OpenAPI contract](../schemas/api/openapi.yaml)) · [Settings](reference/settings.md) · [Test strategy](testing/test-strategy.md) · [OpenSSF Best Practices answers](security/openssf-best-practices.md)
+[External interfaces](reference/interfaces.md) · [REST API](reference/api.md) (from the [OpenAPI contract](../schemas/api/openapi.yaml)) · [Settings](reference/settings.md) · [Test strategy](testing/test-strategy.md) · [OpenSSF Best Practices answers](security/openssf-best-practices.md)
 
 ## Adopting it in your organization
 

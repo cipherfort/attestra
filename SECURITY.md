@@ -24,6 +24,14 @@ Include what you can of:
 
 We credit reporters in the advisory unless you prefer otherwise. We do not run a paid bug bounty.
 
+## Published vulnerabilities
+
+Fixed vulnerabilities are published as GitHub security advisories, with a CVE where one applies:
+[github.com/cipherfort/fortproof/security/advisories](https://github.com/cipherfort/fortproof/security/advisories).
+Each advisory gives the affected and fixed versions, how to tell whether you are affected, and how to fix or work
+around it. The release that fixes it says so in its notes, with the CVE or GHSA identifier. None have been published
+so far.
+
 ## Supported versions
 
 Before 1.0, only the latest release gets security fixes. From 1.0, the latest minor release and the previous one do.

@@ -138,3 +138,31 @@ when the answers were given (for example, two-factor authentication is required 
 | OSPS-QA-05.01 | Met | No generated executables are committed; build outputs are git-ignored and produced in CI. |
 | OSPS-QA-05.02 | Met | The only binary file is a documented test fixture (a snappy-compressed public Sigstore bundle, decoded by the tests): https://github.com/cipherfort/fortproof/blob/main/backend/tests/fixtures/attestations/README.md |
 | OSPS-VM-02.01 | Met | Security contacts: https://github.com/cipherfort/fortproof/blob/main/SECURITY.md |
+
+## OpenSSF Baseline, level 2
+
+Answers for [bestpractices.dev/en/projects/15625/baseline-2](https://www.bestpractices.dev/en/projects/15625/baseline-2),
+against Baseline criteria version 2026.08.28, given after the first release with published artifacts (v0.1.3).
+Repository settings were checked through the GitHub API when the answers were written.
+
+| Control | Answer | Justification |
+|---|---|---|
+| OSPS-AC-04.01 | Met | The repository's default workflow token is read-only (Settings → Actions → Workflow permissions), and every workflow starts from `permissions: {}`, granting each job only what it needs: https://github.com/cipherfort/fortproof/tree/main/.github/workflows |
+| OSPS-BR-02.01 | Met | Every release has a unique semantic version, set by release-please and tagged `vX.Y.Z`; a ruleset makes release tags immutable: https://github.com/cipherfort/fortproof/releases |
+| OSPS-BR-04.01 | Met | Every release has a human-readable changelog of features and fixes, in CHANGELOG.md and its release notes; security fixes are listed with their CVE or GHSA identifier (RELEASING.md): https://github.com/cipherfort/fortproof/blob/main/CHANGELOG.md |
+| OSPS-BR-05.01 | Met | Dependencies come through each ecosystem's package manager from committed lock files (uv, npm, Go modules); base images are pinned by digest and actions by commit SHA: https://github.com/cipherfort/fortproof/blob/main/CONTRIBUTING.md#dependencies |
+| OSPS-BR-06.01 | Met | Each release image is signed with cosign (keyless) and carries a SLSA provenance attestation naming its digest; the Helm chart is signed in GHCR. Each release also carries the chart file with its Sigstore signature bundle and the image's provenance (from v0.1.4). Release notes give the verification commands: https://fortproof.dev/install/helm/ |
+| OSPS-DO-06.01 | Met | How the project chooses, obtains and tracks its dependencies: https://github.com/cipherfort/fortproof/blob/main/CONTRIBUTING.md#dependencies |
+| OSPS-DO-07.01 | Met | Build instructions, with the tools and versions required: https://github.com/cipherfort/fortproof/blob/main/CONTRIBUTING.md#build |
+| OSPS-GV-01.01 | Met | Members with access to sensitive resources (organization, registry, signing, domain, security reports): https://github.com/cipherfort/fortproof/blob/main/MAINTAINERS.md#access-to-sensitive-resources |
+| OSPS-GV-01.02 | Met | Roles and responsibilities of users, contributors and maintainers: https://github.com/cipherfort/fortproof/blob/main/GOVERNANCE.md#roles |
+| OSPS-GV-03.02 | Met | Requirements for an acceptable contribution (sign-off, commit title, tests, documentation, checks, review): https://github.com/cipherfort/fortproof/blob/main/CONTRIBUTING.md#what-a-pull-request-needs |
+| OSPS-LE-01.01 | Met | Every commit must carry a DCO sign-off; the `signoff` check is required by the ruleset on main: https://github.com/cipherfort/fortproof/blob/main/CONTRIBUTING.md#developer-certificate-of-origin-dco |
+| OSPS-QA-03.01 | Met | A repository ruleset on main requires 13 status checks to pass on a branch that is up to date with main before a pull request can merge. |
+| OSPS-QA-06.01 | Met | Every pull request runs the backend unit and integration tests, database security-property tests, browser tests, an API contract test and a Helm install on kind: https://github.com/cipherfort/fortproof/blob/main/.github/workflows/ci.yml |
+| OSPS-SA-01.01 | Met | Design documentation of the system's actors and actions: platform architecture https://fortproof.dev/architecture/02-platform-architecture/ and the threat model's trust boundaries, components and flows https://fortproof.dev/security/platform-security-architecture/ |
+| OSPS-SA-02.01 | Met | Every external interface of the released image and chart (web UI, REST API, webhooks, settings, evidence format, outbound calls, CLI, plugins): https://fortproof.dev/reference/interfaces/ |
+| OSPS-SA-03.01 | Met | A STRIDE threat model of the platform (T-01 to T-30, each with its inherent risk, controls and residual risk), refreshed for the open-source product, with abuse cases that drive the security tests: https://fortproof.dev/security/platform-security-architecture/ |
+| OSPS-VM-01.01 | Met | Coordinated disclosure policy with response times (acknowledgement in 3 working days, fix for critical and high in 30 days, disclosure at fix or 90 days): https://github.com/cipherfort/fortproof/blob/main/SECURITY.md |
+| OSPS-VM-03.01 | Met | GitHub private vulnerability reporting is enabled, with an email address as an alternative: https://github.com/cipherfort/fortproof/security/advisories/new |
+| OSPS-VM-04.01 | Met | Fixed vulnerabilities are published as GitHub security advisories, with affected and fixed versions and remediation; none so far: https://github.com/cipherfort/fortproof/blob/main/SECURITY.md#published-vulnerabilities |
