@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: Apache-2.0
 import { useQueries, useQuery } from "@tanstack/react-query";
-import { Activity, Boxes, FileCheck2, FileX2, ShieldAlert, ShieldCheck, XCircle } from "lucide-react";
+import { Activity, Boxes, FileCheck2, FileX2, ShieldAlert, ShieldCheck, Users, XCircle } from "lucide-react";
 import { Link } from "react-router";
 import { api, type ActivityItem, type ControlItem, type OrgUnitRow, type PostureTrend } from "../api";
 import { BulletBars } from "../components/charts/BulletBars";
@@ -8,6 +8,7 @@ import { Heatmap } from "../components/charts/Heatmap";
 import { LineChart } from "../components/charts/LineChart";
 import { ConfidenceBadge, PriorityChip } from "../components/domain/badges";
 import { evidenceLabel } from "../components/domain/evidence";
+import { ButtonLink } from "../components/ui/Button";
 import { Card } from "../components/ui/Card";
 import { Kpi } from "../components/ui/Kpi";
 import { PageHeader } from "../components/ui/PageHeader";
@@ -77,6 +78,25 @@ export function Overview() {
 
   if (me.isPending) return <Skeleton className="h-96 w-full" />;
   if (canApps && apps.data && apps.data.length === 0) {
+    // The set-up checklist is for the people who set the platform up; anyone else simply has no applications in
+    // their scope yet (usually: not in a team), and needs to know who can change that.
+    if (!perms.has("integration.read")) {
+      return (
+        <>
+          <PageHeader title="Overview" />
+          <Card>
+            <EmptyState
+              icon={Users}
+              title="No applications to show you yet"
+              action={perms.has("application.register") && <ButtonLink to="/register" size="sm">Register an application</ButtonLink>}
+            >
+              You see the applications of the teams you belong to. Ask a platform administrator to add you to your team
+              {perms.has("application.register") ? ", or register your team's application." : "."}
+            </EmptyState>
+          </Card>
+        </>
+      );
+    }
     return (
       <>
         <PageHeader title="Overview" />

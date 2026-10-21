@@ -36,7 +36,7 @@ repository → security pipeline → evidence (verified) → controls → findin
 - **Rules as data.** 48 controls, the tiering model, the risk model and the exception policy are YAML files you change by pull request, and every verdict records which rule version produced it.
 - **Bring your own tools, or none.** Source control, sign-in, ticketing, vulnerability data, cloud posture, SIEM and storage are integrations you choose; nothing is assumed to exist.
 
-## Try it in 15 minutes
+## Try it in a few minutes
 
 **With Docker only** (the released image, real sign-in through Keycloak, write-once evidence storage, the demo world):
 

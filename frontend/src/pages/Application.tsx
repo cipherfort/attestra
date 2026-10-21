@@ -312,6 +312,7 @@ function ControlsTab({ rows, loading }: { rows: ControlRow[]; loading: boolean }
           ]}
           initialSort={[{ id: "state", desc: false }]}
           pageSize={50}
+          onRowClick={setOpen}
         />
       )}
       <Dialog open={!!open} onClose={() => setOpen(null)} title={open ? `${open.worst.control_key} · ${open.worst.title}` : ""} variant="drawer">

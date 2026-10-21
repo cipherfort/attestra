@@ -90,6 +90,7 @@ def test_csrf_required_for_unsafe_methods(web, idp):
     csrf = me["csrf_token"]
     r = web.post("/auth/logout", headers={"X-AAP-CSRF": csrf})
     assert r.status_code == 200 and r.json()["end_session_url"].startswith("https://idp.test/logout")
+    assert "client_id=" in r.json()["end_session_url"]  # the provider ends its own session too (Keycloak requires it)
     assert web.get("/api/v1/users/me").status_code == 401  # session gone
 
 
