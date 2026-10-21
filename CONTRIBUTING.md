@@ -37,6 +37,22 @@ cd backend && uv sync && uv run aap demo seed && uv run aap api --port 8765
 cd frontend && npm ci && npm run build   # or: npm run dev (proxies /api to :8765)
 ```
 
+## Build
+
+What the release ships, built from a checkout. You need Docker, [uv](https://docs.astral.sh/uv/) (it installs
+Python 3.12 and every locked Python dependency) and Node.js 22 (npm installs the locked UI dependencies). Go is only
+needed inside the image build.
+
+```bash
+cd frontend && npm ci && npm run build     # the web UI, into frontend/dist (the API serves it)
+cd backend && uv sync --locked             # the Python package `aap` and its locked dependencies
+docker build -t fortproof:dev .            # the image a release publishes: UI, backend, rules, and gh built from source
+helm package charts/fortproof              # the Helm chart
+```
+
+`deploy/compose/setup.sh` builds the image from your checkout and starts it with the demo world (see
+[Getting started](docs/getting-started.md)).
+
 ## Checks your change must pass
 
 These are the same checks CI runs:
@@ -65,6 +81,20 @@ E2E_BASE_URL=http://127.0.0.1:8765 npx playwright test   # every page and role, 
 Changed the UI? Regenerate the screenshots in the README and on the docs site with `npm run screenshots` and
 `npm run screenshots:webp` (needs the demo API running and `cwebp`).
 
+## What a pull request needs
+
+A pull request is merged when:
+
+1. every commit is signed off (DCO, above);
+2. its title is a [Conventional Commit](https://www.conventionalcommits.org/) (`feat:`, `fix:`, `docs:`, `chore:`,
+   `feat!:` for a breaking change). Pull requests are squash-merged, so the title becomes the commit message and the
+   changelog entry;
+3. it changes behaviour only with tests that show the new behaviour, and fixes a bug with a test that failed before;
+4. the documentation says what the code now does (user guide, reference, runbook or ADR, as the change needs);
+5. every required check passes on a branch that is up to date with `main` (the checks above, run by CI);
+6. it is approved under the decision rules in [GOVERNANCE.md](GOVERNANCE.md#decisions) (while there is one maintainer:
+   merged after a 48-hour public review window, except security fixes).
+
 ## Rules the code follows
 
 These are invariants, enforced by tests. A pull request that weakens one needs an ADR.
@@ -74,6 +104,25 @@ These are invariants, enforced by tests. A pull request that weakens one needs a
 3. **Ledgers are append-only.** Evidence, evaluations, finding events and audit records are never updated or deleted.
 4. **Least privilege everywhere.** Read-only connector scopes; no secrets in repositories, logs, command lines or Terraform state.
 5. **No telemetry.** The platform never phones home.
+
+## Dependencies
+
+How the project chooses, obtains and tracks what it depends on.
+
+- **Choosing.** A new dependency needs a reason a few lines of our own code would not cover. It must be maintained (a
+  release or commit in the last year), and its licence must pass the licence gate: runtime dependencies are
+  Apache-2.0 compatible (`tools/licenses/check.py`, run in CI; an exception needs a reason in
+  `tools/licenses/exceptions.yaml`, reviewed by a maintainer). The
+  standard library and the dependencies already in use come first.
+- **Obtaining.** Through each ecosystem's package manager, from lock files committed to the repository:
+  `backend/uv.lock` (`uv sync --locked`), `frontend/package-lock.json` (`npm ci`), Go modules for the bundled `gh`.
+  Container base images are pinned by digest, GitHub Actions by commit SHA, and the bundled `gh` is built from a
+  pinned commit of its release tag. Nothing is downloaded unpinned at build time.
+- **Tracking.** Dependabot proposes updates weekly for Python, npm, GitHub Actions, Docker and Terraform, after a
+  3-day cooldown ([`.github/dependabot.yml`](.github/dependabot.yml)); each update is a pull request that passes the
+  same checks. CI audits runtime dependencies for known vulnerabilities on every change (`pip-audit`, `npm audit`),
+  and the release scans the image (Trivy) and refuses to publish with fixable HIGH or CRITICAL findings. Every
+  published image carries an SBOM listing what it contains.
 
 ## Plugins
 
