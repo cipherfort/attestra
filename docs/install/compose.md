@@ -5,8 +5,8 @@ image:
 
 <!-- x-release-please-start-version -->
 ```bash
-git clone --branch v0.1.3 https://github.com/cipherfort/fortproof && cd fortproof
-AAP_IMAGE=ghcr.io/cipherfort/fortproof:v0.1.3 deploy/compose/setup.sh
+git clone --branch v0.1.4 https://github.com/cipherfort/fortproof && cd fortproof
+AAP_IMAGE=ghcr.io/cipherfort/fortproof:v0.1.4 deploy/compose/setup.sh
 ```
 <!-- x-release-please-end -->
 
