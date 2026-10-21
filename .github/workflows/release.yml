@@ -92,6 +92,7 @@ jobs:
       contents: write       # the GitHub release
       packages: write
       id-token: write
+      attestations: read    # the image's provenance, attached to the release
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -117,6 +118,15 @@ jobs:
           echo "$out"
           chart_digest=$(echo "$out" | sed -n 's/^Digest: //p')
           cosign sign --yes "ghcr.io/${GITHUB_REPOSITORY_OWNER,,}/charts/fortproof@${chart_digest}"
+          # the release's own files carry their proof too: a signature bundle for the chart file, and the image's
+          # SLSA provenance as published in the attestation store
+          cosign sign-blob --yes --bundle "fortproof-${version}.tgz.sigstore.json" "fortproof-${version}.tgz"
+          gh attestation download "oci://${IMAGE}@${DIGEST}" --repo "$GITHUB_REPOSITORY" \
+            --predicate-type https://slsa.dev/provenance/v1
+          for f in "${DIGEST}.jsonl" "${DIGEST/:/-}.jsonl"; do   # gh names it after the digest (":" kept on Linux)
+            if [ -f "$f" ]; then mv "$f" "fortproof-image-${TAG}.intoto.jsonl"; fi
+          done
+          test -s "fortproof-image-${TAG}.intoto.jsonl"
       - name: GitHub release with verification instructions
         env:
           IMAGE: ${{ needs.image.outputs.image }}
@@ -134,14 +144,24 @@ jobs:
             --certificate-oidc-issuer https://token.actions.githubusercontent.com
           \`\`\`
           Helm: \`helm install fortproof oci://ghcr.io/${GITHUB_REPOSITORY_OWNER,,}/charts/fortproof --version ${TAG#v}\` (see docs/install/helm.md).
+
+          The chart file attached here is signed too (\`fortproof-${TAG#v}.tgz.sigstore.json\`), and
+          \`fortproof-image-${TAG}.intoto.jsonl\` is the image's SLSA provenance:
+          \`\`\`bash
+          cosign verify-blob fortproof-${TAG#v}.tgz --bundle fortproof-${TAG#v}.tgz.sigstore.json \\
+            --certificate-identity-regexp "^https://github.com/${GITHUB_REPOSITORY}/.github/workflows/release.yml@" \\
+            --certificate-oidc-issuer https://token.actions.githubusercontent.com
+          \`\`\`
           NOTES
           if gh release view "$TAG" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
             # release-please created it with the changelog: attach the chart and append the verification notes
             gh release view "$TAG" --repo "$GITHUB_REPOSITORY" --json body --jq .body > body.md
             printf '\n\n## Verify and install\n\n' >> body.md
             cat notes.md >> body.md
-            gh release upload "$TAG" fortproof-*.tgz --repo "$GITHUB_REPOSITORY" --clobber
+            gh release upload "$TAG" fortproof-*.tgz fortproof-*.sigstore.json fortproof-image-*.intoto.jsonl \
+              --repo "$GITHUB_REPOSITORY" --clobber
             gh release edit "$TAG" --repo "$GITHUB_REPOSITORY" --notes-file body.md
           else
-            gh release create "$TAG" fortproof-*.tgz --repo "$GITHUB_REPOSITORY" --title "$TAG" --notes-file notes.md --verify-tag
+            gh release create "$TAG" fortproof-*.tgz fortproof-*.sigstore.json fortproof-image-*.intoto.jsonl \
+              --repo "$GITHUB_REPOSITORY" --title "$TAG" --notes-file notes.md --verify-tag
           fi
