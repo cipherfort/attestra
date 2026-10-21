@@ -203,9 +203,13 @@ class OidcClient:
         end = self.metadata().get("end_session_endpoint")
         if not end:
             return None
+        # OpenID Connect RP-Initiated Logout: with a post-logout redirect, the provider must know which client asks
+        # (id_token_hint or client_id). Without either, Keycloak refuses ("Missing parameters: id_token_hint") and
+        # keeps its own session, so the next visit signs the person straight back in.
+        params = {"client_id": self.s.client_id}
         if self.s.post_logout_redirect_uri:
-            return f"{end}?{urlencode({'post_logout_redirect_uri': self.s.post_logout_redirect_uri})}"
-        return str(end)
+            params["post_logout_redirect_uri"] = self.s.post_logout_redirect_uri
+        return f"{end}?{urlencode(params)}"
 
 
 def managed_identity_assertion(client_id: str) -> Callable[[], str]:

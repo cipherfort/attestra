@@ -38,8 +38,8 @@ function csvCell(v: unknown): string {
   return /[",\n]/.test(s) ? `"${s.replaceAll('"', '""')}"` : s;
 }
 
-/** Sortable, searchable, faceted table. Rows link to `rowHref` (the whole row is clickable, the first link is
- *  the keyboard target). `csv` exports the filtered rows. */
+/** Sortable, searchable, faceted table. Rows link to `rowHref`, or open something on the page with `onRowClick`
+ *  (the whole row is clickable; the first link or button in it is the keyboard target). `csv` exports the filtered rows. */
 export function DataTable<T>({
   data,
   columns,
@@ -48,6 +48,7 @@ export function DataTable<T>({
   facets = [],
   initialSort = [],
   rowHref,
+  onRowClick,
   pageSize = 25,
   csv,
   empty,
@@ -61,6 +62,7 @@ export function DataTable<T>({
   facets?: Facet[];
   initialSort?: SortingState;
   rowHref?: (row: T) => string;
+  onRowClick?: (row: T) => void;
   pageSize?: number;
   csv?: { filename: string; row: (row: T) => Record<string, unknown> };
   empty?: ReactNode;
@@ -99,7 +101,8 @@ export function DataTable<T>({
     URL.revokeObjectURL(url);
   };
   const activeFilters = columnFilters.length + (globalFilter ? 1 : 0);
-  const open = (row: Row<T>) => { if (rowHref) void navigate(rowHref(row.original)); };
+  const open = (row: Row<T>) => { if (rowHref) void navigate(rowHref(row.original)); else onRowClick?.(row.original); };
+  const clickable = !!(rowHref || onRowClick);
   return (
     <div>
       <div className="flex flex-wrap items-center gap-2 border-b border-line px-4 py-3">
@@ -176,8 +179,8 @@ export function DataTable<T>({
               {table.getRowModel().rows.map((row) => (
                 <tr
                   key={row.id}
-                  onClick={rowHref ? (e) => { if (!(e.target as HTMLElement).closest("a,button,input")) open(row); } : undefined}
-                  className={`border-b border-line last:border-b-0 ${rowHref ? "cursor-pointer hover:bg-surface-2" : ""}`}
+                  onClick={clickable ? (e) => { if (!(e.target as HTMLElement).closest("a,button,input")) open(row); } : undefined}
+                  className={`border-b border-line last:border-b-0 ${clickable ? "cursor-pointer hover:bg-surface-2" : ""}`}
                 >
                   {row.getVisibleCells().map((cell) => {
                     const meta = cell.column.columnDef.meta as { align?: "right" } | undefined;

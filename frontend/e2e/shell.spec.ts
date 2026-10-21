@@ -104,6 +104,11 @@ test("application tabs live in the URL and a control opens in a drawer", async (
   await expect(drawer).toContainText("How it is proven");
   await page.keyboard.press("Escape");
   await expect(drawer).toBeHidden();
+  // the whole row opens it too, as every other table's rows do
+  await page.locator("main tbody tr").filter({ hasText: "Dependency review gates" }).locator("td").last().click();
+  await expect(drawer).toBeVisible();
+  await page.keyboard.press("Escape");
+  await expect(drawer).toBeHidden();
   await page.getByRole("tab", { name: "Evidence" }).click();
   await expect(page.locator("main tbody tr").first()).toBeVisible();
   await page.reload();
