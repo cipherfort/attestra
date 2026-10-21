@@ -3,6 +3,13 @@
 All notable changes, newest first. From 0.1.0 on this file is maintained by release-please from Conventional Commit
 messages (`feat:`, `fix:`, `docs:` ...); see [RELEASING.md](RELEASING.md).
 
+## [0.1.5](https://github.com/cipherfort/fortproof/compare/v0.1.4...v0.1.5) (2026-10-21)
+
+
+### Bug Fixes
+
+* sign-out ends the identity provider's session; clearer first view for people without a team ([#70](https://github.com/cipherfort/fortproof/issues/70)) ([dea552a](https://github.com/cipherfort/fortproof/commit/dea552a9cd801a62b6e9a6e64782fc98e330b07e))
+
 ## [0.1.4](https://github.com/cipherfort/fortproof/compare/v0.1.3...v0.1.4) (2026-10-21)
 
 
