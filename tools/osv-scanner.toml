@@ -1,0 +1,21 @@
+# Known vulnerabilities in tools/requirements-checkov.txt that cannot be fixed yet, with the reason each one does not
+# affect the project. Read by OSV-Scanner (and so by OpenSSF Scorecard). Review by the date on each entry, or sooner
+# when Checkov releases an update.
+#
+# Checkov runs only in CI (ci.yml, "Terraform" job), against this repository's own reviewed Terraform examples.
+# It is not part of anything FortProof ships.
+
+[[IgnoredVulns]]
+id = "PYSEC-2026-3807"
+ignoreUntil = 2027-01-21
+reason = "asteval sandbox escape (fixed in 1.0.9). Checkov pins asteval==1.0.6 exactly, up to its latest release (3.3.30). Checkov evaluates expressions only from this repository's reviewed Terraform, in CI; no untrusted input reaches it."
+
+[[IgnoredVulns]]
+id = "GHSA-9w56-46f6-3qhx"
+ignoreUntil = 2027-01-21
+reason = "asteval sandbox escape through numpy ctypes (fixed in 1.0.9). Same pin and exposure as PYSEC-2026-3807: CI only, trusted input."
+
+[[IgnoredVulns]]
+id = "PYSEC-2026-1325"
+ignoreUntil = 2027-01-21
+reason = "Minerva timing attack on P-256 signing in python-ecdsa; no fixed version exists. Checkov depends on ecdsa, but the CI job signs nothing with it and runs on a short-lived runner."
