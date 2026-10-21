@@ -26,6 +26,7 @@ minor also gets security fixes ([SECURITY.md](SECURITY.md)).
    - push it to GHCR with an SBOM;
    - attach a SLSA provenance attestation and a cosign keyless signature;
    - package the chart pinned to the image digest, push it to GHCR (OCI) and sign it;
+   - attach the chart, its signature bundle and the image's SLSA provenance to the GitHub release;
    - publish a GitHub release with the verification commands.
 5. A maintainer verifies the published artifacts (commands in the release notes) before announcing the release.
 
