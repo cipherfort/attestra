@@ -6,7 +6,7 @@ readme = "README.md"
 requires-python = ">=3.12,<3.13"
 license = { text = "Apache-2.0" }
 dependencies = [
-    "fastapi>=0.143.1",
+    "fastapi>=0.156.4",
     "uvicorn>=0.32",
     "pydantic>=2.14.1",
     "sqlalchemy>=2.1.4",
@@ -20,8 +20,8 @@ dependencies = [
     "azure-identity>=1.19",
     "azure-storage-blob>=12.24",
     "azure-keyvault-secrets>=4.9",
-    "boto3>=1.43.113",
-    "sigstore>=3.6",
+    "boto3>=1.43.116",
+    "sigstore>=4.5.1",
     "cramjam>=2.14.0",
     "azure-keyvault-keys>=4.10",
 ]
@@ -29,7 +29,7 @@ dependencies = [
 [dependency-groups]
 dev = [
     "pytest>=8.3",
-    "hypothesis>=6.169.1",
+    "hypothesis>=6.170.5",
     "ruff>=0.17.0",
     "mypy>=1.13",
     "types-pyyaml",
